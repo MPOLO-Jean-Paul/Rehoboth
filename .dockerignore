@@ -1,0 +1,10 @@
+.env
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+.git
+.gitignore
+Dockerfile
+render.yaml
+docker/
