@@ -12,7 +12,8 @@ services:
       - key: APP_DEBUG
         value: "false"
       - key: APP_KEY
-        generateValue: true
+        sync: false
+
       - key: DB_CONNECTION
         value: mysql
       - key: DB_HOST
