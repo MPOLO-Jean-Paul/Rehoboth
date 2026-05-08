@@ -1,0 +1,10 @@
+
+> polyclique-mobile@1.0.0 dev
+> expo start --dev-client --host lan --port 8081
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL REACT_NATIVE_PACKAGER_HOSTNAME EXPO_PACKAGER_HOSTNAME EXPO_NO_WEB
+Starting project at C:\laragon\www\polyclique-api\polyclique-mobile
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.

@@ -1,0 +1,4 @@
+(node:8764) [UNDICI-EHPA] Warning: EnvHttpProxyAgent is experimental, expect them to change at any time.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The /android project does not contain any URI schemes. Expo CLI will not be able to use links to launch the project. You can configure a custom URI scheme using the --scheme option.
+Error: EPERM: operation not permitted, rename 'C:\laragon\www\polyclique-api\polyclique-mobile\.expo\devices.json.Nlif4znjHJ7Wx0VUl4RzAmc_SYnZj15bw9-nE6xatLY' -> 'C:\laragon\www\polyclique-api\polyclique-mobile\.expo\devices.json'

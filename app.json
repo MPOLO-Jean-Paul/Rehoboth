@@ -1,29 +1,47 @@
 {
   "expo": {
-    "name": "polyclique-mobile",
-    "slug": "polyclique-mobile",
-    "version": "1.0.0",
+    "name": "Rehoboth Medical",
+    "slug": "rehoboth-medical-erp",
+    "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "icon": "./assets/logo.png",
+    "jsEngine": "hermes",
+    "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mpolo.rehobothmedical"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/logo.png",
+        "backgroundColor": "#0F172A"
       },
-      "edgeToEdgeEnabled": true
+      "package": "com.mpolo.rehobothmedical",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {}
+      ],
+      [
+        "./plugins/withNdkVersion.js",
+        "26.1.10909125"
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5bb3b737-f28d-4602-acad-3de60369af1a"
+      }
+    },
+    "owner": "mpolo"
   }
 }

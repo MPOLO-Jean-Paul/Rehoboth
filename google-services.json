@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "786362413500",
+    "project_id": "rehoboth-75347",
+    "storage_bucket": "rehoboth-75347.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786362413500:android:4dedecf93527da81283bb9",
+        "android_client_info": {
+          "package_name": "com.mpolo.rehobothmedical"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKXMQsJa3xe1f4efEedumJhbhxU_U7OaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
