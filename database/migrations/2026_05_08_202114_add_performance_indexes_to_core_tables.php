@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('staff_messages', function (Blueprint $table) {
-            $table->index('sender_id');
-            $table->index('target_role');
+            // target_role is already indexed in 2026_05_02_220000
             $table->index('created_at');
         });
 
@@ -43,8 +42,9 @@ return new class extends Migration
         });
 
         Schema::table('patients', function (Blueprint $table) {
-            $table->index('name');
-            $table->index('phone');
+            $table->index('first_name');
+            $table->index('last_name');
+            $table->index('contact_info');
             $table->index('insurance_id');
         });
     }
@@ -55,8 +55,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('staff_messages', function (Blueprint $table) {
-            $table->dropIndex(['sender_id']);
-            $table->dropIndex(['target_role']);
             $table->dropIndex(['created_at']);
         });
 
@@ -86,8 +84,9 @@ return new class extends Migration
         });
 
         Schema::table('patients', function (Blueprint $table) {
-            $table->dropIndex(['name']);
-            $table->dropIndex(['phone']);
+            $table->dropIndex(['first_name']);
+            $table->dropIndex(['last_name']);
+            $table->dropIndex(['contact_info']);
             $table->dropIndex(['insurance_id']);
         });
     }
