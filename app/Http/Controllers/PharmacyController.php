@@ -305,6 +305,7 @@ class PharmacyController extends Controller
         // Log the message in staff messages as well
         \App\Models\StaffMessage::create([
             'sender_id' => $request->user()->id,
+            'target_role' => 'admin',
             'subject' => $typeLabel,
             'message' => $body,
             'is_read' => false
@@ -539,9 +540,9 @@ class PharmacyController extends Controller
                 "• Produits délivrés : {$itemsCount}\n" .
                 "Rapport généré par : " . $request->user()->name;
 
-        // 1. Enregistrer le message pour l'admin
+        // 1. Enregistrer le message pour l'admin (Expéditeur système pour que seul l'admin le voit)
         \App\Models\StaffMessage::create([
-            'sender_id' => $request->user()->id,
+            'sender_id' => 1, // System
             'target_role' => 'admin',
             'subject' => $title,
             'message' => $body,
@@ -572,6 +573,7 @@ class PharmacyController extends Controller
         // Optionnel: Enregistrer aussi en message staff interne
         \App\Models\StaffMessage::create([
             'sender_id' => 1, // System
+            'target_role' => 'admin',
             'subject' => $title,
             'message' => $body,
             'is_read' => false

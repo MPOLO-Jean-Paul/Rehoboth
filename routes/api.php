@@ -32,11 +32,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/all', [NotificationController::class, 'destroyAll']);
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
 
     // Shared Messages
     Route::get('/messages', [AdminController::class, 'getMessages']);
     Route::post('/messages/{id}/read', [AdminController::class, 'markMessageAsRead']);
     Route::post('/messages/read-all', [AdminController::class, 'markAllMessagesAsRead']);
+    Route::delete('/messages/{id}', [AdminController::class, 'deleteMessage']);
+
 });
 
 Route::middleware(['auth:sanctum', 'role:admin,reception,soins'])->group(function () {
@@ -138,6 +142,7 @@ Route::middleware(['auth:sanctum', 'role:admin,pharmacie,soins'])->group(functio
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Admin
+    Route::get('/admin/bootstrap', [AdminController::class, 'getBootstrap']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::post('/admin/users', [AdminController::class, 'createUser']);
     Route::get('/admin/users', [AdminController::class, 'getUsers']);

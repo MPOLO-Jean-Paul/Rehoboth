@@ -56,6 +56,39 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Toutes les notifications marquées comme lues']);
     }
 
+    public function destroy(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $deleted = \DB::table('notifications')
+            ->where('id', $id)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('role', $user->role);
+            })
+            ->delete();
+
+        if (!$deleted) {
+            return response()->json(['message' => 'Notification non trouvée ou déjà supprimée'], 404);
+        }
+
+        return response()->json(['message' => 'Notification supprimée']);
+    }
+
+    public function destroyAll(Request $request)
+    {
+        $user = $request->user();
+
+        \DB::table('notifications')
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere('role', $user->role);
+            })
+            ->delete();
+
+        return response()->json(['message' => 'Toutes les notifications supprimées']);
+    }
+
     public function unreadCount(Request $request)
     {
         $user = $request->user();

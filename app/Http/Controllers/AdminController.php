@@ -237,6 +237,8 @@ class AdminController extends Controller
                                ->orWhere('target_role', $user->role);
                         });
                   });
+        })->whereDoesntHave('reads', function($q) use ($user) {
+            $q->where('user_id', $user->id)->whereNotNull('deleted_at');
         });
 
         $query = (clone $baseQuery)
@@ -294,6 +296,43 @@ class AdminController extends Controller
         );
 
         return response()->json(['message' => 'Message marqué comme lu']);
+    }
+
+    public function deleteMessage(Request $request, $id)
+    {
+        $user = $request->user();
+
+        // Find the message visible to this user
+        $message = StaffMessage::where(function ($query) use ($user) {
+            $query->where('sender_id', $user->id)
+                  ->orWhereNull('target_role')
+                  ->orWhere('target_role', $user->role);
+        })->findOrFail($id);
+
+        // Admin who sent the message can permanently delete it
+        if ($user->role === 'admin' && (int)$message->sender_id === (int)$user->id) {
+            // Hard delete – remove all reads records first, then the message
+            StaffMessageRead::where('staff_message_id', $message->id)->delete();
+            $message->delete();
+            return response()->json(['message' => 'Message définitivement supprimé']);
+        }
+
+        // Other users: soft-delete via the reads pivot table
+        // Use raw upsert to avoid unique constraint violation
+        \DB::table('staff_message_reads')->upsert(
+            [
+                'staff_message_id' => $message->id,
+                'user_id'          => $user->id,
+                'deleted_at'       => now(),
+                'read_at'          => now(),
+                'created_at'       => now(),
+                'updated_at'       => now(),
+            ],
+            ['staff_message_id', 'user_id'],   // unique keys
+            ['deleted_at', 'updated_at']        // columns to update on conflict
+        );
+
+        return response()->json(['message' => 'Message supprimé']);
     }
 
     public function markAllMessagesAsRead(Request $request)
@@ -674,9 +713,30 @@ class AdminController extends Controller
             Setting::setValue('lab_tests_catalog', json_encode($labTests));
         }
 
+    public function getBootstrap(Request $request)
+    {
+        $period = $request->get('period', 'day');
+        $user = $request->user();
+
+        // Use parallel logic (conceptual in PHP, but we combine into one response)
         return response()->json([
-            'message' => 'Paramètres mis à jour et synchronisés',
-            'settings' => Setting::all(),
+            'stats' => $this->getDashboardStats($request)->original,
+            'users' => User::all(),
+            'patients' => \App\Models\Patient::latest()->take(100)->get(),
+            'messages' => $this->getMessages($request)->original,
+            'insurances' => \App\Models\Insurance::all(),
+            'server_time' => now()->toDateTimeString()
         ]);
+    }
+
+    private function getDashboardStats(Request $request)
+    {
+        $period = $request->get('period', 'day');
+        $cacheKey = "admin_stats_{$period}";
+
+        // Cache for 1 minute to avoid heavy DB hits on every click
+        return \Cache::remember($cacheKey, 60, function () use ($request) {
+            return $this->getDashboard($request);
+        });
     }
 }
