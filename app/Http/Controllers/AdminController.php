@@ -713,6 +713,12 @@ class AdminController extends Controller
             Setting::setValue('lab_tests_catalog', json_encode($labTests));
         }
 
+        return response()->json([
+            'message' => 'Paramètres mis à jour',
+            'settings' => $saved,
+        ]);
+    }
+
     public function getBootstrap(Request $request)
     {
         $period = $request->get('period', 'day');
@@ -736,7 +742,7 @@ class AdminController extends Controller
 
         // Cache for 1 minute to avoid heavy DB hits on every click
         return \Cache::remember($cacheKey, 60, function () use ($request) {
-            return $this->getDashboard($request);
+            return $this->dashboard($request);
         });
     }
 }
