@@ -9,6 +9,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AppContext, navigationRef } from '../../App';
 import { Theme } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
+import { withCacheBust } from '../utils/media';
 
 const { width } = Dimensions.get('window');
 
@@ -83,7 +84,7 @@ export default function PremiumLeftDrawer({
                   {user?.profile_photo ? (
                      <Image
                        key={`${user.profile_photo}-${user.updated_at}`}
-                       source={{ uri: `${user.profile_photo}?t=${new Date(user.updated_at || Date.now()).getTime()}`, cache: 'reload' }}
+                       source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
                        style={{ width: '100%', height: '100%', borderRadius: 14 }}
                        resizeMode="cover"
                      />

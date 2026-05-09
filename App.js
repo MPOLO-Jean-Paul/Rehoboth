@@ -59,6 +59,8 @@ export default function App() {
   const ring1Opacity = useRef(new Animated.Value(0.5)).current;
   const ring2Scale = useRef(new Animated.Value(1)).current;
   const ring2Opacity = useRef(new Animated.Value(0.3)).current;
+  const seenNotificationIds = useRef(new Set());
+  const notificationPollReady = useRef(false);
 
   useEffect(() => {
     if (!initialRoute) {
@@ -182,9 +184,11 @@ export default function App() {
     // Show notification banner when app is in FOREGROUND
     notificationListener = Notifications.addNotificationReceivedListener(notification => {
       const { title, body, data } = notification.request.content;
+      if (data?.__localEcho) return;
+
       console.log('[REHOBOTH] Notification reçue:', title);
       // Re-schedule as local notification so it shows in the system tray even in foreground
-      sendLocalNotification(title, body, data ?? {});
+      sendLocalNotification(title, body, { ...(data ?? {}), __localEcho: true });
     });
 
     // Handle tap on notification → navigate to relevant screen
@@ -198,6 +202,59 @@ export default function App() {
       if (responseListener) responseListener.remove();
     };
   }, [initialRoute]);
+
+  useEffect(() => {
+    seenNotificationIds.current = new Set();
+    notificationPollReady.current = false;
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!Notifications || !notificationsEnabled || !user || !initialRoute || initialRoute === 'Home' || initialRoute === 'Login') {
+      return;
+    }
+
+    let isMounted = true;
+
+    const pollServerNotifications = async () => {
+      try {
+        const response = await api.get('/notifications');
+        const notifications = Array.isArray(response.data) ? response.data : [];
+
+        const unreadNotifications = notifications.filter(item => !item.is_read);
+        const incomingIds = new Set(unreadNotifications.map(item => item.id));
+
+        if (!notificationPollReady.current) {
+          seenNotificationIds.current = incomingIds;
+          notificationPollReady.current = true;
+          return;
+        }
+
+        for (const item of unreadNotifications.reverse()) {
+          if (!isMounted || seenNotificationIds.current.has(item.id)) continue;
+
+          seenNotificationIds.current.add(item.id);
+          await sendLocalNotification(
+            item.title || 'REHOBOTH',
+            item.body || 'Nouvelle notification',
+            { ...(item.data ?? {}), notification_id: item.id, type: item.type, __localEcho: true },
+            item.type === 'emergency' ? 'medical-alerts' : 'default'
+          );
+        }
+      } catch (e) {
+        if (__DEV__) {
+          console.log('[REHOBOTH] Poll notifications ignoré:', e?.message || e);
+        }
+      }
+    };
+
+    pollServerNotifications();
+    const interval = setInterval(pollServerNotifications, 20000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [initialRoute, notificationsEnabled, user?.id]);
 
   // Process pending notification once we are logged in and navigation is ready
   useEffect(() => {

@@ -8,6 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 import { ToastContext } from './ToastManager';
 import api from '../services/api';
 import { Theme } from '../constants/theme';
+import { withCacheBust } from '../utils/media';
 
 export default function ProfileView({ onBack }) {
   const { user, setUser, lang } = useContext(AppContext);
@@ -17,7 +18,7 @@ export default function ProfileView({ onBack }) {
   const [uploading, setUploading] = useState(false);
   // Local URI with cache-buster timestamp, updated after each successful upload
   const [photoUri, setPhotoUri] = useState(
-    user?.profile_photo ? `${user.profile_photo}?t=${Date.now()}` : null
+    user?.profile_photo ? withCacheBust(user.profile_photo) : null
   );
 
   const handlePickImage = async () => {
@@ -59,7 +60,7 @@ export default function ProfileView({ onBack }) {
       const updatedUser = response.data.user;
       // Build full URL with timestamp to force refresh
       const freshUrl = updatedUser.profile_photo
-        ? `${updatedUser.profile_photo}?t=${Date.now()}`
+        ? withCacheBust(updatedUser.profile_photo)
         : `${uri}?t=${Date.now()}`;
       
       setPhotoUri(freshUrl);

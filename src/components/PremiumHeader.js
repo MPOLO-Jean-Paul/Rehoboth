@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../hooks/useTheme';
 import api from '../services/api';
 import { Theme } from '../constants/theme';
+import { withCacheBust } from '../utils/media';
 
 export default function PremiumHeader({ 
   onLeftPress, 
@@ -88,7 +89,7 @@ export default function PremiumHeader({
                 {user?.profile_photo ? (
                   <Image
                     key={`${user.profile_photo}-${user.updated_at}`}
-                    source={{ uri: `${user.profile_photo}?t=${new Date(user.updated_at || Date.now()).getTime()}`, cache: 'reload' }}
+                    source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
                     style={{ width: '100%', height: '100%', borderRadius: 14 }}
                     resizeMode="cover"
                   />
