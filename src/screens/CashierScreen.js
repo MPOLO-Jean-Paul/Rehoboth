@@ -503,7 +503,7 @@ export default function CashierScreen({ navigation, route }) {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                <View style={{ flex: 1 }}>
                   <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>{t.amount.toUpperCase()}</Text>
-                  <Text style={{ fontSize: 22, fontWeight: '900', color: '#22C55E' }} numberOfLines={1} adjustsFontSizeToFit>{item.amount.toLocaleString()} <Text style={{ fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                  <Text style={{ fontSize: 22, fontWeight: '900', color: '#22C55E' }} numberOfLines={1} adjustsFontSizeToFit>{item.amount.toLocaleString()} <Text style={{ fontSize: 12 }}>{"FC"</Text></Text>
                </View>
 
                {activeTab === 'pending' ? (
@@ -513,7 +513,7 @@ export default function CashierScreen({ navigation, route }) {
                      style={{ minWidth: 140, height: 48, borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: brandColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }}
                   >
                      <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 }}>
-                        {payingId === item.id ? <ActivityIndicator size="small" color="#FFF" /> : (
+                        {payingId === item.id ? <ActivityIndicator size="" color="#FFF" /> : (
                            <>
                               <MaterialIcons name="account-balance-wallet" size={20} color="#FFF" style={{ marginRight: 8 }} />
                               <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 0.5 }}>{t.pay.toUpperCase()}</Text>
@@ -525,10 +525,10 @@ export default function CashierScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#22C55E15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, marginRight: 10 }}>
                         <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-                        <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PAYÉ"] || "PAYÉ"}</Text>
+                        <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 6 }}>{"PAYÉ"</Text>
                      </View>
                      <TouchableOpacity onPress={() => printReceipt(item)} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name="printer" size={20} color={brandColor} />
+                        <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                      </TouchableOpacity>
                   </View>
                )}
@@ -544,9 +544,9 @@ export default function CashierScreen({ navigation, route }) {
          <PremiumHeader
             onLeftPress={() => toggleLeft(true)}
             onRightPress={() => toggleRight(true)}
-            title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
+            title="REHOBOTH"
             subtitle={menuItems.find(m => m.id === activeView)?.label || 'CAISSE'}
-            icon="cash-register"
+            icon=""
             isDark={isDark}
             navigation={navigation}
          />
@@ -589,9 +589,9 @@ export default function CashierScreen({ navigation, route }) {
                                     >
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                           <View>
-                                             <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["EN ATTENTE D'ENCAISSEMENT"] || "EN ATTENTE D'ENCAISSEMENT"}</Text>
+                                             <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>{"EN ATTENTE D'ENCAISSEMENT"</Text>
                                              <Text style={{ color: '#FFF', fontSize: 32, fontWeight: '900', marginTop: 8 }}>
-                                                {invoices.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text>
+                                                {invoices.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 16 }}>FC</Text>
                                              </Text>
                                           </View>
                                           <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
@@ -656,7 +656,7 @@ export default function CashierScreen({ navigation, route }) {
                      <ScrollView contentContainerStyle={{ paddingTop: 125 + insets.top, paddingBottom: 130 + insets.bottom, paddingHorizontal: 20 }}>
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                              <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RECETTES"] || "RECETTES"}</Text>
+                              <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>{"RECETTES"</Text>
                               <View style={{ flexDirection: 'row', backgroundColor: isDark ? '#1A1A1A' : '#E2E8F0', borderRadius: 14, padding: 4 }}>
                                  {['day', 'week', 'month', 'all'].map(p => (
                                     <TouchableOpacity key={p} onPress={() => setRecettePeriod(p)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: recettePeriod === p ? brandColor : 'transparent' }}>
@@ -669,27 +669,27 @@ export default function CashierScreen({ navigation, route }) {
                            <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 32, borderRadius: 40, marginBottom: 24, elevation: 15, shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 20 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                  <View>
-                                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: '900', letterSpacing: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOTAL ENCAISSÉ"] || "TOTAL ENCAISSÉ"}</Text>
-                                    <Text style={{ fontSize: 42, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{history.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 18 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: '900', letterSpacing: 2 }}>TOTAL ENCAISSÉ</Text>
+                                    <Text style={{ fontSize: 42, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{history.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 18 }}>{"FC"</Text></Text>
                                  </View>
                                  <View style={{ width: 60, height: 60, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                                    <MaterialCommunityIcons name="finance" size={32} color="#FFF" />
+                                    <MaterialCommunityIcons name="help-circle" size={32} color="#FFF" />
                                  </View>
                               </View>
                               <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 24 }} />
                               <View style={{ flexDirection: 'row', gap: 20 }}>
                                  <View>
-                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TRANSACTIONS"] || "TRANSACTIONS"}</Text>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>{"TRANSACTIONS"</Text>
                                     <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900' }}>{history.length}</Text>
                                  </View>
                                  <View>
-                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PÉRIODE"] || "PÉRIODE"}</Text>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>PÉRIODE</Text>
                                     <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900' }}>{recettePeriod === 'day' ? 'AUJOURD\'HUI' : recettePeriod.toUpperCase()}</Text>
                                  </View>
                               </View>
                            </LinearGradient>
 
-                           <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION PAR DÉPARTEMENT"] || "RÉPARTITION PAR DÉPARTEMENT"}</Text>
+                           <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5, marginLeft: 4 }}>{"RÉPARTITION PAR DÉPARTEMENT"</Text>
                            <View style={{ gap: 12 }}>
                               {Object.entries(history.reduce((acc, inv) => {
                                  const s = inv.service || 'AUTRE';
@@ -699,11 +699,11 @@ export default function CashierScreen({ navigation, route }) {
                                  <View key={i} style={{ padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                                          <MaterialIcons name="category" size={20} color={brandColor} />
+                                          <MaterialIcons name="help-circle" size={20} color={brandColor} />
                                        </View>
                                        <View>
                                           <Text style={{ fontWeight: '800', color: isDark ? '#E2E8F0' : '#1A1A1A', fontSize: 14 }}>{service.toUpperCase()}</Text>
-                                          <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Performance Service"] || "Performance Service"}</Text>
+                                          <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#94A3B8' }}>{"Performance Service"</Text>
                                        </View>
                                     </View>
                                     <Text style={{ fontWeight: '900', color: brandColor, fontSize: 16 }}>{amount.toLocaleString()} FC</Text>
@@ -720,11 +720,11 @@ export default function CashierScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                               <View>
-                                 <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ASSURANCES"] || "ASSURANCES"}</Text>
-                                 <Text style={{ fontSize: 11, color: brandColor, fontWeight: '900', marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GESTION DES COMPTES SOCIÉTÉS"] || "GESTION DES COMPTES SOCIÉTÉS"}</Text>
+                                 <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>ASSURANCES</Text>
+                                 <Text style={{ fontSize: 11, color: brandColor, fontWeight: '900', marginTop: 4 }}>{"GESTION DES COMPTES SOCIÉTÉS"</Text>
                               </View>
                               <TouchableOpacity onPress={() => fetchInsurances()} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center' }}>
-                                 <MaterialIcons name="refresh" size={20} color={brandColor} />
+                                 <MaterialIcons name="help-circle" size={20} color={brandColor} />
                               </TouchableOpacity>
                            </View>
 
@@ -750,14 +750,14 @@ export default function CashierScreen({ navigation, route }) {
 
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                        <View>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["STATUT CONTRAT"] || "STATUT CONTRAT"}</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{"STATUT CONTRAT"</Text>
                                           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
                                              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ins.status === 'active' ? '#22C55E' : '#EF4444', marginRight: 8 }} />
                                              <Text style={{ fontSize: 13, fontWeight: '900', color: ins.status === 'active' ? '#22C55E' : '#EF4444' }}>{ins.status === 'active' ? 'ACTIF' : 'INACTIF'}</Text>
                                           </View>
                                        </View>
                                        <View style={{ alignItems: 'flex-end' }}>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["COUVERTURE"] || "COUVERTURE"}</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>COUVERTURE</Text>
                                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A', marginTop: 6 }}>{ins.coverage_percentage}% DES FRAIS</Text>
                                        </View>
                                     </View>
@@ -774,8 +774,8 @@ export default function CashierScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                               <View>
-                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["COMPTABILITÉ"] || "COMPTABILITÉ"}</Text>
-                                 <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Gestion des journaux et balances"] || "Gestion des journaux et balances"}</Text>
+                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{"COMPTABILITÉ"</Text>
+                                 <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>Gestion des journaux et balances</Text>
                               </View>
                               <TouchableOpacity onPress={handleExportAccounting} style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: isDark ? '#1A1A1A' : '#FFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
                                  <MaterialCommunityIcons name="printer-outline" size={24} color={brandColor} />
@@ -785,8 +785,8 @@ export default function CashierScreen({ navigation, route }) {
                            {/* BALANCE DES PAIEMENTS CARD */}
                            <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 28, borderRadius: 35, marginBottom: 32, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION DES FLUX"] || "RÉPARTITION DES FLUX"}</Text>
-                                 <MaterialIcons name="account-balance-wallet" size={20} color={brandColor} />
+                                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: 1 }}>{"RÉPARTITION DES FLUX"</Text>
+                                 <MaterialIcons name="help-circle" size={20} color={brandColor} />
                               </View>
 
                               <View style={{ gap: 20 }}>
@@ -794,7 +794,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                           <View style={{ width: 12, height: 12, borderRadius: 4, backgroundColor: brandColor, marginRight: 10 }} />
-                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ASSURANCES (PRISE EN CHARGE)"] || "ASSURANCES (PRISE EN CHARGE)"}</Text>
+                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>{"ASSURANCES (PRISE EN CHARGE)"</Text>
                                        </View>
                                        <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{(accountingData.insured || 0).toLocaleString()} FC</Text>
                                     </View>
@@ -807,7 +807,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                           <View style={{ width: 12, height: 12, borderRadius: 4, backgroundColor: '#22C55E', marginRight: 10 }} />
-                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PRIVÉS (CASH / MOBILE)"] || "PRIVÉS (CASH / MOBILE)"}</Text>
+                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>PRIVÉS (CASH / MOBILE)</Text>
                                        </View>
                                        <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{(accountingData.private || 0).toLocaleString()} FC</Text>
                                     </View>
@@ -822,21 +822,21 @@ export default function CashierScreen({ navigation, route }) {
                            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 32 }}>
                               <TouchableOpacity onPress={handleCreateJournal} style={{ flex: 1, backgroundColor: brandColor, paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
                                  <MaterialIcons name="add-chart" size={22} color="#FFF" />
-                                 <Text style={{ color: '#FFF', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOUVEAU"] || "NOUVEAU"}</Text>
+                                 <Text style={{ color: '#FFF', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{"NOUVEAU"</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={() => setShowAutoModal(true)} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: autoJournalEnabled ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
-                                 <MaterialIcons name="autorenew" size={22} color={autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A')} />
+                                 <MaterialIcons name="help-circle" size={22} color={autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A')} />
                                  <Text style={{ color: autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A'), fontSize: 8, fontWeight: '900', marginTop: 5 }}>AUTO : {autoJournalEnabled ? autoJournalFreq.toUpperCase() : 'OFF'}</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={handleCloseSession} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                  <MaterialIcons name="lock-clock" size={22} color={isDark ? '#F1F5F9' : '#0A0A0A'} />
-                                 <Text style={{ color: isDark ? '#F1F5F9' : '#0A0A0A', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CLÔTURE"] || "CLÔTURE"}</Text>
+                                 <Text style={{ color: isDark ? '#F1F5F9' : '#0A0A0A', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{"CLÔTURE"</Text>
                               </TouchableOpacity>
                            </View>
 
                            {/* JOURNALS LIST */}
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1.5, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVES DES JOURNAUX"] || "ARCHIVES DES JOURNAUX"}</Text>
+                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1.5, marginLeft: 4 }}>ARCHIVES DES JOURNAUX</Text>
                               <MaterialCommunityIcons name="sort-variant" size={20} color={brandColor} />
                            </View>
 
@@ -887,8 +887,8 @@ export default function CashierScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                               <View>
-                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RAPPORTS"] || "RAPPORTS"}</Text>
-                                 <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Analyse des flux financiers"] || "Analyse des flux financiers"}</Text>
+                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{"RAPPORTS"</Text>
+                                 <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>Analyse des flux financiers</Text>
                               </View>
                               <TouchableOpacity style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: isDark ? '#1A1A1A' : '#FFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
                                  <MaterialIcons name="file-download" size={24} color={brandColor} />
@@ -924,8 +924,8 @@ export default function CashierScreen({ navigation, route }) {
                                     <LinearGradient colors={isDark ? ['#1A1A1A', '#0A0A0A'] : ['#FFF', '#F8FAFC']} style={{ padding: 24, borderRadius: 32, marginBottom: 32, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20 }}>
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                           <View>
-                                             <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PERFORMANCE GLOBALE"] || "PERFORMANCE GLOBALE"}</Text>
-                                             <Text style={{ fontSize: 36, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginTop: 8 }}>{totalRev.toLocaleString()} <Text style={{ fontSize: 16, color: brandColor }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                             <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{"PERFORMANCE GLOBALE"</Text>
+                                             <Text style={{ fontSize: 36, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginTop: 8 }}>{totalRev.toLocaleString()} <Text style={{ fontSize: 16, color: brandColor }}>FC</Text></Text>
 
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: trend >= 0 ? '#22C55E15' : '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start' }}>
                                                 <MaterialIcons name={trend >= 0 ? "trending-up" : "trending-down"} size={14} color={trend >= 0 ? "#22C55E" : "#EF4444"} />
@@ -941,18 +941,18 @@ export default function CashierScreen({ navigation, route }) {
 
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                           <View style={{ flex: 1 }}>
-                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOTAL ACTES"] || "TOTAL ACTES"}</Text>
+                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>{"TOTAL ACTES"</Text>
                                              <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#E2E8F0' : '#1A1A1A', marginTop: 4 }}>{history.length}</Text>
                                           </View>
                                           <View style={{ width: 1, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', marginHorizontal: 20 }} />
                                           <View style={{ flex: 1 }}>
-                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PANIER MOYEN"] || "PANIER MOYEN"}</Text>
-                                             <Text style={{ fontSize: 20, fontWeight: '900', color: '#22C55E', marginTop: 4 }}>{history.length > 0 ? Math.round(totalRev / history.length).toLocaleString() : 0} <Text style={{ fontSize: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>PANIER MOYEN</Text>
+                                             <Text style={{ fontSize: 20, fontWeight: '900', color: '#22C55E', marginTop: 4 }}>{history.length > 0 ? Math.round(totalRev / history.length).toLocaleString() : 0} <Text style={{ fontSize: 10 }}>{"FC"</Text></Text>
                                           </View>
                                        </View>
                                     </LinearGradient>
 
-                                    <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["HISTORIQUE QUOTIDIEN"] || "HISTORIQUE QUOTIDIEN"}</Text>
+                                    <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1, marginLeft: 4 }}>HISTORIQUE QUOTIDIEN</Text>
 
                                     {Object.entries(history.reduce((acc, h) => {
                                        const d = new Date(h.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -974,11 +974,11 @@ export default function CashierScreen({ navigation, route }) {
                                                    <Text style={{ fontSize: 11, color: '#22C55E', fontWeight: '700' }}>{data.count} Actes réalisés</Text>
                                                 </View>
                                              </View>
-                                             <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 18 }}>{data.paid.toLocaleString()} <Text style={{ fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                             <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 18 }}>{data.paid.toLocaleString()} <Text style={{ fontSize: 11 }}>{"FC"</Text></Text>
                                           </View>
 
                                           <View style={{ padding: 20 }}>
-                                             <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION PAR SERVICE :"] || "RÉPARTITION PAR SERVICE :"}</Text>
+                                             <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5 }}>RÉPARTITION PAR SERVICE :</Text>
                                              {Object.entries(data.services).map(([srv, val], idx) => {
                                                 const percentage = Math.round((val / data.paid) * 100);
                                                 return (
@@ -988,7 +988,7 @@ export default function CashierScreen({ navigation, route }) {
                                                             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: brandColor, marginRight: 10 }} />
                                                             <Text style={{ fontSize: 13, color: isDark ? '#E2E8F0' : '#475569', fontWeight: '700' }}>{srv.toUpperCase()}</Text>
                                                          </View>
-                                                         <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{val.toLocaleString()} <Text style={{ fontSize: 9 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                                         <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{val.toLocaleString()} <Text style={{ fontSize: 9 }}>{"FC"</Text></Text>
                                                       </View>
                                                       <View style={{ height: 6, backgroundColor: isDark ? '#0A0A0A' : '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
                                                          <View style={{ width: `${percentage}%`, height: '100%', backgroundColor: brandColor, borderRadius: 3 }} />
@@ -1018,11 +1018,11 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ width: 40, height: 5, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignSelf: 'center', borderRadius: 3, marginTop: 12 }} />
                <View style={{ padding: 24, borderBottomWidth: 1, borderBottomColor: isDark ? '#1A1A1A' : '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <View>
-                     <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSUMÉ ANALYTIQUE"] || "RÉSUMÉ ANALYTIQUE"}</Text>
-                     <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#555555' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Performance et flux de trésorerie"] || "Performance et flux de trésorerie"}</Text>
+                     <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.8 }}>RÉSUMÉ ANALYTIQUE</Text>
+                     <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#555555' : '#94A3B8' }}>{"Performance et flux de trésorerie"</Text>
                   </View>
                   <TouchableOpacity onPress={() => toggleBottomTab('summary')} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                     <MaterialIcons name="close" size={24} color={brandColor} />
+                     <MaterialIcons name="help-circle" size={24} color={brandColor} />
                   </TouchableOpacity>
                </View>
                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 24, paddingBottom: 60 + insets.bottom }}>
@@ -1034,8 +1034,8 @@ export default function CashierScreen({ navigation, route }) {
                         <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 28, borderRadius: 32, marginBottom: 30, elevation: 8, shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 15 }}>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                               <View>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RECETTE AUJOURD'HUI"] || "RECETTE AUJOURD'HUI"}</Text>
-                                 <Text style={{ fontSize: 38, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{Number(summary.today?.total || 0).toLocaleString()} <Text style={{ fontSize: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{"RECETTE AUJOURD'HUI"</Text>
+                                 <Text style={{ fontSize: 38, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{Number(summary.today?.total || 0).toLocaleString()} <Text style={{ fontSize: 16 }}>FC</Text></Text>
                               </View>
                               <View style={{ width: 50, height: 50, borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
                                  <MaterialCommunityIcons name="wallet" size={28} color="#FFF" />
@@ -1054,24 +1054,24 @@ export default function CashierScreen({ navigation, route }) {
                         {/* SECONDARY STATS ROW */}
                         <View style={{ flexDirection: 'row', gap: 15, marginBottom: 30 }}>
                            <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SITUATION HEBDO"] || "SITUATION HEBDO"}</Text>
+                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{"SITUATION HEBDO"</Text>
                               <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{Number(summary.week?.total || 0).toLocaleString()} FC</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: summary.week?.growth >= 0 ? '#22C55E' : '#EF4444' }}>{summary.week?.growth > 0 ? '+' : ''}{summary.week?.growth}%</Text>
-                                 <Text style={{ fontSize: 10, color: isDark ? '#555555' : '#94A3B8', marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["vs sem-1"] || "vs sem-1"}</Text>
+                                 <Text style={{ fontSize: 10, color: isDark ? '#555555' : '#94A3B8', marginLeft: 6 }}>vs sem-1</Text>
                               </View>
                            </View>
                            <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PANIER MOYEN"] || "PANIER MOYEN"}</Text>
+                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{"PANIER MOYEN"</Text>
                               <Text style={{ fontSize: 18, fontWeight: '900', color: brandColor }}>{summary.today?.count > 0 ? Math.round(summary.today.total / summary.today.count).toLocaleString() : 0} FC</Text>
-                              <Text style={{ fontSize: 10, color: isDark ? '#555555' : '#94A3B8', marginTop: 10, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PAR TRANSACTION"] || "PAR TRANSACTION"}</Text>
+                              <Text style={{ fontSize: 10, color: isDark ? '#555555' : '#94A3B8', marginTop: 10, fontWeight: '700' }}>PAR TRANSACTION</Text>
                            </View>
                         </View>
 
                         {/* PROGRESS TO GOAL */}
                         <View style={{ marginBottom: 35, paddingHorizontal: 10 }}>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                              <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["OBJECTIF DU MOIS"] || "OBJECTIF DU MOIS"}</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{"OBJECTIF DU MOIS"</Text>
                               <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor }}>65%</Text>
                            </View>
                            <View style={{ height: 10, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', borderRadius: 5, overflow: 'hidden' }}>
@@ -1080,7 +1080,7 @@ export default function CashierScreen({ navigation, route }) {
                         </View>
 
                         {/* BY SERVICE BREAKDOWN */}
-                        <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION ANALYTIQUE"] || "RÉPARTITION ANALYTIQUE"}</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20, letterSpacing: 1 }}>RÉPARTITION ANALYTIQUE</Text>
                         {summary.by_service?.map((s, i) => {
                            const percentage = Math.round((s.total / summary.today?.total) * 100) || 0;
                            return (
@@ -1096,7 +1096,7 @@ export default function CashierScreen({ navigation, route }) {
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 15 }}>{s.total.toLocaleString()}</Text>
-                                    <Text style={{ fontSize: 10, color: brandColor, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text>
+                                    <Text style={{ fontSize: 10, color: brandColor, fontWeight: '800' }}>{"FC"</Text>
                                  </View>
                               </View>
                            );
@@ -1140,14 +1140,14 @@ export default function CashierScreen({ navigation, route }) {
          />
 
          {/* PAYMENT MODAL (Simplified for design brief) */}
-         <Modal visible={showPaymentModal} animationType="slide" transparent>
+         <Modal visible={showPaymentModal} animationType="" transparent>
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
                <View style={{ backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 24, paddingBottom: 40 + insets.bottom }}>
                   <View style={{ width: 40, height: 4, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignSelf: 'center', borderRadius: 2, marginBottom: 20 }} />
 
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÈGLEMENT FACTURE"] || "RÈGLEMENT FACTURE"}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"RÈGLEMENT FACTURE"</Text>
                         <Text style={{ color: brandColor, fontWeight: '900', fontSize: 18 }}>{activeInvoice?.amount.toLocaleString()} FC</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowPaymentModal(false)}><MaterialIcons name='close' size={28} color={isDark ? '#FFF' : '#0A0A0A'} /></TouchableOpacity>
@@ -1157,7 +1157,7 @@ export default function CashierScreen({ navigation, route }) {
                      <FadeInView style={{ backgroundColor: insuranceError ? '#EF444410' : (isInsuranceVerified ? '#22C55E10' : brandColor + '10'), padding: 24, borderRadius: 32, borderWidth: 1, borderColor: insuranceError ? '#EF444430' : (isInsuranceVerified ? '#22C55E30' : brandColor + '30'), marginBottom: 28 }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}>
                            <View style={{ width: 50, height: 50, borderRadius: 18, backgroundColor: insuranceError ? '#EF4444' : (isInsuranceVerified ? '#22C55E' : brandColor), alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
-                              <MaterialCommunityIcons name={insuranceError ? "shield-alert" : (isInsuranceVerified ? "shield-check" : "shield-search")} size={28} color="#FFF" />
+                              <MaterialCommunityIcons name={insuranceError ? "" : (isInsuranceVerified ? "shield-check" : "shield-search")} size={28} color="#FFF" />
                            </View>
                            <View style={{ marginLeft: 16, flex: 1 }}>
                               <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>
@@ -1177,17 +1177,17 @@ export default function CashierScreen({ navigation, route }) {
 
                         {insuranceError && (
                            <TouchableOpacity onPress={switchToPrivate} style={{ marginTop: 20, paddingVertical: 12, backgroundColor: '#EF444415', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#EF444430' }}>
-                              <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PASSER EN MODE PRIVÉ (CASH)"] || "PASSER EN MODE PRIVÉ (CASH)"}</Text>
+                              <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 11 }}>{"PASSER EN MODE PRIVÉ (CASH)"</Text>
                            </TouchableOpacity>
                         )}
                      </FadeInView>
                   ) : (
                      <>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                           <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MODE DE PAIEMENT :"] || "MODE DE PAIEMENT :"}</Text>
+                           <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', letterSpacing: 1.5 }}>MODE DE PAIEMENT :</Text>
                            {activeInvoice?.patient?.is_insured && (
                               <TouchableOpacity onPress={() => { setPaymentMethod('insurance'); setIsInsuranceVerified(false); setInsuranceError(null); }}>
-                                 <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOURNER À L'ASSURANCE"] || "RETOURNER À L'ASSURANCE"}</Text>
+                                 <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10 }}>{"RETOURNER À L'ASSURANCE"</Text>
                               </TouchableOpacity>
                            )}
                         </View>
@@ -1202,7 +1202,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <MaterialCommunityIcons name={m.icon} size={32} color={paymentMethod === m.id ? m.color : (isDark ? '#555555' : '#94A3B8')} />
                                  ) : (
                                     <View style={{ width: 54, height: 36, marginBottom: 4, borderRadius: 8, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 }}>
-                                       <Image source={m.logo} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
+                                       <Image source={m.logo} style={{ width: '100%', height: '100%' }} resizeMode="" />
                                     </View>
                                  )}
                                  <Text style={{ fontSize: 9, fontWeight: '900', color: paymentMethod === m.id ? m.color : (isDark ? '#555555' : '#94A3B8'), marginTop: 6 }}>{m.label}</Text>
@@ -1216,8 +1216,8 @@ export default function CashierScreen({ navigation, route }) {
                      <FadeInView style={{ marginBottom: 24 }}>
                         <TextInput
                            style={{ height: 64, borderRadius: 24, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', paddingHorizontal: 24, fontSize: 20, fontWeight: '900', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}
-                           placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Entrez le numéro mobile..."] || "Entrez le numéro mobile..."}
-                           keyboardType="phone-pad"
+                           placeholder={"Entrez le numéro mobile...'
+                           keyboardType=""
                            value={paymentPhone}
                            onChangeText={setPaymentPhone}
                         />
@@ -1234,7 +1234,7 @@ export default function CashierScreen({ navigation, route }) {
                             ) : paymentPhone.length >= 9 && (
                               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
                                 <MaterialCommunityIcons name="alert-circle" size={10} color="#EF4444" />
-                                <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NUMÉRO INVALIDE"] || "NUMÉRO INVALIDE"}</Text>
+                                <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>{"NUMÉRO INVALIDE"</Text>
                               </View>
                             )}
                           </View>
@@ -1248,7 +1248,7 @@ export default function CashierScreen({ navigation, route }) {
                      style={{ height: 70, borderRadius: 35, overflow: 'hidden', opacity: (paymentMethod === 'insurance' && insuranceError) ? 0.5 : 1 }}
                   >
                      <LinearGradient colors={insuranceError ? ['#94A3B8', '#64748B'] : Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSimulating || verifyingInsurance ? <ActivityIndicator color="#FFF" /> : (
+                        {isSimulating || verifyingInsurance ? <ActivityIndicator color="" /> : (
                            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>
                               {paymentMethod === 'insurance'
                                  ? (isInsuranceVerified ? 'VALIDER LA PRISE EN CHARGE' : 'VÉRIFIER LE STATUT CONTRAT')
@@ -1284,20 +1284,20 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ width: '100%', backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderRadius: 40, padding: 30, borderWidth: 1, borderColor: isDark ? '#1A1A1A' : '#E2E8F0', elevation: 20 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
                      <View>
-                        <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["JOURNAL AUTO"] || "JOURNAL AUTO"}</Text>
-                        <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AUTOMATISATION DES CYCLES"] || "AUTOMATISATION DES CYCLES"}</Text>
+                        <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"JOURNAL AUTO"</Text>
+                        <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>AUTOMATISATION DES CYCLES</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowAutoModal(false)}><MaterialIcons name="close" size={28} color={isDark ? '#FFF' : '#0A0A0A'} /></TouchableOpacity>
                   </View>
 
-                  <Text style={{ fontSize: 13, color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '600', marginBottom: 25, lineHeight: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Activez l'ouverture et la clôture automatique des journaux selon la durée souhaitée."] || "Activez l'ouverture et la clôture automatique des journaux selon la durée souhaitée."}</Text>
+                  <Text style={{ fontSize: 13, color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '600', marginBottom: 25, lineHeight: 20 }}>{"Activez l'ouverture et la clôture automatique des journaux selon la durée souhaitée."</Text>
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 24 }}>
                      <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{autoJournalEnabled ? 'ACTIVÉ' : 'DÉSACTIVÉ'}</Text>
                      <Switch value={autoJournalEnabled} onValueChange={setAutoJournalEnabled} trackColor={{ false: '#767577', true: brandColor }} thumbColor={autoJournalEnabled ? '#FFF' : '#f4f3f4'} />
                   </View>
 
-                  <Text style={[styles.label, { marginBottom: 15 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DURÉE DE L'EXERCICE"] || "DURÉE DE L'EXERCICE"}</Text>
+                  <Text style={[styles.label, { marginBottom: 15 }]}>DURÉE DE L'EXERCICE</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 30 }}>
                      {[
                         { id: 'day', label: 'JOUR' },
@@ -1319,7 +1319,7 @@ export default function CashierScreen({ navigation, route }) {
 
                   <TouchableOpacity onPress={handleSaveAutoSettings} disabled={isSubmitting} style={{ height: 60, borderRadius: 30, overflow: 'hidden', elevation: 4 }}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ENREGISTRER"] || "ENREGISTRER"}</Text>}
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{"ENREGISTRER"</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                </View>
@@ -1327,16 +1327,16 @@ export default function CashierScreen({ navigation, route }) {
          </Modal>
 
          {/* JOURNAL DETAILS MODAL */}
-         <Modal visible={showJournalDetails} animationType="slide" transparent>
+         <Modal visible={showJournalDetails} animationType="" transparent>
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' }}>
                <View style={{ height: height * 0.9, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
                   <View style={{ padding: 24, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderBottomWidth: 1, borderBottomColor: isDark ? '#2E2E2E' : '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAILS JOURNAL"] || "DÉTAILS JOURNAL"}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"DÉTAILS JOURNAL"</Text>
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedJournal?.reference || 'CHARGEMENT...'}</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowJournalDetails(false)} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialIcons name="close" size={24} color={brandColor} />
+                        <MaterialIcons name="help-circle" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 
@@ -1344,40 +1344,40 @@ export default function CashierScreen({ navigation, route }) {
                      {journalLoading ? (
                         <View style={{ marginTop: 100, alignItems: 'center' }}>
                            <ActivityIndicator size="large" color={brandColor} />
-                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉCUPÉRATION DES OPÉRATIONS..."] || "RÉCUPÉRATION DES OPÉRATIONS..."}</Text>
+                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{"RÉCUPÉRATION DES OPÉRATIONS..."</Text>
                         </View>
                      ) : selectedJournal && (
                         <FadeInView>
                            {/* SUMMARY BAR */}
                            <View style={{ flexDirection: 'row', gap: 15, marginBottom: 30 }}>
                               <View style={{ flex: 1, backgroundColor: brandColor + '10', padding: 20, borderRadius: 24, borderWidth: 1, borderColor: brandColor + '20' }}>
-                                 <Text style={{ fontSize: 9, fontWeight: '900', color: brandColor, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOTAL RECETTE"] || "TOTAL RECETTE"}</Text>
+                                 <Text style={{ fontSize: 9, fontWeight: '900', color: brandColor, marginBottom: 8 }}>TOTAL RECETTE</Text>
                                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{Number(selectedJournal.closing_amount).toLocaleString()} FC</Text>
                               </View>
                               <View style={{ flex: 1, backgroundColor: '#22C55E10', padding: 20, borderRadius: 24, borderWidth: 1, borderColor: '#22C55E20' }}>
-                                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTES TOTAL"] || "ACTES TOTAL"}</Text>
+                                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', marginBottom: 8 }}>{"ACTES TOTAL"</Text>
                                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{selectedJournal.invoices_count}</Text>
                               </View>
                            </View>
 
                            <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 20, borderRadius: 24, marginBottom: 30, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
-                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["OUVERT LE"] || "OUVERT LE"}</Text>
+                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>OUVERT LE</Text>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{new Date(selectedJournal.opened_at).toLocaleString()}</Text>
                               </View>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
-                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CLÔTURÉ LE"] || "CLÔTURÉ LE"}</Text>
+                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{"CLÔTURÉ LE"</Text>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{selectedJournal.closed_at ? new Date(selectedJournal.closed_at).toLocaleString() : 'EN COURS'}</Text>
                               </View>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CAISSIER"] || "CAISSIER"}</Text>
+                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>CAISSIER</Text>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: brandColor }}>{selectedJournal.user?.name || 'ADMIN'}</Text>
                               </View>
                            </View>
 
-                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["LISTE DES OPÉRATIONS"] || "LISTE DES OPÉRATIONS"}</Text>
+                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1.5 }}>{"LISTE DES OPÉRATIONS"</Text>
                            {selectedJournal.invoices?.length === 0 ? (
-                              <Text style={{ textAlign: 'center', color: '#64748B', marginTop: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune opération trouvée."] || "Aucune opération trouvée."}</Text>
+                              <Text style={{ textAlign: 'center', color: '#64748B', marginTop: 20 }}>Aucune opération trouvée.</Text>
                            ) : selectedJournal.invoices.map((inv, idx) => (
                               <View key={inv.id} style={{ padding: 18, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1401,11 +1401,11 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ height: height * 0.9, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
                   <View style={{ padding: 24, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderBottomWidth: 1, borderBottomColor: isDark ? '#2E2E2E' : '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RELEVÉ MENSUEL"] || "RELEVÉ MENSUEL"}</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"RELEVÉ MENSUEL"</Text>
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedInsurance?.name}</Text>
                      </View>
                      <TouchableOpacity onPress={() => { setSelectedInsurance(null); setInsuranceReport(null); }} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialIcons name="close" size={24} color={brandColor} />
+                        <MaterialIcons name="help-circle" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 
@@ -1413,33 +1413,33 @@ export default function CashierScreen({ navigation, route }) {
                      {reportLoading ? (
                         <View style={{ marginTop: 100, alignItems: 'center' }}>
                            <ActivityIndicator size="large" color={brandColor} />
-                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GÉNÉRATION DU RAPPORT..."] || "GÉNÉRATION DU RAPPORT..."}</Text>
+                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{"GÉNÉRATION DU RAPPORT..."</Text>
                         </View>
                      ) : insuranceReport && (
                         <FadeInView>
                            {/* STATS CARDS */}
                            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
                               <View style={{ flex: 1, backgroundColor: brandColor, padding: 20, borderRadius: 24 }}>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOTAL BRUT"] || "TOTAL BRUT"}</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>TOTAL BRUT</Text>
                                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.total_amount.toLocaleString()} FC</Text>
                               </View>
                               <View style={{ flex: 1, backgroundColor: '#22C55E', padding: 20, borderRadius: 24 }}>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉGLÉ"] || "RÉGLÉ"}</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>{"RÉGLÉ"</Text>
                                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.settled_amount.toLocaleString()} FC</Text>
                               </View>
                            </View>
 
                            <View style={{ padding: 24, backgroundColor: '#F9AB00', borderRadius: 24, marginBottom: 24, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                               <View>
-                                 <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SOLDE À RECOUVRER"] || "SOLDE À RECOUVRER"}</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: '900' }}>SOLDE À RECOUVRER</Text>
                                  <Text style={{ color: '#FFF', fontSize: 24, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.pending_amount.toLocaleString()} FC</Text>
                               </View>
                               <TouchableOpacity onPress={() => setShowSettleModal(true)} style={{ backgroundColor: '#FFF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
-                                 <Text style={{ color: '#F9AB00', fontWeight: '900', fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉGLER"] || "RÉGLER"}</Text>
+                                 <Text style={{ color: '#F9AB00', fontWeight: '900', fontSize: 11 }}>{"RÉGLER"</Text>
                               </TouchableOpacity>
                            </View>
 
-                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAIL DES PRESTATIONS"] || "DÉTAIL DES PRESTATIONS"}</Text>
+                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5 }}>DÉTAIL DES PRESTATIONS</Text>
                            {insuranceReport.invoices.map((inv, idx) => (
                               <View key={inv.id} style={{ padding: 16, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, marginBottom: 10, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -1456,7 +1456,7 @@ export default function CashierScreen({ navigation, route }) {
                            ))}
 
                            <TouchableOpacity style={{ marginTop: 20, height: 60, borderRadius: 20, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: brandColor + '20' }}>
-                              <Text style={{ color: brandColor, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ENVOYER LE RELEVÉ PAR EMAIL"] || "ENVOYER LE RELEVÉ PAR EMAIL"}</Text>
+                              <Text style={{ color: brandColor, fontWeight: '900' }}>{"ENVOYER LE RELEVÉ PAR EMAIL"</Text>
                            </TouchableOpacity>
                         </FadeInView>
                      )}
@@ -1466,24 +1466,23 @@ export default function CashierScreen({ navigation, route }) {
          </Modal>
 
          {/* SETTLE MODAL */}
-         <Modal visible={showSettleModal} transparent animationType="fade">
+         <Modal visible={showSettleModal} transparent animationType="">
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                <View style={{ width: '100%', backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderRadius: 32, padding: 24 }}>
-                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDER RÈGLEMENT"] || "VALIDER RÈGLEMENT"}</Text>
-                  <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Veuillez entrer la référence du paiement (Bordereau ou Chèque)."] || "Veuillez entrer la référence du paiement (Bordereau ou Chèque)."}</Text>
+                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12 }}>{"VALIDER RÈGLEMENT"</Text>
+                  <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 20 }}>Veuillez entrer la référence du paiement (Bordereau ou Chèque).</Text>
                   <TextInput
                      style={{ height: 60, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', borderRadius: 16, paddingHorizontal: 20, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '900', marginBottom: 20 }}
-                     placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Référence paiement..."] || "Référence paiement..."}
-                     placeholderTextColor="#64748B"
+                     placeholder={"Référence paiement..." placeholderTextColor=""
                      value={paymentRef}
                      onChangeText={setPaymentRef}
                   />
                   <View style={{ flexDirection: 'row', gap: 12 }}>
                      <TouchableOpacity onPress={() => setShowSettleModal(false)} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANNULER"] || "ANNULER"}</Text>
+                        <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B' }}>{"ANNULER"</Text>
                      </TouchableOpacity>
                      <TouchableOpacity onPress={handleSettleInvoices} disabled={isSubmitting} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: brandColor, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: '900', color: '#FFF' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDER"] || "VALIDER"}</Text>
+                        <Text style={{ fontWeight: '900', color: '#FFF' }}>VALIDER</Text>
                      </TouchableOpacity>
                   </View>
                </View>

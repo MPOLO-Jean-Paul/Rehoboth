@@ -38,8 +38,8 @@ export default function SoinsNavPanel({ isOpen, anim, onClose, isDark: _ignored,
             <MaterialCommunityIcons name="medical-bag" size={24} color="#FFF" />
           </LinearGradient>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NAVIGATION SOINS"] || "NAVIGATION SOINS"}</Text>
-            <Text style={{ color: brandColor, fontSize: 10, fontWeight: '800', marginTop: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MODULE INFIRMIER"] || "MODULE INFIRMIER"}</Text>
+            <Text style={[styles.title, { color: C.text }]}>NAVIGATION SOINS</Text>
+            <Text style={{ color: brandColor, fontSize: 10, fontWeight: '800', marginTop: 2 }}>MODULE INFIRMIER</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: C.closeBg }]}>
             <MaterialIcons name="close" size={20} color={C.closeIc} />

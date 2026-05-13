@@ -347,7 +347,7 @@ export default function LoginScreen({ navigation }) {
                 {t.loginTitle || 'REHOBOTH'}
               </Text>
               <View style={[tw`px-5 py-1.5 mb-3 border`, { borderRadius: 999, backgroundColor: C.brandLight, borderColor: C.brandMedium }]}>
-                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ESPACE HOSPITALIER SÉCURISÉ"] || "ESPACE HOSPITALIER SÉCURISÉ"}</Text>
+                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>{"ESPACE HOSPITALIER SÉCURISÉ"</Text>
               </View>
               <Text style={[tw`text-sm text-center leading-5 px-3`, { color: isDark ? '#CBD5E1' : '#475569' }]}>
                 {t.loginSubtitle || 'Accédez à votre espace sécurisé Rehoboth'}
@@ -370,14 +370,13 @@ export default function LoginScreen({ navigation }) {
                     ? { borderColor: brandColor, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : '#FFF' } 
                     : { borderColor: isDark ? 'rgba(148, 163, 184, 0.16)' : C.border, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF' }
                 ]}>
-                  <Feather name="mail" size={20} color={emailFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
+                  <Feather name="help-circle" size={20} color={emailFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["agent@mdcd.com"] || "agent@mdcd.com"}
-                    placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                    placeholder={"agent@mdcd.com" placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                     value={email}
                     onChangeText={setEmail}
-                    autoCapitalize="none"
+                    autoCapitalize=""
                     autoCorrect={false}
                     keyboardType="email-address"
                     returnKeyType="next"
@@ -403,11 +402,10 @@ export default function LoginScreen({ navigation }) {
                   <Feather name="shield" size={20} color={passFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["••••••••"] || "••••••••"}
-                    placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                    placeholder={"••••••••" placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                     value={password}
                     onChangeText={setPassword}
-                    autoCapitalize="none"
+                    autoCapitalize=""
                     autoCorrect={false}
                     secureTextEntry={!showPassword}
                     returnKeyType="done"
@@ -448,12 +446,12 @@ export default function LoginScreen({ navigation }) {
                   {biometricsChecked && isBiometricSupported && hasStoredSession ? (
                     <TouchableOpacity onPress={handleBiometricLogin} style={tw`flex-row items-center`}>
                       <MaterialCommunityIcons name={biometricType === 'face' ? 'face-recognition' : 'fingerprint'} size={18} color={brandColor} style={tw`mr-1`} />
-                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Biométrie"] || "Biométrie"}</Text>
+                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>{"Biométrie"</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity onPress={showLoginHelp}>
                       <Text style={tw`text-sm font-black text-[${brandColor}]`}>
-                        {t.loginForgot || "Oublié ?"}
+                        {t.loginForgot || ""}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -482,14 +480,14 @@ export default function LoginScreen({ navigation }) {
                   {loading ? (
                     <View style={tw`flex-row items-center`}>
                       <ActivityIndicator color="#FFF" style={tw`mr-3`} />
-                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AUTHENTIFICATION..."] || "AUTHENTIFICATION..."}</Text>
+                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>{"AUTHENTIFICATION..."</Text>
                     </View>
                   ) : (
                     <>
                       <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black mr-2`, { letterSpacing: 0 }]}>
                         {t.login || 'Se Connecter'}
                       </Text>
-                      <Feather name="arrow-right" size={20} color="#FFF" />
+                      <Feather name="help-circle" size={20} color="#FFF" />
                     </>
                   )}
                 </PressableScale>

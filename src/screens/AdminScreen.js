@@ -592,8 +592,8 @@ export default function AdminScreen({ navigation }) {
       <PremiumHeader 
         onLeftPress={() => toggleLeft(true)}
         onRightPress={() => toggleRight(true)}
-        title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
-        subtitle="ADMINISTRATION"
+        title="REHOBOTH"
+        subtitle=""
         isDark={isDark}
         navigation={navigation}
       />
@@ -649,7 +649,7 @@ export default function AdminScreen({ navigation }) {
                            <TouchableOpacity onPress={() => setShowRevenueModal(true)}>
                               <Text style={styles.heroValue}>{(stats?.revenue_period || 0).toLocaleString()} FC</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VOIR LE DÉTAIL DES REVENUS"] || "VOIR LE DÉTAIL DES REVENUS"}</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '700' }}>VOIR LE DÉTAIL DES REVENUS</Text>
                                  <MaterialIcons name="chevron-right" size={14} color="rgba(255,255,255,0.7)" />
                               </View>
                            </TouchableOpacity>
@@ -665,8 +665,8 @@ export default function AdminScreen({ navigation }) {
 
                   <View style={{ marginTop: 25 }}>
                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, paddingHorizontal: 5 }}>
-                        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION DES REVENUS"] || "RÉPARTITION DES REVENUS"}</Text>
-                        <MaterialCommunityIcons name="chart-pie" size={18} color={brandColor} />
+                        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>RÉPARTITION DES REVENUS</Text>
+                        <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
                      </View>
                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
                         {stats?.revenue_by_service?.map((rev, i) => (
@@ -681,7 +681,7 @@ export default function AdminScreen({ navigation }) {
                            </FadeInView>
                         ))}
                         {(!stats?.revenue_by_service || stats.revenue_by_service.length === 0) && (
-                           <Text style={{ color: C.sub, fontStyle: 'italic', marginVertical: 20, marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun revenu enregistré."] || "Aucun revenu enregistré."}</Text>
+                           <Text style={{ color: C.sub, fontStyle: 'italic', marginVertical: 20, marginLeft: 5 }}>Aucun revenu enregistré.</Text>
                         )}
                      </ScrollView>
                   </View>
@@ -691,10 +691,10 @@ export default function AdminScreen({ navigation }) {
            {activeView === 'users' && (
               <FadeInView>
                  <View style={styles.rowBetween}>
-                    <Text style={[styles.vTitle, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PERSONNEL"] || "PERSONNEL"}</Text>
+                    <Text style={[styles.vTitle, { color: C.text }]}>PERSONNEL</Text>
                     <TouchableOpacity style={styles.addBtn} onPress={() => setShowUserModal(true)}>
                        <MaterialIcons name="add" size={18} color="#FFF" />
-                       <Text style={styles.addBtnT}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER"] || "AJOUTER"}</Text>
+                       <Text style={styles.addBtnT}>AJOUTER</Text>
                     </TouchableOpacity>
                  </View>
 
@@ -715,7 +715,7 @@ export default function AdminScreen({ navigation }) {
                                 </View>
                              ) : null}
                              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#22C55E', marginRight: 4 }} />
-                             <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTIF"] || "ACTIF"}</Text>
+                             <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>ACTIF</Text>
                           </View>
                        </View>
                        <View style={styles.uActions}>
@@ -730,7 +730,7 @@ export default function AdminScreen({ navigation }) {
            {activeView === 'patients' && (
               <FadeInView>
                  <View style={styles.rowBetween}>
-                    <Text style={[styles.vTitle, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BASE PATIENTS"] || "BASE PATIENTS"}</Text>
+                    <Text style={[styles.vTitle, { color: C.text }]}>BASE PATIENTS</Text>
                     <View style={{ backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
                        <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{patients.length} DOSSIERS</Text>
                     </View>
@@ -739,7 +739,7 @@ export default function AdminScreen({ navigation }) {
                  <View style={[styles.searchBox, { backgroundColor: C.surface, borderColor: C.border, marginTop: 10, marginBottom: 20 }]}>
                     <MaterialIcons name="search" size={22} color={brandColor} />
                     <TextInput 
-                       placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chercher par nom ou numéro..."] || "Chercher par nom ou numéro..."} 
+                       placeholder="Chercher par nom ou numéro..." 
                        placeholderTextColor={C.sub} 
                        style={[styles.searchInput, { color: C.text }]} 
                        value={patientSearch} 
@@ -751,7 +751,7 @@ export default function AdminScreen({ navigation }) {
                     patients.filter(p => `${p.first_name} ${p.last_name} ${p.id}`.toLowerCase().includes(patientSearch.toLowerCase())).map((p, i) => (
                        <TouchableOpacity key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
                           <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.divider, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                             <MaterialCommunityIcons name="folder" size={24} color={brandColor} />
+                             <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
                           </View>
                           <View style={{ flex: 1 }}>
                              <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name}</Text>
@@ -790,11 +790,11 @@ export default function AdminScreen({ navigation }) {
                           style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: C.divider, padding: 12, borderRadius: 15, alignSelf: 'flex-start' }}
                        >
                           <MaterialIcons name="arrow-back" size={20} color={C.text} />
-                          <Text style={{ marginLeft: 8, fontWeight: '900', color: C.text, fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR AUX DOSSIERS"] || "RETOUR AUX DOSSIERS"}</Text>
+                          <Text style={{ marginLeft: 8, fontWeight: '900', color: C.text, fontSize: 12 }}>RETOUR AUX DOSSIERS</Text>
                        </TouchableOpacity>
 
                        <View style={{ backgroundColor: brandColor, padding: 20, borderRadius: 28, marginBottom: 20, elevation: 6 }}>
-                          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DOSSIER MENSUEL"] || "DOSSIER MENSUEL"}</Text>
+                          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>DOSSIER MENSUEL</Text>
                           <Text style={{ color: '#FFF', fontSize: 24, fontWeight: '900', marginTop: 4 }}>{selectedMonthFolder.month.toUpperCase()}</Text>
                        </View>
 
@@ -822,26 +822,26 @@ export default function AdminScreen({ navigation }) {
            {/* MESSAGING VIEW */}
             {activeView === 'comm' && (
                <FadeInView>
-                  <Text style={[styles.vTitle, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BROADCAST & EMAILS"] || "BROADCAST & EMAILS"}</Text>
+                  <Text style={[styles.vTitle, { color: C.text }]}>BROADCAST & EMAILS</Text>
                   
                    <View style={[styles.premiumCard, { backgroundColor: C.surface, borderColor: C.border, marginTop: 16, elevation: 6, borderRadius: 28, overflow: 'hidden', borderWidth: 1 }]}>
                      <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                           <MaterialCommunityIcons name={broadcast.id ? "email-edit-outline" : "email-fast-outline"} size={32} color="#FFF" />
+                           <MaterialCommunityIcons name={broadcast.id ? "edit" : "email-fast-outline"} size={32} color="#FFF" />
                            <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900', marginLeft: 15 }}>{broadcast.id ? "MODIFIER LE MESSAGE" : "DIFFUSION GÉNÉRALE"}</Text>
                         </View>
                         {broadcast.id && (
                            <TouchableOpacity onPress={() => setBroadcast({ subject: '', message: '', target_role: '', priority: 'normal' })}>
-                              <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANNULER"] || "ANNULER"}</Text>
+                              <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>ANNULER</Text>
                            </TouchableOpacity>
                         )}
                      </LinearGradient>
                      <View style={{ padding: 20 }}>
-                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["OBJET"] || "OBJET"}</Text>
-                        <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Objet du message..."] || "Objet du message..."} placeholderTextColor={C.placeholder} value={broadcast.subject} onChangeText={v => setBroadcast({...broadcast, subject: v})} />
-                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MESSAGE"] || "MESSAGE"}</Text>
-                        <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input, height: 120, textAlignVertical: 'top', paddingTop: 15 }]} multiline placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Contenu du broadcast..."] || "Contenu du broadcast..."} placeholderTextColor={C.placeholder} value={broadcast.message} onChangeText={v => setBroadcast({...broadcast, message: v})} />
-                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DESTINATAIRES"] || "DESTINATAIRES"}</Text>
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>OBJET</Text>
+                        <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Objet du message..." placeholderTextColor={C.placeholder} value={broadcast.subject} onChangeText={v => setBroadcast({...broadcast, subject: v})} />
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>MESSAGE</Text>
+                        <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input, height: 120, textAlignVertical: 'top', paddingTop: 15 }]} multiline placeholder="Contenu du broadcast..." placeholderTextColor={C.placeholder} value={broadcast.message} onChangeText={v => setBroadcast({...broadcast, message: v})} />
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>DESTINATAIRES</Text>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
                            {[
                               { id: '', label: 'Tous' },
@@ -866,7 +866,7 @@ export default function AdminScreen({ navigation }) {
                               );
                            })}
                         </ScrollView>
-                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PRIORITÉ"] || "PRIORITÉ"}</Text>
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 8 }}>PRIORITÉ</Text>
                         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 14 }}>
                            {[
                               { id: 'normal', label: 'Info', color: brandColor },
@@ -896,9 +896,9 @@ export default function AdminScreen({ navigation }) {
 
                    <View style={[styles.premiumCard, { backgroundColor: C.surface, borderColor: C.border, marginTop: 18, padding: 18 }]}>
                       <View style={styles.rowBetween}>
-                         <Text style={[styles.vTitle, { color: C.text, fontSize: 18 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MESSAGES REÇUS"] || "MESSAGES REÇUS"}</Text>
+                         <Text style={[styles.vTitle, { color: C.text, fontSize: 18 }]}>MESSAGES REÇUS</Text>
                          <TouchableOpacity onPress={fetchGlobalData}>
-                            <MaterialIcons name="refresh" size={22} color={brandColor} />
+                            <MaterialIcons name="help-circle" size={22} color={brandColor} />
                          </TouchableOpacity>
                       </View>
 
@@ -945,7 +945,7 @@ export default function AdminScreen({ navigation }) {
                       )) : (
                          <View style={{ alignItems: 'center', paddingVertical: 35 }}>
                             <MaterialCommunityIcons name="email-open-outline" size={48} color={C.sub} />
-                            <Text style={{ color: C.sub, marginTop: 12, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun message reçu pour le moment."] || "Aucun message reçu pour le moment."}</Text>
+                            <Text style={{ color: C.sub, marginTop: 12, fontWeight: '800' }}>Aucun message reçu pour le moment.</Text>
                          </View>
                       )}
                    </View>
@@ -956,7 +956,7 @@ export default function AdminScreen({ navigation }) {
             {activeView === 'stats' && (
                <FadeInView style={{ flex: 1 }}>
                   <View style={styles.rowBetween}>
-                     <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BILAN & ANALYTIQUE"] || "BILAN & ANALYTIQUE"}</Text>
+                     <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]}>BILAN & ANALYTIQUE</Text>
                      <TouchableOpacity onPress={() => fetchGlobalData()} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center' }}>
                         <MaterialIcons name="refresh" size={24} color={brandColor} />
                      </TouchableOpacity>
@@ -968,21 +968,21 @@ export default function AdminScreen({ navigation }) {
                   <LinearGradient colors={['#1A1A1A', '#0A0A0A']} style={{ borderRadius: 32, padding: 24, marginBottom: 25, elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.3, shadowRadius: 20 }}>
                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                         <View>
-                           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["INDEX DE PERFORMANCE GLOBALE"] || "INDEX DE PERFORMANCE GLOBALE"}</Text>
+                           <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>INDEX DE PERFORMANCE GLOBALE</Text>
                            <Text style={{ color: '#FFF', fontSize: 28, fontWeight: '900', marginTop: 5 }}>94.2%</Text>
                         </View>
                         <View style={{ width: 60, height: 60, borderRadius: 30, borderWidth: 4, borderColor: '#22C55E', alignItems: 'center', justifyContent: 'center' }}>
-                           <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 14 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["A+"] || "A+"}</Text>
+                           <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 14 }}>A+</Text>
                         </View>
                      </View>
                      <View style={{ height: 4, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2, overflow: 'hidden' }}>
                         <View style={{ width: '94%', height: '100%', backgroundColor: '#22C55E' }} />
                      </View>
-                     <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, marginTop: 8, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BASÉ SUR LE FLUX DE PATIENTS ET LES REVENUS DU MOIS"] || "BASÉ SUR LE FLUX DE PATIENTS ET LES REVENUS DU MOIS"}</Text>
+                     <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, marginTop: 8, fontWeight: '700' }}>BASÉ SUR LE FLUX DE PATIENTS ET LES REVENUS DU MOIS</Text>
                   </LinearGradient>
 
                   {/* SERVICE DISTRIBUTION */}
-                  <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginBottom: 15, marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION DU FLUX ACTUEL"] || "RÉPARTITION DU FLUX ACTUEL"}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginBottom: 15, marginLeft: 5 }}>RÉPARTITION DU FLUX ACTUEL</Text>
                   <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border, marginBottom: 25 }}>
                      {stats?.visits_by_service?.length > 0 ? stats.visits_by_service.map((s, idx) => (
                         <View key={idx} style={{ marginBottom: 15 }}>
@@ -995,14 +995,14 @@ export default function AdminScreen({ navigation }) {
                            </View>
                         </View>
                      )) : (
-                        <Text style={{ color: C.sub, textAlign: 'center', fontStyle: 'italic' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune donnée de flux en direct."] || "Aucune donnée de flux en direct."}</Text>
+                        <Text style={{ color: C.sub, textAlign: 'center', fontStyle: 'italic' }}>Aucune donnée de flux en direct.</Text>
                      )}
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 15, marginBottom: 25 }}>
                      {/* TOP INSURANCES */}
                      <View style={{ flex: 1, backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border }}>
-                        <Text style={{ fontSize: 11, fontWeight: '900', color: C.text, marginBottom: 15 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOP ASSURANCES"] || "TOP ASSURANCES"}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '900', color: C.text, marginBottom: 15 }}>TOP ASSURANCES</Text>
                         {stats?.top_insurances?.map((ins, i) => (
                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ['#3B82F6', '#8B5CF6', '#EC4899'][i] || brandColor, marginRight: 10 }} />
@@ -1014,33 +1014,33 @@ export default function AdminScreen({ navigation }) {
 
                      {/* CRITICAL ALERTS */}
                      <View style={{ flex: 1, backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border }}>
-                        <Text style={{ fontSize: 11, fontWeight: '900', color: C.danger, marginBottom: 15 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ALERTES CRITIQUES"] || "ALERTES CRITIQUES"}</Text>
+                        <Text style={{ fontSize: 11, fontWeight: '900', color: C.danger, marginBottom: 15 }}>ALERTES CRITIQUES</Text>
                         {(stats?.low_stock_medicines?.length || 0) > 0 ? (
                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <MaterialIcons name="warning" size={20} color={C.danger} />
+                              <MaterialIcons name="help-circle" size={20} color={C.danger} />
                               <View style={{ marginLeft: 10 }}>
                                  <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>{stats.low_stock_medicines.length}</Text>
-                                 <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["STOCK FAIBLE"] || "STOCK FAIBLE"}</Text>
+                                 <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>STOCK FAIBLE</Text>
                               </View>
                            </View>
                         ) : (
                            <View style={{ flexDirection: 'row', alignItems: 'center', opacity: 0.5 }}>
-                              <MaterialIcons name="check-circle" size={20} color="#22C55E" />
-                              <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["STOCK STABLE"] || "STOCK STABLE"}</Text>
+                              <MaterialIcons name="help-circle" size={20} color="#22C55E" />
+                              <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>STOCK STABLE</Text>
                            </View>
                         )}
                         <View style={{ height: 1, backgroundColor: C.border, marginVertical: 12 }} />
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                           <MaterialIcons name="error-outline" size={20} color="#F59E0B" />
+                           <MaterialIcons name="help-circle" size={20} color="#F59E0B" />
                            <View style={{ marginLeft: 10 }}>
                               <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>0</Text>
-                              <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENCES ATTENTE"] || "URGENCES ATTENTE"}</Text>
+                              <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>URGENCES ATTENTE</Text>
                            </View>
                         </View>
                      </View>
                   </View>
 
-                  <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginBottom: 15, marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BILAN ET RENDEMENT DES SERVICES"] || "BILAN ET RENDEMENT DES SERVICES"}</Text>
+                  <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginBottom: 15, marginLeft: 5 }}>BILAN ET RENDEMENT DES SERVICES</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingBottom: 10 }}>
                      {[
                         { name: 'Caisse', status: 'Stable', icon: 'cash-check', col: '#38A169', rate: '98%', yield: 'Recette Optimale' },
@@ -1069,8 +1069,8 @@ export default function AdminScreen({ navigation }) {
                             <MaterialCommunityIcons name="file-chart" size={24} color="#FFF" />
                          </LinearGradient>
                          <View>
-                            <Text style={{ fontSize: 16, fontWeight: '900', color: C.text }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RAPPORTS AUTOMATIQUES"] || "RAPPORTS AUTOMATIQUES"}</Text>
-                            <Text style={{ fontSize: 11, color: C.sub, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Recevoir le bilan par email/notif"] || "Recevoir le bilan par email/notif"}</Text>
+                            <Text style={{ fontSize: 16, fontWeight: '900', color: C.text }}>RAPPORTS AUTOMATIQUES</Text>
+                            <Text style={{ fontSize: 11, color: C.sub, fontWeight: '700' }}>Recevoir le bilan par email/notif</Text>
                          </View>
                       </View>
 
@@ -1096,7 +1096,7 @@ export default function AdminScreen({ navigation }) {
                       >
                          <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                             <MaterialCommunityIcons name="presentation" size={22} color="#FFF" style={{ marginRight: 12 }} />
-                            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GÉNÉRER BILAN COMPLET"] || "GÉNÉRER BILAN COMPLET"}</Text>
+                            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, letterSpacing: 1 }}>GÉNÉRER BILAN COMPLET</Text>
                          </LinearGradient>
                       </TouchableOpacity>
                   </View>
@@ -1107,7 +1107,7 @@ export default function AdminScreen({ navigation }) {
             {activeView === 'notifications' && (
                <FadeInView>
                   <View style={styles.rowBetween}>
-                     <Text style={[styles.vTitle, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTIFICATIONS"] || "NOTIFICATIONS"}</Text>
+                     <Text style={[styles.vTitle, { color: C.text }]}>NOTIFICATIONS</Text>
                      <TouchableOpacity onPress={fetchGlobalData}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
 
@@ -1125,7 +1125,7 @@ export default function AdminScreen({ navigation }) {
                   )) : (
                      <View style={{ alignItems: 'center', paddingVertical: 60, opacity: 0.5 }}>
                         <MaterialCommunityIcons name="bell-off-outline" size={64} color={C.sub} />
-                        <Text style={{ color: C.sub, marginTop: 15, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune notification pour le moment."] || "Aucune notification pour le moment."}</Text>
+                        <Text style={{ color: C.sub, marginTop: 15, fontWeight: '800' }}>Aucune notification pour le moment.</Text>
                      </View>
                   )}
                </FadeInView>
@@ -1137,15 +1137,15 @@ export default function AdminScreen({ navigation }) {
                <FadeInView>
                   <View style={styles.rowBetween}>
                      <View style={{ flex: 1, marginRight: 10 }}>
-                        <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]} numberOfLines={1}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ASSURANCES"] || "ASSURANCES"}</Text>
-                        <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }} numberOfLines={1}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GESTION & RENTABILITÉ"] || "GESTION & RENTABILITÉ"}</Text>
+                        <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]} numberOfLines={1}>ASSURANCES</Text>
+                        <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }} numberOfLines={1}>GESTION & RENTABILITÉ</Text>
                      </View>
                      <TouchableOpacity 
                         style={[styles.addBtn, { backgroundColor: brandColor, paddingHorizontal: 12, height: 40, borderRadius: 14 }]} 
                         onPress={() => { setEditingInsurance(null); setNewInsurance({ name: '', contract_date: '', monthly_flat_fee: '', contact_info: '' }); setShowInsuranceModal(true); }}
                      >
-                        <MaterialIcons name="add" size={18} color="#FFF" />
-                        <Text style={[styles.addBtnT, { fontSize: 11, marginLeft: 4 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOUVEAU"] || "NOUVEAU"}</Text>
+                        <MaterialIcons name="help-circle" size={18} color="#FFF" />
+                        <Text style={[styles.addBtnT, { fontSize: 11, marginLeft: 4 }]}>NOUVEAU</Text>
                      </TouchableOpacity>
                   </View>
 
@@ -1173,7 +1173,7 @@ export default function AdminScreen({ navigation }) {
                               
                               <View style={{ marginVertical: 15 }}>
                                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                                    <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CONSOMMATION"] || "CONSOMMATION"}</Text>
+                                    <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>CONSOMMATION</Text>
                                     <Text style={{ fontSize: 9, fontWeight: '900', color: C.text }}>{Math.round(ratio * 100)}%</Text>
                                  </View>
                                  <View style={{ height: 6, backgroundColor: C.divider, borderRadius: 3, overflow: 'hidden' }}>
@@ -1183,7 +1183,7 @@ export default function AdminScreen({ navigation }) {
 
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                  <View>
-                                    <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FORFAIT"] || "FORFAIT"}</Text>
+                                    <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub }}>FORFAIT</Text>
                                     <Text style={{ fontSize: 13, fontWeight: '900', color: C.text }}>{flatFee.toLocaleString()} FC</Text>
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
@@ -1201,7 +1201,7 @@ export default function AdminScreen({ navigation }) {
                   <View style={[styles.searchBox, { backgroundColor: C.surface, borderColor: C.border, marginBottom: 20, borderRadius: 20, height: 50 }]}>
                      <MaterialIcons name="search" size={22} color={brandColor} />
                      <TextInput 
-                        placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chercher une compagnie..."] || "Chercher une compagnie..."} 
+                        placeholder="Chercher une compagnie..." 
                         placeholderTextColor={C.placeholder}
                         style={[styles.searchInput, { color: C.text, fontSize: 14 }]}
                         value={insuranceSearch}
@@ -1220,7 +1220,7 @@ export default function AdminScreen({ navigation }) {
                            
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
                               <LinearGradient colors={[brandColor, '#4F46E5']} style={{ width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-                                 <MaterialCommunityIcons name="office-building" size={26} color="#FFF" />
+                                 <MaterialCommunityIcons name="help-circle" size={26} color="#FFF" />
                               </LinearGradient>
                               <View style={{ flex: 1, marginLeft: 16 }}>
                                  <Text style={{ fontSize: 19, fontWeight: '900', color: C.text }}>{ins.name}</Text>
@@ -1248,22 +1248,22 @@ export default function AdminScreen({ navigation }) {
 
                            <View style={{ flexDirection: 'row', backgroundColor: C.bg, borderRadius: 20, padding: 15 }}>
                               <View style={{ flex: 1 }}>
-                                 <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["POURCENTAGE MEMBRES"] || "POURCENTAGE MEMBRES"}</Text>
+                                 <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>NB MEMBRES</Text>
                                  <View style={{ flexDirection: 'row', alignItems: 'baseline', marginTop: 4 }}>
                                     <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>{ins.insured_members_count || 0}</Text>
-                                    <Text style={{ fontSize: 10, color: C.sub, fontWeight: '700', marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PERSONNES"] || "PERSONNES"}</Text>
+                                    <Text style={{ fontSize: 10, color: C.sub, fontWeight: '700', marginLeft: 4 }}>PERSONNES</Text>
                                  </View>
                               </View>
                               <View style={{ width: 1, backgroundColor: C.border, marginHorizontal: 15 }} />
                               <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                                 <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALEUR MENSUELLE"] || "VALEUR MENSUELLE"}</Text>
+                                 <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>VALEUR MENSUELLE</Text>
                                  <Text style={{ fontSize: 18, fontWeight: '900', color: brandColor, marginTop: 4 }}>{ins.monthly_flat_fee?.toLocaleString()} FC</Text>
                               </View>
                            </View>
 
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15, justifyContent: 'space-between' }}>
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                 <MaterialIcons name="info-outline" size={14} color={C.sub} />
+                                 <MaterialIcons name="help-circle" size={14} color={C.sub} />
                                  <Text style={{ fontSize: 10, color: C.sub, marginLeft: 5, fontWeight: '600' }} numberOfLines={1}>
                                     {ins.contact_info || "Aucune information de contact"}
                                  </Text>
@@ -1280,8 +1280,8 @@ export default function AdminScreen({ navigation }) {
                <FadeInView>
                   <View style={styles.rowBetween}>
                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CATALOGUE"] || "CATALOGUE"}</Text>
-                        <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GESTION DES PRIX & SERVICES"] || "GESTION DES PRIX & SERVICES"}</Text>
+                        <Text style={[styles.vTitle, { color: C.text, marginBottom: 0 }]}>CATALOGUE</Text>
+                        <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }}>GESTION DES PRIX & SERVICES</Text>
                      </View>
                      <TouchableOpacity 
                        onPress={() => setShowCatalogModal(true)}
@@ -1294,7 +1294,7 @@ export default function AdminScreen({ navigation }) {
                   <View style={[styles.searchBox, { backgroundColor: C.surface, borderColor: C.border, marginBottom: 15, borderRadius: 20, height: 48, marginTop: 10 }]}>
                      <MaterialIcons name="search" size={20} color={brandColor} />
                      <TextInput 
-                        placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chercher un service ou produit..."] || "Chercher un service ou produit..."} 
+                        placeholder="Chercher un service ou produit..." 
                         placeholderTextColor={C.placeholder}
                         style={[styles.searchInput, { color: C.text, fontSize: 13 }]}
                         value={catalogSearch}
@@ -1355,7 +1355,7 @@ export default function AdminScreen({ navigation }) {
                                        {item.type === 'Produit' && (
                                           <TextInput 
                                             style={{ fontSize: 11, color: C.sub, padding: 0, marginTop: 2, fontWeight: '700' }}
-                                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Dosage (ex: 500mg)..."] || "Dosage (ex: 500mg)..."}
+                                            placeholder="Dosage (ex: 500mg)..."
                                             placeholderTextColor={C.sub}
                                             value={item.dosage || ''}
                                             multiline
@@ -1379,14 +1379,14 @@ export default function AdminScreen({ navigation }) {
                                                  setPriceCatalog(next);
                                               }}
                                            />
-                                           <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text>
+                                           <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10, marginLeft: 4 }}>FC</Text>
                                         </View>
                                         {!item.locked && (
                                            <TouchableOpacity 
                                               onPress={() => handleDeleteCatalogItem(globalIndex)}
                                               style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.danger + '15', alignItems: 'center', justifyContent: 'center', marginLeft: 8 }}
                                            >
-                                              <MaterialIcons name="delete-outline" size={18} color={C.danger} />
+                                              <MaterialIcons name="help-circle" size={18} color={C.danger} />
                                            </TouchableOpacity>
                                         )}
                                      </View>
@@ -1435,20 +1435,20 @@ export default function AdminScreen({ navigation }) {
                           </View>
                        </View>
                     ))}
-                    {diseases.length === 0 && <Text style={{ color: C.sub, textAlign: 'center' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune donnée de diagnostic."] || "Aucune donnée de diagnostic."}</Text>}
+                    {diseases.length === 0 && <Text style={{ color: C.sub, textAlign: 'center' }}>{"Aucune donnée de diagnostic."</Text>}
                  </View>
               ) : activeBottomTab === 'stock' ? (
                  <View>
                     <View style={{ backgroundColor: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF444420' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B20' : '#10B98120'), padding: 15, borderRadius: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF444440' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B40' : '#10B98140') }}>
                        <MaterialCommunityIcons 
-                         name={expiryData.pharmacy_health?.alert_level === 'critical' ? "alert-octagon" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "alert" : "check-decagram")} 
+                         name={expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "alert" : "check-decagram")} 
                          size={24} 
                          color={expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981')} 
                        />
                        <View style={{ marginLeft: 12 }}>
-                          <Text style={{ fontWeight: '900', color: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981'), fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SANTÉ DE LA PHARMACIE"] || "SANTÉ DE LA PHARMACIE"}</Text>
+                          <Text style={{ fontWeight: '900', color: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981'), fontSize: 11 }}>{"SANTÉ DE LA PHARMACIE"</Text>
                           <Text style={{ color: C.text, fontWeight: '700', fontSize: 13 }}>
-                             {expiryData.pharmacy_health?.alert_level === 'critical' ? "Action immédiate requise" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "Attention requise" : "État du stock stable")}
+                             {expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "Attention requise" : "État du stock stable")}
                           </Text>
                        </View>
                     </View>
@@ -1488,7 +1488,7 @@ export default function AdminScreen({ navigation }) {
                  </View>
               ) : activeBottomTab === 'caisse' ? (
                  <View>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 15, letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BILAN DES ENTRÉES PAR SERVICE"] || "BILAN DES ENTRÉES PAR SERVICE"}</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 15, letterSpacing: 1.5 }}>{"BILAN DES ENTRÉES PAR SERVICE"</Text>
                     {cashData.items?.map((c, i) => (
                        <View key={i} style={{ padding: 18, backgroundColor: C.surface, borderRadius: 24, marginBottom: 14, borderWidth: 1, borderColor: C.border, elevation: 2 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
@@ -1499,7 +1499,7 @@ export default function AdminScreen({ navigation }) {
                           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                              <Text style={{ color: C.sub, fontSize: 11 }}>{c.count} transactions effectuées</Text>
                              <View style={{ backgroundColor: c.color + '15', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 }}>
-                                <Text style={{ color: c.color, fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDE"] || "VALIDE"}</Text>
+                                <Text style={{ color: c.color, fontSize: 9, fontWeight: '900' }}>VALIDE</Text>
                              </View>
                           </View>
                        </View>
@@ -1507,12 +1507,12 @@ export default function AdminScreen({ navigation }) {
                     {(!cashData.items || cashData.items.length === 0) && (
                        <View style={{ alignItems: 'center', paddingVertical: 40 }}>
                           <MaterialCommunityIcons name="cash-remove" size={48} color={C.sub} style={{ opacity: 0.3 }} />
-                          <Text style={{ color: C.sub, marginTop: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune recette enregistrée pour cette période."] || "Aucune recette enregistrée pour cette période."}</Text>
+                          <Text style={{ color: C.sub, marginTop: 10 }}>{"Aucune recette enregistrée pour cette période."</Text>
                        </View>
                     )}
                  </View>
               ) : (
-                 <Text style={{ color: C.text }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Sélectionnez une catégorie"] || "Sélectionnez une catégorie"}</Text>
+                 <Text style={{ color: C.text }}>Sélectionnez une catégorie</Text>
               )}
            </ScrollView>
         </Animated.View>
@@ -1575,17 +1575,16 @@ export default function AdminScreen({ navigation }) {
                </View>
                <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
                   <Text style={styles.label}>{t.users.fullName}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Jean Mpolo"] || "Ex: Jean Mpolo"} placeholderTextColor="#64748B" value={showEditModal ? editingUser?.name : newUser.name} onChangeText={v => showEditModal ? setEditingUser({...editingUser, name: v}) : setNewUser({...newUser, name: v})} />
-                  <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["POSTNOM"] || "POSTNOM"}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Bakole"] || "Ex: Bakole"} placeholderTextColor="#64748B" value={showEditModal ? editingUser?.postname : newUser.postname} onChangeText={v => showEditModal ? setEditingUser({...editingUser, postname: v}) : setNewUser({...newUser, postname: v})} />
-                  <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TÉLÉPHONE"] || "TÉLÉPHONE"}</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Ex: Jean Mpolo" placeholderTextColor="" value={showEditModal ? editingUser?.name : newUser.name} onChangeText={v => showEditModal ? setEditingUser({...editingUser, name: v}) : setNewUser({...newUser, name: v})} />
+                  <Text style={styles.label}>{"POSTNOM"</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: Bakole" placeholderTextColor="#64748B" value={showEditModal ? editingUser?.postname : newUser.postname} onChangeText={v => showEditModal ? setEditingUser({...editingUser, postname: v}) : setNewUser({...newUser, postname: v})} />
+                  <Text style={styles.label}>{"TÉLÉPHONE"</Text>
                   <View style={{ marginBottom: 20 }}>
                      <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                        <MaterialIcons name="phone" size={20} color={brandColor} />
+                        <MaterialIcons name="help-circle" size={20} color={brandColor} />
                         <TextInput 
                            style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                           placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["08X XXX XXXX"] || "08X XXX XXXX"} 
-                           placeholderTextColor="#64748B" 
+                           placeholder={"08X XXX XXXX" placeholderTextColor="" 
                            keyboardType="phone-pad" 
                            value={showEditModal ? editingUser?.phone : newUser.phone} 
                            onChangeText={v => {
@@ -1603,18 +1602,17 @@ export default function AdminScreen({ navigation }) {
                      </View>
                   </View>
                   <Text style={styles.label}>{t.users.emailAddress}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["agent@test.com"] || "agent@test.com"} placeholderTextColor="#64748B" autoCapitalize="none" keyboardType="email-address" value={showEditModal ? editingUser?.email : newUser.email} onChangeText={v => showEditModal ? setEditingUser({...editingUser, email: v}) : setNewUser({...newUser, email: v})} />
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"agent@test.com" placeholderTextColor="" autoCapitalize="none" keyboardType="email-address" value={showEditModal ? editingUser?.email : newUser.email} onChangeText={v => showEditModal ? setEditingUser({...editingUser, email: v}) : setNewUser({...newUser, email: v})} />
                   
                   {!showEditModal && (
                      <>
-                        <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MOT DE PASSE"] || "MOT DE PASSE"}</Text>
+                        <Text style={styles.label}>{"MOT DE PASSE"</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialIcons name="lock-outline" size={20} color={brandColor} />
+                              <MaterialIcons name="help-circle" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                 placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["••••••••"] || "••••••••"} 
-                                 placeholderTextColor="#64748B" 
+                                 placeholder={"••••••••" placeholderTextColor="" 
                                  secureTextEntry={!showPassword} 
                                  value={newUser.password} 
                                  onChangeText={v => setNewUser({...newUser, password: v})} 
@@ -1625,14 +1623,13 @@ export default function AdminScreen({ navigation }) {
                            </View>
                         </View>
 
-                        <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CONFIRMER LE MOT DE PASSE"] || "CONFIRMER LE MOT DE PASSE"}</Text>
+                        <Text style={styles.label}>{"CONFIRMER LE MOT DE PASSE"</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialIcons name="lock-clock" size={20} color={brandColor} />
+                              <MaterialIcons name="help-circle" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                 placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["••••••••"] || "••••••••"} 
-                                 placeholderTextColor="#64748B" 
+                                 placeholder={"••••••••" placeholderTextColor="" 
                                  secureTextEntry={!showConfirmPassword} 
                                  value={newUser.confirmPassword} 
                                  onChangeText={v => setNewUser({...newUser, confirmPassword: v})} 
@@ -1663,10 +1660,10 @@ export default function AdminScreen({ navigation }) {
 
                   {(showEditModal ? editingUser?.role : newUser.role) === 'medecin' && (
                      <FadeInView>
-                        <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SPÉCIALITÉ MÉDICALE"] || "SPÉCIALITÉ MÉDICALE"}</Text>
+                        <Text style={styles.label}>{"SPÉCIALITÉ MÉDICALE"</Text>
                         <TextInput 
                            style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                           placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Cardiologie, Pédiatrie..."] || "Ex: Cardiologie, Pédiatrie..."} 
+                           placeholder="Ex: Cardiologie, Pédiatrie..." 
                            placeholderTextColor="#64748B" 
                            value={showEditModal ? editingUser?.specialty : newUser.specialty} 
                            onChangeText={v => showEditModal ? setEditingUser({...editingUser, specialty: v}) : setNewUser({...newUser, specialty: v})} 
@@ -1680,19 +1677,18 @@ export default function AdminScreen({ navigation }) {
                           style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}
                         >
                            <MaterialIcons name="lock-reset" size={20} color={brandColor} />
-                           <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉINITIALISER LE MOT DE PASSE"] || "RÉINITIALISER LE MOT DE PASSE"}</Text>
+                           <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 10 }}>{"RÉINITIALISER LE MOT DE PASSE"</Text>
                         </TouchableOpacity>
 
                         {showResetSection && (
                            <FadeInView style={{ marginBottom: 20, backgroundColor: C.surface, padding: 15, borderRadius: 18, borderWidth: 1, borderColor: C.border }}>
-                              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOUVEAU MOT DE PASSE"] || "NOUVEAU MOT DE PASSE"}</Text>
+                              <Text style={styles.label}>NOUVEAU MOT DE PASSE</Text>
                               <View style={{ marginBottom: 15 }}>
                                  <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
                                     <MaterialIcons name="vpn-key" size={20} color={brandColor} />
                                     <TextInput 
                                        style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                       placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["••••••••"] || "••••••••"} 
-                                       placeholderTextColor="#64748B" 
+                                       placeholder={"••••••••" placeholderTextColor="" 
                                        secureTextEntry={!showResetPassword} 
                                        value={resetPasswordVal} 
                                        onChangeText={setResetPasswordVal} 
@@ -1704,7 +1700,7 @@ export default function AdminScreen({ navigation }) {
                               </View>
                               <TouchableOpacity onPress={handleResetPassword} disabled={isResetting}>
                                  <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
-                                    {isResetting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDER LE NOUVEAU PASS"] || "VALIDER LE NOUVEAU PASS"}</Text>}
+                                    {isResetting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{"VALIDER LE NOUVEAU PASS"</Text>}
                                  </LinearGradient>
                               </TouchableOpacity>
                            </FadeInView>
@@ -1714,15 +1710,15 @@ export default function AdminScreen({ navigation }) {
                           onPress={() => handleDeleteUser(editingUser.id)}
                           style={{ flexDirection: 'row', alignItems: 'center' }}
                         >
-                           <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
-                           <Text style={{ color: '#EF4444', fontWeight: '800', marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SUPPRIMER LE COMPTE DÉFINITIVEMENT"] || "SUPPRIMER LE COMPTE DÉFINITIVEMENT"}</Text>
+                           <MaterialIcons name="help-circle" size={20} color="#EF4444" />
+                           <Text style={{ color: '#EF4444', fontWeight: '800', marginLeft: 10 }}>{"SUPPRIMER LE COMPTE DÉFINITIVEMENT"</Text>
                         </TouchableOpacity>
                      </View>
                   )}
 
                   <TouchableOpacity onPress={showEditModal ? handleUpdateUser : handleCreateUser} disabled={isSubmitting} style={{ marginTop: 30 }}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
-                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{showEditModal ? t.save.toUpperCase() : t.users.generate.toUpperCase()}</Text>}
+                        {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{showEditModal ? t.save.toUpperCase() : t.users.generate.toUpperCase()}</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                   <View style={{ height: 40 }} />
@@ -1741,28 +1737,28 @@ export default function AdminScreen({ navigation }) {
                         <MaterialCommunityIcons name="trophy-variant" size={24} color="#FFF" />
                      </LinearGradient>
                      <View>
-                        <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BILAN GÉNÉRAL MDCD"] || "BILAN GÉNÉRAL MDCD"}</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>{"BILAN GÉNÉRAL MDCD"</Text>
                         <Text style={{ fontSize: 11, color: C.sub, fontWeight: '700' }}>Période : {reportFrequency === 'daily' ? 'Journalière' : reportFrequency === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}</Text>
                      </View>
                   </View>
                   <TouchableOpacity onPress={() => setShowBilanModal(false)} style={styles.closeBtn}>
-                     <MaterialIcons name="close" size={24} color={C.text} />
+                     <MaterialIcons name="help-circle" size={24} color={C.text} />
                   </TouchableOpacity>
                </View>
 
                <ScrollView contentContainerStyle={{ padding: 25 }}>
                   <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderRadius: 28, padding: 25, borderWidth: 1, borderColor: C.divider, marginBottom: 25 }}>
-                     <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 2, marginBottom: 15 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSUMÉ FINANCIER"] || "RÉSUMÉ FINANCIER"}</Text>
+                     <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 2, marginBottom: 15 }}>{"RÉSUMÉ FINANCIER"</Text>
                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <View>
-                           <Text style={{ fontSize: 34, fontWeight: '900', color: C.text }}>{(stats?.revenue_period || 0).toLocaleString()} <Text style={{ fontSize: 14 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC"] || "FC"}</Text></Text>
-                           <Text style={{ fontSize: 11, fontWeight: '800', color: '#22C55E', marginTop: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Rendement Optimal (+12.5%)"] || "Rendement Optimal (+12.5%)"}</Text>
+                           <Text style={{ fontSize: 34, fontWeight: '900', color: C.text }}>{(stats?.revenue_period || 0).toLocaleString()} <Text style={{ fontSize: 14 }}>FC</Text></Text>
+                           <Text style={{ fontSize: 11, fontWeight: '800', color: '#22C55E', marginTop: 5 }}>{"Rendement Optimal (+12.5%)"</Text>
                         </View>
-                        <MaterialCommunityIcons name="trending-up" size={44} color="#22C55E15" />
+                        <MaterialCommunityIcons name="help-circle" size={44} color="#22C55E15" />
                      </View>
                   </View>
 
-                  <Text style={{ fontSize: 14, fontWeight: '900', color: C.text, marginBottom: 18, marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAILS PAR SERVICE"] || "DÉTAILS PAR SERVICE"}</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '900', color: C.text, marginBottom: 18, marginLeft: 5 }}>{"DÉTAILS PAR SERVICE"</Text>
                   
                   {[
                      { name: 'RÉCEPTION / ACCUEIL', val: stats?.total_visits_period || 0, unit: 'Visites', yield: '100%', col: '#3182CE', icon: 'account-multiple-check' },
@@ -1783,7 +1779,7 @@ export default function AdminScreen({ navigation }) {
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
                            <Text style={{ fontSize: 12, fontWeight: '900', color: s.col }}>{s.yield}</Text>
-                           <Text style={{ fontSize: 8, color: C.sub, fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RENDEMENT"] || "RENDEMENT"}</Text>
+                           <Text style={{ fontSize: 8, color: C.sub, fontWeight: '800' }}>RENDEMENT</Text>
                         </View>
                      </View>
                   ))}
@@ -1791,9 +1787,9 @@ export default function AdminScreen({ navigation }) {
                   <View style={{ marginTop: 20, padding: 20, backgroundColor: brandColor + '08', borderRadius: 24, borderWidth: 1, borderColor: brandColor + '20' }}>
                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <MaterialIcons name="info-outline" size={18} color={brandColor} />
-                        <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RECOMMANDATION SYSTÈME"] || "RECOMMANDATION SYSTÈME"}</Text>
+                        <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, marginLeft: 8 }}>{"RECOMMANDATION SYSTÈME"</Text>
                      </View>
-                     <Text style={{ fontSize: 12, color: C.text, lineHeight: 18, fontWeight: '600' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Le service des soins est en sur-capacité. Envisagez de renforcer l'équipe de nuit pour maintenir la qualité MDCD."] || "Le service des soins est en sur-capacité. Envisagez de renforcer l'équipe de nuit pour maintenir la qualité MDCD."}</Text>
+                     <Text style={{ fontSize: 12, color: C.text, lineHeight: 18, fontWeight: '600' }}>Le service des soins est en sur-capacité. Envisagez de renforcer l'équipe de nuit pour maintenir la qualité MDCD.</Text>
                   </View>
 
                   <TouchableOpacity 
@@ -1801,7 +1797,7 @@ export default function AdminScreen({ navigation }) {
                     onPress={() => { setShowBilanModal(false); showToast("Rapport envoyé à l'administration", "success"); }}
                   >
                      <MaterialCommunityIcons name="send-check" size={20} color={C.bg} style={{ marginRight: 10 }} />
-                     <Text style={{ color: C.bg, fontWeight: '900', fontSize: 13 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVER & PARTAGER"] || "ARCHIVER & PARTAGER"}</Text>
+                     <Text style={{ color: C.bg, fontWeight: '900', fontSize: 13 }}>{"ARCHIVER & PARTAGER"</Text>
                   </TouchableOpacity>
                   <View style={{ height: 40 }} />
                </ScrollView>
@@ -1809,7 +1805,7 @@ export default function AdminScreen({ navigation }) {
          </View>
       </Modal>
 
-      <Modal visible={showInsuranceModal} animationType="slide" transparent>
+      <Modal visible={showInsuranceModal} animationType="" transparent>
         <View style={styles.modalOverlay}>
            <View style={[styles.modalSheet, { backgroundColor: C.bg, height: height * 0.92 }]}>
             <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
@@ -1820,13 +1816,13 @@ export default function AdminScreen({ navigation }) {
             </View>
             <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOM DE LA COMPAGNIE"] || "NOM DE LA COMPAGNIE"}</Text>
-              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: ASCOMA, SONAS, CNSS..."] || "Ex: ASCOMA, SONAS, CNSS..."} placeholderTextColor="#64748B" value={newInsurance.name} onChangeText={v => setNewInsurance({...newInsurance, name: v})} />
+              <Text style={styles.label}>{"NOM DE LA COMPAGNIE"</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: ASCOMA, SONAS, CNSS..." placeholderTextColor="#64748B" value={newInsurance.name} onChangeText={v => setNewInsurance({...newInsurance, name: v})} />
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["EMAIL DE CONTACT"] || "EMAIL DE CONTACT"}</Text>
-              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["contact@ascoma.cd"] || "contact@ascoma.cd"} placeholderTextColor="#64748B" keyboardType="email-address" autoCapitalize="none" value={newInsurance.email} onChangeText={v => setNewInsurance({...newInsurance, email: v})} />
+              <Text style={styles.label}>{"EMAIL DE CONTACT"</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="contact@ascoma.cd" placeholderTextColor="#64748B" keyboardType="email-address" autoCapitalize="none" value={newInsurance.email} onChangeText={v => setNewInsurance({...newInsurance, email: v})} />
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TYPE DE CONTRAT (PÉRIODICITÉ)"] || "TYPE DE CONTRAT (PÉRIODICITÉ)"}</Text>
+              <Text style={styles.label}>{"TYPE DE CONTRAT (PÉRIODICITÉ)"</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
                 {[
                   { id: 'mensuel', label: 'MENSUEL', icon: 'calendar-month' },
@@ -1847,24 +1843,24 @@ export default function AdminScreen({ navigation }) {
                 })}
               </View>
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MONTANT DU FORFAIT (FC)"] || "MONTANT DU FORFAIT (FC)"}</Text>
-              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: 500000"] || "Ex: 500000"} placeholderTextColor="#64748B" keyboardType="numeric" value={newInsurance.monthly_flat_fee} onChangeText={v => setNewInsurance({...newInsurance, monthly_flat_fee: v})} />
+              <Text style={styles.label}>MONTANT DU FORFAIT (FC)</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Ex: 500000" placeholderTextColor="" keyboardType="numeric" value={newInsurance.monthly_flat_fee} onChangeText={v => setNewInsurance({...newInsurance, monthly_flat_fee: v})} />
 
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉBUT CONTRAT (JJ/MM/AAAA)"] || "DÉBUT CONTRAT (JJ/MM/AAAA)"}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["01/01/2026"] || "01/01/2026"} placeholderTextColor="#64748B" value={newInsurance.contract_date} onChangeText={v => setNewInsurance({...newInsurance, contract_date: v})} />
+                  <Text style={styles.label}>{"DÉBUT CONTRAT (JJ/MM/AAAA)"</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="01/01/2026" placeholderTextColor="#64748B" value={newInsurance.contract_date} onChangeText={v => setNewInsurance({...newInsurance, contract_date: v})} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FIN CONTRAT (JJ/MM/AAAA)"] || "FIN CONTRAT (JJ/MM/AAAA)"}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["31/12/2026"] || "31/12/2026"} placeholderTextColor="#64748B" value={newInsurance.contract_end_date} onChangeText={v => setNewInsurance({...newInsurance, contract_end_date: v})} />
+                  <Text style={styles.label}>{"FIN CONTRAT (JJ/MM/AAAA)"</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="31/12/2026" placeholderTextColor="#64748B" value={newInsurance.contract_end_date} onChangeText={v => setNewInsurance({...newInsurance, contract_end_date: v})} />
                 </View>
               </View>
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CONTACTS / INFOS COMPLÉMENTAIRES"] || "CONTACTS / INFOS COMPLÉMENTAIRES"}</Text>
-              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input, height: 90, textAlignVertical: 'top', paddingTop: 12 }]} multiline placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Numéro de téléphone, personne de contact..."] || "Numéro de téléphone, personne de contact..."} placeholderTextColor="#64748B" value={newInsurance.contact_info} onChangeText={v => setNewInsurance({...newInsurance, contact_info: v})} />
+              <Text style={styles.label}>{"CONTACTS / INFOS COMPLÉMENTAIRES"</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input, height: 90, textAlignVertical: 'top', paddingTop: 12 }]} multiline placeholder="Numéro de téléphone, personne de contact..." placeholderTextColor="#64748B" value={newInsurance.contact_info} onChangeText={v => setNewInsurance({...newInsurance, contact_info: v})} />
 
-              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ÉTAT DU CONTRAT"] || "ÉTAT DU CONTRAT"}</Text>
+              <Text style={styles.label}>{"ÉTAT DU CONTRAT"</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
                 {[
                   { id: 'active', label: 'ACTIF', color: '#22C55E' },
@@ -1883,7 +1879,7 @@ export default function AdminScreen({ navigation }) {
 
               <TouchableOpacity onPress={handleSaveInsurance} disabled={isSubmitting} style={{ marginTop: 10 }}>
                 <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
-                   {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{editingInsurance ? "METTRE À JOUR" : "CRÉER LE CONTRAT"}</Text>}
+                   {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{editingInsurance ? "METTRE À JOUR" : "CRÉER LE CONTRAT"}</Text>}
                 </LinearGradient>
               </TouchableOpacity>
               <View style={{ height: 50 }} />
@@ -1898,10 +1894,10 @@ export default function AdminScreen({ navigation }) {
             <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
                <View>
                   <Text style={[styles.dimT, { color: C.text }]}>{activeInsurance?.name}</Text>
-                  <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GESTION DES ADHÉRENTS"] || "GESTION DES ADHÉRENTS"}</Text>
+                  <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900' }}>{"GESTION DES ADHÉRENTS"</Text>
                </View>
                <TouchableOpacity onPress={() => setShowMemberModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                  <MaterialIcons name="close" size={22} color={C.closeIc} />
+                  <MaterialIcons name="help-circle" size={22} color={C.closeIc} />
                </TouchableOpacity>
             </View>
             
@@ -1912,17 +1908,17 @@ export default function AdminScreen({ navigation }) {
                     <Text style={styles.label}>{editingMember ? "MODIFIER ADHÉRENT" : "NOUVEL ADHÉRENT"}</Text>
                     {editingMember && (
                       <TouchableOpacity onPress={() => { setEditingMember(null); setNewMember({ member_name: '', membership_code: '' }); }}>
-                        <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANNULER"] || "ANNULER"}</Text>
+                        <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>ANNULER</Text>
                       </TouchableOpacity>
                     )}
                   </View>
                   <View style={{ flexDirection: 'row', gap: 10 }}>
-                     <TextInput style={[styles.input, { flex: 1, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Nom Complet"] || "Nom Complet"} placeholderTextColor="#64748B" value={newMember.member_name} onChangeText={v => setNewMember({...newMember, member_name: v})} />
-                     <TextInput style={[styles.input, { width: 100, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code ID"] || "Code ID"} placeholderTextColor={C.placeholder} value={newMember.membership_code} onChangeText={v => setNewMember({...newMember, membership_code: v})} />
+                     <TextInput style={[styles.input, { flex: 1, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Nom Complet" placeholderTextColor="#64748B" value={newMember.member_name} onChangeText={v => setNewMember({...newMember, member_name: v})} />
+                     <TextInput style={[styles.input, { width: 100, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Code ID" placeholderTextColor={C.placeholder} value={newMember.membership_code} onChangeText={v => setNewMember({...newMember, membership_code: v})} />
                   </View>
                   <TouchableOpacity onPress={handleAddMember} disabled={isSubmitting} style={{ marginTop: 12 }}>
                      <LinearGradient colors={editingMember ? ['#F59E0B', '#D97706'] : ['#3B82F6', '#2563EB']} style={{ height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{editingMember ? "ENREGISTRER LES MODIFICATIONS" : "AJOUTER À LA LISTE"}</Text>}
+                        {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{editingMember ? "ENREGISTRER LES MODIFICATIONS" : "AJOUTER À LA LISTE"}</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                </View>
@@ -1931,8 +1927,7 @@ export default function AdminScreen({ navigation }) {
                <View style={[styles.searchBox, { height: 44, borderRadius: 12, backgroundColor: C.input, marginBottom: 15 }]}>
                   <MaterialIcons name="search" size={20} color={C.sub} />
                   <TextInput 
-                    placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chercher un adhérent..."] || "Chercher un adhérent..."} 
-                    placeholderTextColor={C.sub} 
+                    placeholder={"Chercher un adhérent..." placeholderTextColor={C.sub} 
                     style={[styles.searchInput, { color: C.text, fontSize: 13 }]} 
                     value={memberSearch}
                     onChangeText={setMemberSearch}
@@ -1946,7 +1941,7 @@ export default function AdminScreen({ navigation }) {
                   renderItem={({ item }) => (
                      <View style={{ paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.divider, flexDirection: 'row', alignItems: 'center' }}>
                         <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#3B82F615', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                           <MaterialCommunityIcons name="account" size={20} color="#3B82F6" />
+                           <MaterialCommunityIcons name="help-circle" size={20} color="#3B82F6" />
                         </View>
                         <View style={{ flex: 1 }}>
                            <Text style={{ color: C.text, fontWeight: '800', fontSize: 14 }}>{item.member_name}</Text>
@@ -1965,7 +1960,7 @@ export default function AdminScreen({ navigation }) {
                   ListEmptyComponent={() => (
                      <View style={{ alignItems: 'center', marginTop: 40 }}>
                         <MaterialCommunityIcons name="account-search-outline" size={48} color={C.sub} style={{ opacity: 0.3 }} />
-                        <Text style={{ color: C.sub, marginTop: 10, fontSize: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun adhérent trouvé."] || "Aucun adhérent trouvé."}</Text>
+                        <Text style={{ color: C.sub, marginTop: 10, fontSize: 12 }}>{"Aucun adhérent trouvé."</Text>
                      </View>
                   )}
                />
@@ -1974,18 +1969,18 @@ export default function AdminScreen({ navigation }) {
         </View>
       </Modal>
 
-      <Modal visible={showCatalogModal} animationType="slide" transparent>
+      <Modal visible={showCatalogModal} animationType="" transparent>
          <View style={styles.modalOverlay}>
              <View style={[styles.modalSheet, { backgroundColor: C.bg, height: '85%' }]}>
                 <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
-                  <Text style={[styles.dimT, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER SERVICES"] || "AJOUTER SERVICES"}</Text>
+                  <Text style={[styles.dimT, { color: C.text }]}>{"AJOUTER SERVICES"</Text>
                   <TouchableOpacity onPress={() => setShowCatalogModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                     <MaterialIcons name="close" size={22} color={C.closeIc} />
+                     <MaterialIcons name="help-circle" size={22} color={C.closeIc} />
                   </TouchableOpacity>
                </View>
                
                <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-                  <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CATÉGORIE COMMUNE"] || "CATÉGORIE COMMUNE"}</Text>
+                  <Text style={styles.label}>{"CATÉGORIE COMMUNE"</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
                      {['Dossier', 'Consultation', 'Examen', 'Soins', 'Produit', 'Autre'].map(cat => (
                         <TouchableOpacity 
@@ -2007,24 +2002,23 @@ export default function AdminScreen({ navigation }) {
 
                   {bulkCategory === 'Autre' && (
                      <FadeInView style={{ marginBottom: 20 }}>
-                        <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOM DE LA CATÉGORIE PERSONNALISÉE"] || "NOM DE LA CATÉGORIE PERSONNALISÉE"}</Text>
+                        <Text style={styles.label}>NOM DE LA CATÉGORIE PERSONNALISÉE</Text>
                         <TextInput 
                            style={[styles.input, { color: isDark ? '#FFF' : '#000', borderColor: brandColor, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC' }]} 
-                           placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Maintenance, Services Externes..."] || "Ex: Maintenance, Services Externes..."} 
-                           placeholderTextColor="#64748B"
+                           placeholder={"Ex: Maintenance, Services Externes..." placeholderTextColor=""
                            value={customCategoryName}
                            onChangeText={setCustomCategoryName}
                         />
                      </FadeInView>
                   )}
 
-                  <Text style={[styles.label, { marginBottom: 15 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["LISTE DES ÉLÉMENTS"] || "LISTE DES ÉLÉMENTS"}</Text>
+                  <Text style={[styles.label, { marginBottom: 15 }]}>{"LISTE DES ÉLÉMENTS"</Text>
                   {bulkCatalogItems.map((item, idx) => (
                      <View key={idx} style={{ flexDirection: 'row', gap: 10, marginBottom: 15, alignItems: 'center' }}>
                         <View style={{ flex: 2 }}>
                            <TextInput 
                                              style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Libellé..."] || "Libellé..."} 
+                              placeholder="Libellé..." 
                               placeholderTextColor="#64748B"
                               value={item.label}
                               onChangeText={v => {
@@ -2038,8 +2032,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ width: 80 }}>
                            <TextInput 
                               style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code..."] || "Code..."} 
-                              placeholderTextColor="#64748B"
+                              placeholder={"Code..." placeholderTextColor=""
                               value={item.code || ''}
                               onChangeText={v => {
                                  const next = [...bulkCatalogItems];
@@ -2053,8 +2046,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ flex: 1 }}>
                            <TextInput 
                                              style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Dosage..."] || "Dosage..."} 
-                              placeholderTextColor="#64748B"
+                              placeholder={"Dosage..." placeholderTextColor=""
                               value={item.dosage || ''}
                               onChangeText={v => {
                                  const next = [...bulkCatalogItems];
@@ -2067,8 +2059,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ flex: 1 }}>
                            <TextInput 
                                              style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Prix..."] || "Prix..."} 
-                              placeholderTextColor="#64748B"
+                              placeholder={"Prix..." placeholderTextColor=""
                               keyboardType="numeric"
                               value={item.price}
                               onChangeText={v => {
@@ -2095,17 +2086,17 @@ export default function AdminScreen({ navigation }) {
                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: brandColor, borderStyle: 'dashed', marginTop: 10 }}
                   >
                      <MaterialIcons name="add" size={20} color={brandColor} />
-                     <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER UNE LIGNE"] || "AJOUTER UNE LIGNE"}</Text>
+                     <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 8 }}>{"AJOUTER UNE LIGNE"</Text>
                   </TouchableOpacity>
                </ScrollView>
 
                <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: C.divider }}>
                   <TouchableOpacity onPress={handleSaveBulkCatalog} disabled={isSubmitting}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
+                        {isSubmitting ? <ActivityIndicator color="" /> : (
                            <>
                               <MaterialIcons name="cloud-upload" size={24} color="#FFF" />
-                              <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ENREGISTRER TOUT"] || "ENREGISTRER TOUT"}</Text>
+                              <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, marginLeft: 10 }}>{"ENREGISTRER TOUT"</Text>
                            </>
                         )}
                      </LinearGradient>
@@ -2115,16 +2106,16 @@ export default function AdminScreen({ navigation }) {
          </View>
       </Modal>
 
-     <Modal visible={showRevenueModal} transparent animationType="slide" onRequestClose={() => setShowRevenueModal(false)}>
+     <Modal visible={showRevenueModal} transparent animationType="" onRequestClose={() => setShowRevenueModal(false)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
            <View style={{ backgroundColor: C.surface, borderRadius: 32, padding: 24, elevation: 10, borderWidth: 1, borderColor: C.border, maxHeight: S.height * 0.8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <MaterialCommunityIcons name="finance" size={24} color={brandColor} />
-                    <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAIL DES REVENUS"] || "DÉTAIL DES REVENUS"}</Text>
+                    <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginLeft: 10 }}>{"DÉTAIL DES REVENUS"</Text>
                  </View>
                  <TouchableOpacity onPress={() => setShowRevenueModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                    <MaterialIcons name="close" size={20} color={C.closeIc} />
+                    <MaterialIcons name="help-circle" size={20} color={C.closeIc} />
                  </TouchableOpacity>
               </View>
               <Text style={{ fontSize: 12, fontWeight: '700', color: C.sub, marginBottom: 20 }}>

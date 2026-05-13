@@ -156,7 +156,7 @@ export default function PremiumRightPanel({
               </View>
             </TouchableOpacity>
             
-            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Paramètres"] || "Paramètres"}</Text>
+            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>{"Paramètres"</Text>
 
             {/* Profile Card */}
             <TouchableOpacity 
@@ -180,7 +180,7 @@ export default function PremiumRightPanel({
                   shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 12
                 }}
               >
-                <MaterialCommunityIcons name={roleIcon} size={28} color="#FFF" />
+                <MaterialCommunityIcons name={roleIcon} size={28} color="" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 18, fontWeight: '900', color: txt }}>{accountName}</Text>
@@ -198,10 +198,10 @@ export default function PremiumRightPanel({
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}>
 
             {/* COMPTE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["COMPTE"] || "COMPTE"}</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"COMPTE"</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
-                icon={<MaterialCommunityIcons name="shield-account" size={18} color="#FFF" />}
+                icon={<MaterialCommunityIcons name="help-circle" size={18} color="#FFF" />}
                 iconBg={brandColor}
                 label="Mon Compte"
                 subtitle="Gérer mes informations"
@@ -211,10 +211,10 @@ export default function PremiumRightPanel({
             </View>
 
             {/* APPARENCE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["APPARENCE"] || "APPARENCE"}</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"APPARENCE"</Text>
 
             {/* Thème */}
-            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Thème de l'application"] || "Thème de l'application"}</Text>
+            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>Thème de l'application</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
               <RadioRow
                 label="Clair"
@@ -239,10 +239,10 @@ export default function PremiumRightPanel({
             </View>
 
             {/* Langue */}
-            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Langue de l'interface"] || "Langue de l'interface"}</Text>
+            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>{"Langue de l'interface"</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
               <RadioRow
-                label="Français"
+                label=""
                 selected={lang === 'fr'}
                 onPress={() => setLang && setLang('fr')}
                 isFirst
@@ -256,10 +256,10 @@ export default function PremiumRightPanel({
             </View>
 
             {/* NOTIFICATIONS */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTIFICATIONS"] || "NOTIFICATIONS"}</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"NOTIFICATIONS"</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
-                icon={<MaterialIcons name={notificationsEnabled ? 'notifications-active' : 'notifications-off'} size={18} color="#FFF" />}
+                icon={<MaterialIcons name={notificationsEnabled ? 'notifications-active' : 'notifications-off'} size={18} color="" />}
                 iconBg="#34C759"
                 label="Notifications push"
                 subtitle={notificationsEnabled ? 'Alertes activées' : 'Alertes désactivées'}

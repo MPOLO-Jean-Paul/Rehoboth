@@ -537,21 +537,21 @@ export default function SoinsScreen({ navigation, route }) {
       <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12, textAlign: 'center', letterSpacing: 0.5 }}>{title}</Text>
       <Text style={{ fontSize: 14, color: isDark ? '#888888' : '#64748B', textAlign: 'center', lineHeight: 24, fontWeight: '600', paddingHorizontal: 20 }}>{message}</Text>
       <TouchableOpacity onPress={() => { fetchVisits(); fetchHistory(); }} style={{ marginTop: 32, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 20, backgroundColor: brandColor, elevation: 4, shadowColor: brandColor, shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}>
-        <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTUALISER"] || "ACTUALISER"}</Text>
+        <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 1 }}>{"ACTUALISER"</Text>
       </TouchableOpacity>
     </FadeInView>
   );
 
   return (
     <View style={[styles.mainContainer, { backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC' }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
+      <StatusBar barStyle={isDark ? "" : "dark-content"} />
 
       <PremiumHeader
         onLeftPress={() => toggleNavPanel(true)}
         onRightPress={() => toggleRight(true)}
-        title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
+        title="REHOBOTH"
         subtitle={soinsMenu.find(m => m.id === activeView)?.label || 'SOINS / INFIRMERIE'}
-        icon="medical-bag"
+        icon=""
         isDark={isDark}
         navigation={navigation}
       />
@@ -614,18 +614,18 @@ export default function SoinsScreen({ navigation, route }) {
 
               {activeView === 'urgencies' && (
                 <View style={{ padding: 20, borderRadius: 24, backgroundColor: isDark ? '#121212' : brandColor + '10', borderWidth: 1, borderColor: isDark ? '#1E1E1E' : brandColor + '30', marginBottom: 24 }}>
-                  <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, letterSpacing: 1, marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉCLARER UNE URGENCE"] || "DÉCLARER UNE URGENCE"}</Text>
+                  <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, letterSpacing: 1, marginBottom: 16 }}>{"DÉCLARER UNE URGENCE"</Text>
 
                   <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Prénom *"] || "Prénom *"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.first_name} onChangeText={v => setEmergencyForm(prev => ({ ...prev, first_name: v }))} />
-                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Nom *"] || "Nom *"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.last_name} onChangeText={v => setEmergencyForm(prev => ({ ...prev, last_name: v }))} />
+                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder="Prénom *" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.first_name} onChangeText={v => setEmergencyForm(prev => ({ ...prev, first_name: v }))} />
+                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={"Nom *" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.last_name} onChangeText={v => setEmergencyForm(prev => ({ ...prev, last_name: v }))} />
                   </View>
 
                   <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
                     <TouchableOpacity onPress={() => setEmergencyForm(prev => ({ ...prev, gender: prev.gender === 'M' ? 'F' : 'M' }))} style={{ width: 80, padding: 12, borderRadius: 12, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', alignItems: 'center' }}>
                       <Text style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800' }}>Sexe: {emergencyForm.gender}</Text>
                     </TouchableOpacity>
-                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Âge (optionnel)"] || "Âge (optionnel)"} keyboardType="numeric" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.age} onChangeText={v => setEmergencyForm(prev => ({ ...prev, age: v }))} />
+                    <TextInput style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder="Âge (optionnel)" keyboardType="numeric" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.age} onChangeText={v => setEmergencyForm(prev => ({ ...prev, age: v }))} />
                   </View>
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, paddingHorizontal: 4 }}>
@@ -635,12 +635,12 @@ export default function SoinsScreen({ navigation, route }) {
                       value={emergencyForm.is_insured}
                       onValueChange={v => setEmergencyForm(prev => ({ ...prev, is_insured: v }))}
                     />
-                    <Text style={{ marginLeft: 10, color: isDark ? '#F1F5F9' : '#1A1A1A', fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Patient Assuré ?"] || "Patient Assuré ?"}</Text>
+                    <Text style={{ marginLeft: 10, color: isDark ? '#F1F5F9' : '#1A1A1A', fontWeight: '700' }}>{"Patient Assuré ?"</Text>
                   </View>
 
                   {emergencyForm.is_insured && (
                     <View style={{ marginBottom: 12, padding: 12, borderRadius: 12, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                      <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 11, fontWeight: '800', marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SÉLECTIONNER L'ASSURANCE"] || "SÉLECTIONNER L'ASSURANCE"}</Text>
+                      <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 11, fontWeight: '800', marginBottom: 8 }}>SÉLECTIONNER L'ASSURANCE</Text>
                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
                         {(insurances || []).map(ins => (
                           <TouchableOpacity key={ins.id} onPress={() => setEmergencyForm(prev => ({ ...prev, insurance_id: ins.id }))} style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8, borderWidth: 1, backgroundColor: emergencyForm.insurance_id === ins.id ? '#22C55E' : 'transparent', borderColor: emergencyForm.insurance_id === ins.id ? '#22C55E' : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
@@ -648,14 +648,14 @@ export default function SoinsScreen({ navigation, route }) {
                           </TouchableOpacity>
                         ))}
                       </View>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code Membre (Numéro de carte) *"] || "Code Membre (Numéro de carte) *"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.insurance_code} onChangeText={v => setEmergencyForm(prev => ({ ...prev, insurance_code: v }))} />
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={"Code Membre (Numéro de carte) *" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.insurance_code} onChangeText={v => setEmergencyForm(prev => ({ ...prev, insurance_code: v }))} />
                     </View>
                   )}
 
-                  <TextInput style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Motif de l'urgence (Ex: Saignements, Inconscient...)"] || "Motif de l'urgence (Ex: Saignements, Inconscient...)"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.complaints} onChangeText={v => setEmergencyForm(prev => ({ ...prev, complaints: v }))} />
+                  <TextInput style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder="Motif de l'urgence (Ex: Saignements, Inconscient...)" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={emergencyForm.complaints} onChangeText={v => setEmergencyForm(prev => ({ ...prev, complaints: v }))} />
 
                   <TouchableOpacity onPress={submitEmergency} disabled={isSubmittingEmergency} style={{ padding: 14, borderRadius: 12, backgroundColor: brandColor, alignItems: 'center' }}>
-                    {isSubmittingEmergency ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ADMETTRE EN URGENCE"] || "ADMETTRE EN URGENCE"}</Text>}
+                    {isSubmittingEmergency ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900' }}>{"ADMETTRE EN URGENCE"</Text>}
                   </TouchableOpacity>
                 </View>
               )}
@@ -669,16 +669,16 @@ export default function SoinsScreen({ navigation, route }) {
                       style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 18, backgroundColor: brandColor, elevation: 4 }}
                       onPress={() => setShowAdmitForm(true)}
                     >
-                      <MaterialCommunityIcons name="plus" size={20} color="#FFF" />
-                      <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ADMETTRE UN PATIENT"] || "ADMETTRE UN PATIENT"}</Text>
+                      <MaterialCommunityIcons name="help-circle" size={20} color="#FFF" />
+                      <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{"ADMETTRE UN PATIENT"</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={{ flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 18, backgroundColor: '#22C55E15', borderWidth: 1, borderColor: '#22C55E30' }}
                       onPress={handleBillDaily}
                       disabled={isBillingDaily}
                     >
-                      {isBillingDaily ? <ActivityIndicator size="small" color="#22C55E" /> : <MaterialCommunityIcons name="cash-multiple" size={22} color="#22C55E" />}
-                      <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FACT. JOURNALIÈRE"] || "FACT. JOURNALIÈRE"}</Text>
+                      {isBillingDaily ? <ActivityIndicator size="" color="#22C55E" /> : <MaterialCommunityIcons name="cash-multiple" size={22} color="#22C55E" />}
+                      <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 8 }}>{"FACT. JOURNALIÈRE"</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -686,17 +686,17 @@ export default function SoinsScreen({ navigation, route }) {
                   {showAdmitForm && (
                     <FadeInView style={{ padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 20, elevation: 4 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                        <Text style={{ fontSize: 15, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOUVELLE ADMISSION"] || "NOUVELLE ADMISSION"}</Text>
+                        <Text style={{ fontSize: 15, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>NOUVELLE ADMISSION</Text>
                         <TouchableOpacity onPress={() => setShowAdmitForm(false)}>
                           <MaterialIcons name="close" size={22} color={brandColor} />
                         </TouchableOpacity>
                       </View>
 
                       {/* Recherche Patient */}
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PATIENT *"] || "PATIENT *"}</Text>
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 8 }}>{"PATIENT *"</Text>
                       {admitForm.patient_id ? (
                         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: isDark ? '#121212' : brandColor + '15', borderRadius: 14, marginBottom: 16, borderWidth: 1, borderColor: isDark ? '#1E1E1E' : brandColor + '30' }}>
-                          <MaterialCommunityIcons name="account-check" size={22} color={brandColor} />
+                          <MaterialCommunityIcons name="search" size={22} color={brandColor} />
                           <Text style={{ flex: 1, marginLeft: 10, fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A' }}>{admitForm.patient_name}</Text>
                           <TouchableOpacity onPress={() => setAdmitForm(p => ({ ...p, patient_id: '', patient_name: '' }))}>
                             <MaterialIcons name="close" size={18} color={brandColor} />
@@ -706,12 +706,11 @@ export default function SoinsScreen({ navigation, route }) {
                         <View style={{ marginBottom: 16 }}>
                           <TextInput
                             style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 8 }}
-                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Rechercher un patient..."] || "Rechercher un patient..."}
-                            placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                            placeholder={"Rechercher un patient..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                             value={patientSearch}
                             onChangeText={searchPatients}
                           />
-                          {searchingPatient && <ActivityIndicator size="small" color={brandColor} style={{ marginBottom: 8 }} />}
+                          {searchingPatient && <ActivityIndicator size="" color={brandColor} style={{ marginBottom: 8 }} />}
                           {patientResults.map(p => (
                             <TouchableOpacity key={p.id} style={{ padding: 12, borderRadius: 10, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', marginBottom: 6 }} onPress={() => { setAdmitForm(f => ({ ...f, patient_id: p.id, patient_name: `${p.first_name} ${p.last_name}` })); setPatientResults([]); setPatientSearch(''); }}>
                               <Text style={{ fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A' }}>{p.first_name} {p.last_name}</Text>
@@ -723,30 +722,30 @@ export default function SoinsScreen({ navigation, route }) {
 
                       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CHAMBRE"] || "CHAMBRE"}</Text>
-                          <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: 12A"] || "Ex: 12A"} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.room_number} onChangeText={v => setAdmitForm(f => ({ ...f, room_number: v }))} />
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"CHAMBRE"</Text>
+                          <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder="Ex: 12A" placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.room_number} onChangeText={v => setAdmitForm(f => ({ ...f, room_number: v }))} />
                         </View>
                         <View style={{ flex: 1 }}>
-                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["LIT"] || "LIT"}</Text>
-                          <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: B2"] || "Ex: B2"} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.bed_number} onChangeText={v => setAdmitForm(f => ({ ...f, bed_number: v }))} />
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"LIT"</Text>
+                          <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }} placeholder="Ex: B2" placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.bed_number} onChangeText={v => setAdmitForm(f => ({ ...f, bed_number: v }))} />
                         </View>
                       </View>
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SERVICE / SALLE"] || "SERVICE / SALLE"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Chirurgie, Maternité, Pédiatrie..."] || "Ex: Chirurgie, Maternité, Pédiatrie..."} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.ward} onChangeText={v => setAdmitForm(f => ({ ...f, ward: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"SERVICE / SALLE"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder="Ex: Chirurgie, Maternité, Pédiatrie..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'} value={admitForm.ward} onChangeText={v => setAdmitForm(f => ({ ...f, ward: v }))} />
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TARIF JOURNALIER (FC) *"] || "TARIF JOURNALIER (FC) *"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: 25000"] || "Ex: 25000"} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} keyboardType="numeric" value={admitForm.daily_rate} onChangeText={v => setAdmitForm(f => ({ ...f, daily_rate: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"TARIF JOURNALIER (FC) *"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12 }} placeholder="Ex: 25000" placeholderTextColor={isDark ? '#555555' : '#94A3B8'} keyboardType="numeric" value={admitForm.daily_rate} onChangeText={v => setAdmitForm(f => ({ ...f, daily_rate: v }))} />
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DIAGNOSTIC INITIAL"] || "DIAGNOSTIC INITIAL"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12, height: 80, textAlignVertical: 'top' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Motif d'hospitalisation..."] || "Motif d'hospitalisation..."} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={admitForm.diagnosis} onChangeText={v => setAdmitForm(f => ({ ...f, diagnosis: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"DIAGNOSTIC INITIAL"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 12, height: 80, textAlignVertical: 'top' }} placeholder="Motif d'hospitalisation..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={admitForm.diagnosis} onChangeText={v => setAdmitForm(f => ({ ...f, diagnosis: v }))} />
 
                       {doctors.length > 0 && (
                         <>
-                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MÉDECIN TRAITANT"] || "MÉDECIN TRAITANT"}</Text>
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 8 }}>{"MÉDECIN TRAITANT"</Text>
                           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
                             <TouchableOpacity onPress={() => setAdmitForm(f => ({ ...f, attending_doctor_id: null }))} style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginRight: 8, backgroundColor: !admitForm.attending_doctor_id ? brandColor : (isDark ? '#1A1A1A' : '#FFF'), borderWidth: 1, borderColor: !admitForm.attending_doctor_id ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
-                              <Text style={{ color: !admitForm.attending_doctor_id ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '800', fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AUCUN"] || "AUCUN"}</Text>
+                              <Text style={{ color: !admitForm.attending_doctor_id ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '800', fontSize: 11 }}>AUCUN</Text>
                             </TouchableOpacity>
                             {doctors.map(d => (
                               <TouchableOpacity key={d.id} onPress={() => setAdmitForm(f => ({ ...f, attending_doctor_id: d.id }))} style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, marginRight: 8, backgroundColor: admitForm.attending_doctor_id === d.id ? brandColor : (isDark ? '#1A1A1A' : '#FFF'), borderWidth: 1, borderColor: admitForm.attending_doctor_id === d.id ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
@@ -761,7 +760,7 @@ export default function SoinsScreen({ navigation, route }) {
                       <TouchableOpacity style={{ height: 58, borderRadius: 29, overflow: 'hidden' }} onPress={handleAdmit} disabled={isSubmitting}>
                         <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                           {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
-                            <><MaterialCommunityIcons name="bed-outline" size={22} color="#FFF" /><Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CONFIRMER L'ADMISSION"] || "CONFIRMER L'ADMISSION"}</Text></>
+                            <><MaterialCommunityIcons name="bed-outline" size={22} color="#FFF" /><Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, marginLeft: 10 }}>{"CONFIRMER L'ADMISSION"</Text></>
                           )}
                         </LinearGradient>
                       </TouchableOpacity>
@@ -782,7 +781,7 @@ export default function SoinsScreen({ navigation, route }) {
                         {/* Card Header */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18 }}>
                           <LinearGradient colors={['#3B82F615', '#3B82F605']} style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-                            <MaterialCommunityIcons name="bed" size={28} color="#3B82F6" />
+                            <MaterialCommunityIcons name="help-circle" size={28} color="#3B82F6" />
                           </LinearGradient>
                           <View style={{ flex: 1, marginLeft: 14 }}>
                             <Text style={{ fontSize: 17, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{h.patient?.first_name} {h.patient?.last_name}</Text>
@@ -794,7 +793,7 @@ export default function SoinsScreen({ navigation, route }) {
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <Text style={{ fontSize: 16, fontWeight: '900', color: brandColor }}>{Number(h.total_amount).toLocaleString()}</Text>
-                            <Text style={{ fontSize: 10, color: isDark ? '#888888' : '#94A3B8', fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FC TOTAL"] || "FC TOTAL"}</Text>
+                            <Text style={{ fontSize: 10, color: isDark ? '#888888' : '#94A3B8', fontWeight: '700' }}>{"FC TOTAL"</Text>
                           </View>
                         </View>
 
@@ -804,17 +803,17 @@ export default function SoinsScreen({ navigation, route }) {
                             <View style={{ height: 1, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', marginBottom: 16 }} />
                             {h.diagnosis && (
                               <View style={{ marginBottom: 12 }}>
-                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DIAGNOSTIC"] || "DIAGNOSTIC"}</Text>
+                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 4 }}>DIAGNOSTIC</Text>
                                 <Text style={{ color: isDark ? '#CBD5E1' : '#475569', lineHeight: 20 }}>{h.diagnosis}</Text>
                               </View>
                             )}
                             <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
                               <View style={{ flex: 1, padding: 14, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderRadius: 14 }}>
-                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ADMISSION"] || "ADMISSION"}</Text>
+                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 4 }}>{"ADMISSION"</Text>
                                 <Text style={{ fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A' }}>{new Date(h.admission_date).toLocaleDateString('fr-FR')}</Text>
                               </View>
                               <View style={{ flex: 1, padding: 14, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderRadius: 14 }}>
-                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TARIF/JOUR"] || "TARIF/JOUR"}</Text>
+                                <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 4 }}>TARIF/JOUR</Text>
                                 <Text style={{ fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A' }}>{Number(h.daily_rate).toLocaleString()} FC</Text>
                               </View>
                             </View>
@@ -824,7 +823,7 @@ export default function SoinsScreen({ navigation, route }) {
                               onPress={() => handleDischarge(h.id)}
                             >
                               <MaterialCommunityIcons name="exit-run" size={20} color="#EF4444" />
-                              <Text style={{ color: '#EF4444', fontWeight: '900', marginLeft: 10, fontSize: 13 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SORTIR CE PATIENT"] || "SORTIR CE PATIENT"}</Text>
+                              <Text style={{ color: '#EF4444', fontWeight: '900', marginLeft: 10, fontSize: 13 }}>{"SORTIR CE PATIENT"</Text>
                             </TouchableOpacity>
                           </FadeInView>
                         )}
@@ -839,7 +838,7 @@ export default function SoinsScreen({ navigation, route }) {
                     <View>
                       {alerts.critical > 0 && (
                         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: '#EF444430' }}>
-                          <MaterialCommunityIcons name="alert-circle" size={16} color="#EF4444" />
+                          <MaterialCommunityIcons name="help-circle" size={16} color="#EF4444" />
                           <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{alerts.critical} ALERTE(S) CRITIQUE(S)</Text>
                         </View>
                       )}
@@ -856,8 +855,8 @@ export default function SoinsScreen({ navigation, route }) {
                       <LinearGradient colors={['#22C55E20', '#22C55E05']} style={{ width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
                         <MaterialCommunityIcons name="check-circle" size={56} color="#22C55E" />
                       </LinearGradient>
-                      <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', textAlign: 'center' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Tout va bien !"] || "Tout va bien !"}</Text>
-                      <Text style={{ color: isDark ? '#888888' : '#94A3B8', marginTop: 8, textAlign: 'center', lineHeight: 22 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune alerte active. Tous les patients hospitalisés sont suivis."] || "Aucune alerte active. Tous les patients hospitalisés sont suivis."}</Text>
+                      <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', textAlign: 'center' }}>{"Tout va bien !"</Text>
+                      <Text style={{ color: isDark ? '#888888' : '#94A3B8', marginTop: 8, textAlign: 'center', lineHeight: 22 }}>Aucune alerte active. Tous les patients hospitalisés sont suivis.</Text>
                     </FadeInView>
                   ) : alerts.alerts.map((alertItem, idx) => {
                     const hasCritical = alertItem.alerts.some(a => a.severity === 'critical');
@@ -902,14 +901,14 @@ export default function SoinsScreen({ navigation, route }) {
                                 onPress={() => handleMarkChecked(alertItem.hospitalization_id)}
                               >
                                 <MaterialCommunityIcons name="check-circle" size={18} color="#22C55E" />
-                                <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VISITE FAITE"] || "VISITE FAITE"}</Text>
+                                <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{"VISITE FAITE"</Text>
                               </TouchableOpacity>
                               <TouchableOpacity
                                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 14, backgroundColor: '#EF444415', borderWidth: 1, borderColor: '#EF444430' }}
                                 onPress={() => handleTriggerAlert(alertItem.hospitalization_id, true, 'Surveillance renforcée requise')}
                               >
-                                <MaterialCommunityIcons name="bell-ring" size={18} color="#EF4444" />
-                                <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ESCALADER"] || "ESCALADER"}</Text>
+                                <MaterialCommunityIcons name="help-circle" size={18} color="#EF4444" />
+                                <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{"ESCALADER"</Text>
                               </TouchableOpacity>
                             </View>
                           </View>
@@ -946,7 +945,7 @@ export default function SoinsScreen({ navigation, route }) {
                             { label: 'Internés', value: todayStats?.hospitalized_count ?? '—', icon: 'bed' },
                           ].map(s => (
                             <View key={s.label} style={{ alignItems: 'center' }}>
-                              <MaterialCommunityIcons name={s.icon} size={24} color="rgba(255,255,255,0.8)" />
+                              <MaterialCommunityIcons name={s.icon} size={24} color="" />
                               <Text style={{ color: '#FFF', fontSize: 22, fontWeight: '900', marginTop: 4 }}>{s.value}</Text>
                               <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '700' }}>{s.label}</Text>
                             </View>
@@ -959,10 +958,10 @@ export default function SoinsScreen({ navigation, route }) {
                           <MaterialCommunityIcons name="alert-circle" size={28} color="#EF4444" />
                           <View style={{ marginLeft: 12, flex: 1 }}>
                             <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 14 }}>{alerts.critical} Alerte(s) critique(s)</Text>
-                            <Text style={{ color: isDark ? '#CBD5E1' : '#475569', fontSize: 12, marginTop: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Consultez la section Alertes pour y répondre."] || "Consultez la section Alertes pour y répondre."}</Text>
+                            <Text style={{ color: isDark ? '#CBD5E1' : '#475569', fontSize: 12, marginTop: 2 }}>{"Consultez la section Alertes pour y répondre."</Text>
                           </View>
                           <TouchableOpacity onPress={() => setActiveView('alertes')}>
-                            <MaterialIcons name="chevron-right" size={28} color="#EF4444" />
+                            <MaterialIcons name="help-circle" size={28} color="#EF4444" />
                           </TouchableOpacity>
                         </View>
                       )}
@@ -973,7 +972,7 @@ export default function SoinsScreen({ navigation, route }) {
                       >
                         <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
                           <MaterialCommunityIcons name="clipboard-text" size={22} color="#FFF" />
-                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, marginLeft: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉDIGER LE RAPPORT DE GARDE"] || "RÉDIGER LE RAPPORT DE GARDE"}</Text>
+                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 14, marginLeft: 10 }}>{"RÉDIGER LE RAPPORT DE GARDE"</Text>
                         </LinearGradient>
                       </TouchableOpacity>
                     </FadeInView>
@@ -983,7 +982,7 @@ export default function SoinsScreen({ navigation, route }) {
                   {reportsView === 'form' && (
                     <FadeInView style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, padding: 20, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                       {/* Sélection période */}
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PÉRIODE DE GARDE"] || "PÉRIODE DE GARDE"}</Text>
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 10 }}>PÉRIODE DE GARDE</Text>
                       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 20 }}>
                         {[{ id: 'matin', label: '☀️ Matin' }, { id: 'apres-midi', label: '🌤️ Après-Midi' }, { id: 'nuit', label: '🌙 Nuit' }].map(s => (
                           <TouchableOpacity key={s.id} style={{ flex: 1, padding: 12, borderRadius: 14, backgroundColor: reportForm.shift_type === s.id ? brandColor : (isDark ? '#0A0A0A' : '#F8FAFC'), borderWidth: 1, borderColor: reportForm.shift_type === s.id ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }} onPress={() => setReportForm(f => ({ ...f, shift_type: s.id }))}>
@@ -993,34 +992,34 @@ export default function SoinsScreen({ navigation, route }) {
                       </View>
 
                       {/* Compteurs auto-remplis */}
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 10 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DONNÉES CHIFFRÉES"] || "DONNÉES CHIFFRÉES"}</Text>
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 10 }}>{"DONNÉES CHIFFRÉES"</Text>
                       <View style={{ flexDirection: 'row', gap: 10, marginBottom: 16 }}>
                         {[{ key: 'patients_seen', label: 'Patients vus' }, { key: 'transfers_done', label: 'Transferts' }, { key: 'emergencies_handled', label: 'Urgences' }].map(f => (
                           <View key={f.key} style={{ flex: 1 }}>
                             <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 0.5, marginBottom: 4 }}>{f.label.toUpperCase()}</Text>
-                            <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', textAlign: 'center', fontWeight: '900', fontSize: 18 }} keyboardType="numeric" value={reportForm[f.key]} onChangeText={v => setReportForm(rf => ({ ...rf, [f.key]: v }))} />
+                            <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', textAlign: 'center', fontWeight: '900', fontSize: 18 }} keyboardType="" value={reportForm[f.key]} onChangeText={v => setReportForm(rf => ({ ...rf, [f.key]: v }))} />
                           </View>
                         ))}
                       </View>
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSUMÉ DE LA GARDE *"] || "RÉSUMÉ DE LA GARDE *"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 16, height: 120, textAlignVertical: 'top', lineHeight: 22 }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Décrivez le déroulement de votre garde: état général des patients, incidents notables, soins effectués..."] || "Décrivez le déroulement de votre garde: état général des patients, incidents notables, soins effectués..."} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.summary} onChangeText={v => setReportForm(f => ({ ...f, summary: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"RÉSUMÉ DE LA GARDE *"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 16, height: 120, textAlignVertical: 'top', lineHeight: 22 }} placeholder="Décrivez le déroulement de votre garde: état général des patients, incidents notables, soins effectués..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.summary} onChangeText={v => setReportForm(f => ({ ...f, summary: v }))} />
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PATIENTS À SURVEILLER (un par ligne)"] || "PATIENTS À SURVEILLER (un par ligne)"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 16, height: 80, textAlignVertical: 'top' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Jean Dupont — Ch.3 — Fièvre persistante"] || "Ex: Jean Dupont — Ch.3 — Fièvre persistante"} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.patients_to_watch} onChangeText={v => setReportForm(f => ({ ...f, patients_to_watch: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"PATIENTS À SURVEILLER (un par ligne)"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 16, height: 80, textAlignVertical: 'top' }} placeholder="Ex: Jean Dupont — Ch.3 — Fièvre persistante" placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.patients_to_watch} onChangeText={v => setReportForm(f => ({ ...f, patients_to_watch: v }))} />
 
-                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTES DE RELÈVE (pour l'équipe suivante)"] || "NOTES DE RELÈVE (pour l'équipe suivante)"}</Text>
-                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 20, height: 80, textAlignVertical: 'top' }} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Informations importantes pour le prochain infirmier..."] || "Informations importantes pour le prochain infirmier..."} placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.handover_notes} onChangeText={v => setReportForm(f => ({ ...f, handover_notes: v }))} />
+                      <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 6 }}>{"NOTES DE RELÈVE (pour l'équipe suivante)"</Text>
+                      <TextInput style={{ backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', padding: 14, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 20, height: 80, textAlignVertical: 'top' }} placeholder="Informations importantes pour le prochain infirmier..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'} multiline value={reportForm.handover_notes} onChangeText={v => setReportForm(f => ({ ...f, handover_notes: v }))} />
 
                       {/* Boutons */}
                       <View style={{ flexDirection: 'row', gap: 12 }}>
                         <TouchableOpacity style={{ flex: 1, padding: 16, borderRadius: 18, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center' }} onPress={() => handleSubmitReport('draft')} disabled={isSubmittingReport}>
-                          <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', fontSize: 13 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["💾 BROUILLON"] || "💾 BROUILLON"}</Text>
+                          <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', fontSize: 13 }}>{"💾 BROUILLON"</Text>
                         </TouchableOpacity>
                         <TouchableOpacity style={{ flex: 2, height: 56, borderRadius: 28, overflow: 'hidden' }} onPress={() => handleSubmitReport('submitted')} disabled={isSubmittingReport}>
                           <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            {isSubmittingReport ? <ActivityIndicator color="#FFF" /> : (
-                              <><MaterialCommunityIcons name="send" size={20} color="#FFF" /><Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SOUMETTRE"] || "SOUMETTRE"}</Text></>
+                            {isSubmittingReport ? <ActivityIndicator color="" /> : (
+                              <><MaterialCommunityIcons name="send" size={20} color="#FFF" /><Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, marginLeft: 8 }}>{"SOUMETTRE"</Text></>
                             )}
                           </LinearGradient>
                         </TouchableOpacity>
@@ -1066,7 +1065,7 @@ export default function SoinsScreen({ navigation, route }) {
                     <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 28, padding: 20, marginBottom: 20, elevation: 6 }}>
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <View>
-                          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FILE D'ATTENTE SOINS"] || "FILE D'ATTENTE SOINS"}</Text>
+                          <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>FILE D'ATTENTE SOINS</Text>
                           <Text style={{ color: '#FFF', fontSize: 36, fontWeight: '900' }}>
                             {(activeView === 'care' ? careList : activeView === 'queue' ? queueList : urgenciesList).length}
                           </Text>
@@ -1076,7 +1075,7 @@ export default function SoinsScreen({ navigation, route }) {
                         </View>
                       </View>
                       <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
-                      <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Appuyez sur un dossier pour saisir les constantes"] || "Appuyez sur un dossier pour saisir les constantes"}</Text>
+                      <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '700' }}>{"Appuyez sur un dossier pour saisir les constantes"</Text>
                     </LinearGradient>
                   )}
 
@@ -1101,13 +1100,13 @@ export default function SoinsScreen({ navigation, route }) {
                       >
                         {(v.complaints_notes?.toLowerCase().includes('urgent') || activeView === 'urgencies') && (
                           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start', marginBottom: 12 }}>
-                            <MaterialCommunityIcons name="alert-circle" size={12} color="#EF4444" />
-                            <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENT"] || "URGENT"}</Text>
+                            <MaterialCommunityIcons name="help-circle" size={12} color="#EF4444" />
+                            <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>{"URGENT"</Text>
                           </View>
                         )}
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <LinearGradient colors={(v.complaints_notes?.toLowerCase().includes('urgent') || activeView === 'urgencies') ? ['#EF444420', '#EF444405'] : (isDark ? ['#1A1A1A', '#121212'] : [brandColor + '20', brandColor + '05'])} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                            <MaterialCommunityIcons name={activeView === 'control' ? "radar" : activeView === 'care' ? "needle" : "heart-pulse"} size={28} color={(v.complaints_notes?.toLowerCase().includes('urgent') || activeView === 'urgencies') ? '#EF4444' : brandColor} />
+                            <MaterialCommunityIcons name={activeView === 'control' ? "" : activeView === 'care' ? "needle" : "heart-pulse"} size={28} color={(v.complaints_notes?.toLowerCase().includes('urgent') || activeView === 'urgencies') ? '#EF4444' : brandColor} />
                           </LinearGradient>
                           <View style={{ flex: 1 }}>
                             <Text style={{ fontSize: 17, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{v.patient?.first_name} {v.patient?.last_name}</Text>
@@ -1139,53 +1138,51 @@ export default function SoinsScreen({ navigation, route }) {
             <FadeInView style={{ paddingTop: 10 }}>
               <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }} onPress={() => setSelectedVisit(null)}>
                 <MaterialIcons name="arrow-back" size={20} color={brandColor} />
-                <Text style={{ color: brandColor, fontWeight: '900', marginLeft: 8, fontSize: 13 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR À LA LISTE"] || "RETOUR À LA LISTE"}</Text>
+                <Text style={{ color: brandColor, fontWeight: '900', marginLeft: 8, fontSize: 13 }}>{"RETOUR À LA LISTE"</Text>
               </TouchableOpacity>
 
               {/* Patient Summary Card */}
               <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 24, borderRadius: 32, marginBottom: 24, elevation: 8 }}>
-                <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PATIENT EN SOINS"] || "PATIENT EN SOINS"}</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>PATIENT EN SOINS</Text>
                 <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF', marginTop: 6 }}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
                 <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
                 <View style={{ flexDirection: 'row', gap: 20 }}>
                   <View>
-                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GENRE / ÂGE"] || "GENRE / ÂGE"}</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>{"GENRE / ÂGE"</Text>
                     <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedVisit.patient?.gender === 'M' ? 'Masculin' : 'Féminin'} · {selectedVisit.patient?.age || '—'} ans</Text>
                   </View>
                   <View>
-                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ASSURANCE"] || "ASSURANCE"}</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>ASSURANCE</Text>
                     <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedVisit.patient?.is_insured ? selectedVisit.patient?.insurance?.name || 'ASSURÉE' : 'PRIVÉ'}</Text>
                   </View>
                 </View>
               </LinearGradient>
 
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                <Text style={styles.fieldHeading}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SIGNES VITAUX (CONSTANTES)"] || "SIGNES VITAUX (CONSTANTES)"}</Text>
+                <Text style={styles.fieldHeading}>{"SIGNES VITAUX (CONSTANTES)"</Text>
                 <TouchableOpacity onPress={() => toggleActionPanel(true)} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
-                  <MaterialCommunityIcons name="toolbox" size={14} color={brandColor} />
-                  <Text style={{ marginLeft: 6, fontSize: 10, fontWeight: '900', color: brandColor }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTES & SOINS"] || "ACTES & SOINS"}</Text>
+                  <MaterialCommunityIcons name="help-circle" size={14} color={brandColor} />
+                  <Text style={{ marginLeft: 6, fontSize: 10, fontWeight: '900', color: brandColor }}>{"ACTES & SOINS"</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={{ gap: 12, marginBottom: 24 }}>
                 <View style={{ flexDirection: 'row', gap: 12 }}>
                   <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, padding: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TEMPÉRATURE (°C)"] || "TEMPÉRATURE (°C)"}</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>TEMPÉRATURE (°C)</Text>
                     <TextInput
                       style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800', fontSize: 18 }}
                       keyboardType="numeric"
-                      placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["37.0"] || "37.0"}
-                      placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
+                      placeholder={"37.0" placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
                       value={vitals.temperature}
                       onChangeText={v => setVitals(prev => ({ ...prev, temperature: v }))}
                     />
                   </View>
                   <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, padding: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TENSION (mmHg)"] || "TENSION (mmHg)"}</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>TENSION (mmHg)</Text>
                     <TextInput
                       style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800', fontSize: 18 }}
-                      placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["120/80"] || "120/80"}
-                      placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
+                      placeholder={"120/80" placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
                       value={vitals.blood_pressure}
                       onChangeText={v => setVitals(prev => ({ ...prev, blood_pressure: v }))}
                     />
@@ -1194,23 +1191,21 @@ export default function SoinsScreen({ navigation, route }) {
 
                 <View style={{ flexDirection: 'row', gap: 12 }}>
                   <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, padding: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["POIDS (Kg)"] || "POIDS (Kg)"}</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>POIDS (Kg)</Text>
                     <TextInput
                       style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800', fontSize: 18 }}
                       keyboardType="numeric"
-                      placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["70"] || "70"}
-                      placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
+                      placeholder={"70" placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
                       value={vitals.weight}
                       onChangeText={v => setVitals(prev => ({ ...prev, weight: v }))}
                     />
                   </View>
                   <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, padding: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SPO2 (%)"] || "SPO2 (%)"}</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginBottom: 8 }}>SPO2 (%)</Text>
                     <TextInput
                       style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800', fontSize: 18 }}
                       keyboardType="numeric"
-                      placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["98"] || "98"}
-                      placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
+                      placeholder={"98" placeholderTextColor={isDark ? '#555555' : '#CBD5E1'}
                       value={vitals.oxygen_saturation}
                       onChangeText={v => setVitals(prev => ({ ...prev, oxygen_saturation: v }))}
                     />
@@ -1218,59 +1213,58 @@ export default function SoinsScreen({ navigation, route }) {
                 </View>
               </View>
 
-              <Text style={styles.fieldHeading}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTES INFIRMIÈRES / OBSERVATIONS"] || "NOTES INFIRMIÈRES / OBSERVATIONS"}</Text>
+              <Text style={styles.fieldHeading}>NOTES INFIRMIÈRES / OBSERVATIONS</Text>
               <View style={{ borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 20, height: 160, marginBottom: 28 }}>
                 <TextInput
                   style={{ flex: 1, color: isDark ? '#FFF' : '#0A0A0A', fontSize: 15, textAlignVertical: 'top', lineHeight: 22 }}
-                  placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Saisissez vos observations, soins administrés..."] || "Saisissez vos observations, soins administrés..."}
-                  placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                  placeholder={"Saisissez vos observations, soins administrés..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                   multiline
                   value={notes}
                   onChangeText={setNotes}
                 />
               </View>
 
-              <Text style={styles.fieldHeading}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ORIENTATION"] || "ORIENTATION"}</Text>
+              <Text style={styles.fieldHeading}>ORIENTATION</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('medecin')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'medecin' ? brandColor : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'medecin' ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
                   <MaterialCommunityIcons name="doctor" size={20} color={transferDestination === 'medecin' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
-                  <Text style={{ color: transferDestination === 'medecin' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VERS MÉDECIN"] || "VERS MÉDECIN"}</Text>
+                  <Text style={{ color: transferDestination === 'medecin' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{"VERS MÉDECIN"</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('pharmacie')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'pharmacie' ? '#10B981' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'pharmacie' ? '#10B981' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="pill" size={20} color={transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
-                  <Text style={{ color: transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PHARMACIE"] || "PHARMACIE"}</Text>
+                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <Text style={{ color: transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{"PHARMACIE"</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('maternite')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="mother-heart" size={20} color={transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
-                  <Text style={{ color: transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MATERNITÉ"] || "MATERNITÉ"}</Text>
+                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <Text style={{ color: transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{"MATERNITÉ"</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('completed')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'completed' ? '#22C55E' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'completed' ? '#22C55E' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="check-all" size={20} color={transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
-                  <Text style={{ color: transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TERMINER ICI"] || "TERMINER ICI"}</Text>
+                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <Text style={{ color: transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>{"TERMINER ICI"</Text>
                 </TouchableOpacity>
               </View>
 
               {transferDestination === 'medecin' && (
                 <View style={{ marginBottom: 20 }}>
-                  <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 12 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CHOISIR LE MÉDECIN (OPTIONNEL)"] || "CHOISIR LE MÉDECIN (OPTIONNEL)"}</Text>
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginBottom: 12 }}>CHOISIR LE MÉDECIN (OPTIONNEL)</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 12 }}>
                     <TouchableOpacity
                       onPress={() => setSelectedDoctorId(null)}
                       style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 16, marginRight: 10, backgroundColor: !selectedDoctorId ? brandColor : (isDark ? '#1A1A1A' : '#FFF'), borderWidth: 1, borderColor: !selectedDoctorId ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}
                     >
-                      <Text style={{ color: !selectedDoctorId ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AUTO"] || "AUTO"}</Text>
+                      <Text style={{ color: !selectedDoctorId ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11 }}>{"AUTO"</Text>
                     </TouchableOpacity>
                     {doctors.map(doc => (
                       <TouchableOpacity
@@ -1288,7 +1282,7 @@ export default function SoinsScreen({ navigation, route }) {
 
               {transferDestination === 'pharmacie' && (
                 <FadeInView style={{ marginBottom: 24, padding: 20, backgroundColor: '#10B98110', borderRadius: 28, borderWidth: 1, borderColor: '#10B98130' }}>
-                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#10B981', letterSpacing: 1, marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PRESCRIPTION D'URGENCE (PHARMACIE)"] || "PRESCRIPTION D'URGENCE (PHARMACIE)"}</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '900', color: '#10B981', letterSpacing: 1, marginBottom: 16 }}>PRESCRIPTION D'URGENCE (PHARMACIE)</Text>
                   
                   {prescriptionItems.map((item, index) => (
                     <View key={index} style={{ marginBottom: 12, padding: 14, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
@@ -1305,8 +1299,7 @@ export default function SoinsScreen({ navigation, route }) {
                   <View style={{ marginTop: 8 }}>
                     <TextInput
                       style={{ backgroundColor: isDark ? '#0A0A0A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', padding: 12, borderRadius: 14, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 10 }}
-                      placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chercher un médicament..."] || "Chercher un médicament..."}
-                      placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                      placeholder={"Chercher un médicament..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                       value={medSearch}
                       onChangeText={q => {
                         setMedSearch(q);
@@ -1339,15 +1332,15 @@ export default function SoinsScreen({ navigation, route }) {
                      onPress={() => setPrescriptionItems(prev => [...prev, { name: 'Autre produit...', quantity: 1, instructions: '' }])}
                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 14, borderStyle: 'dashed', borderWidth: 1, borderColor: '#10B981' }}
                   >
-                     <MaterialIcons name="add" size={18} color="#10B981" />
-                     <Text style={{ color: '#10B981', fontWeight: '900', fontSize: 11, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER MANUELLEMENT"] || "AJOUTER MANUELLEMENT"}</Text>
+                     <MaterialIcons name="help-circle" size={18} color="#10B981" />
+                     <Text style={{ color: '#10B981', fontWeight: '900', fontSize: 11, marginLeft: 8 }}>{"AJOUTER MANUELLEMENT"</Text>
                   </TouchableOpacity>
                 </FadeInView>
               )}
 
               <TouchableOpacity style={{ height: 66, borderRadius: 33, overflow: 'hidden', marginBottom: 20 }} onPress={handleForward} disabled={isSubmitting}>
                 <LinearGradient colors={transferDestination === 'completed' ? ['#22C55E', '#16A34A'] : Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                  {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
+                  {isSubmitting ? <ActivityIndicator color="" /> : (
                     <>
                       <MaterialIcons name={transferDestination === 'completed' ? "check-circle" : "send"} size={24} color="#FFF" style={{ marginRight: 12 }} />
                       <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>{transferDestination === 'completed' ? 'VALIDER & TERMINER' : 'ENVOYER PATIENT'}</Text>
@@ -1394,12 +1387,12 @@ export default function SoinsScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="chart-box-outline" size={26} color="#FFF" />
               </LinearGradient>
               <View>
-                <Text style={{ fontSize: 19, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["STATISTIQUES SOINS"] || "STATISTIQUES SOINS"}</Text>
+                <Text style={{ fontSize: 19, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.5 }}>{"STATISTIQUES SOINS"</Text>
                 <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#94A3B8', fontWeight: '800' }}>{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</Text>
               </View>
             </View>
             <TouchableOpacity onPress={() => toggleBottomTab('stats')} style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-              <MaterialIcons name="close" size={24} color={brandColor} />
+              <MaterialIcons name="help-circle" size={24} color={brandColor} />
             </TouchableOpacity>
           </View>
 
@@ -1414,15 +1407,15 @@ export default function SoinsScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="needle" size={22} color={brandColor} />
                 </View>
                 <Text style={{ fontSize: 34, fontWeight: '950', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{stats?.inCare ?? careList.length}</Text>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1.2, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["EN COURS"] || "EN COURS"}</Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1.2, marginTop: 4 }}>{"EN COURS"</Text>
               </View>
 
               <View style={{ flex: 1, padding: 20, backgroundColor: '#EF444408', borderRadius: 28, borderWidth: 1, borderColor: '#EF444425' }}>
                 <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: '#EF444415', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  <MaterialCommunityIcons name="alert-circle-outline" size={22} color="#EF4444" />
+                  <MaterialCommunityIcons name="help-circle" size={22} color="#EF4444" />
                 </View>
                 <Text style={{ fontSize: 34, fontWeight: '950', color: '#EF4444' }}>{stats?.urgencies ?? urgenciesList.length}</Text>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1.2, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENCES"] || "URGENCES"}</Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1.2, marginTop: 4 }}>{"URGENCES"</Text>
               </View>
             </View>
 
@@ -1430,7 +1423,7 @@ export default function SoinsScreen({ navigation, route }) {
             <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 32, padding: 26, marginBottom: 16, elevation: 8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View>
-                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TRAITEMENTS TERMINÉS"] || "TRAITEMENTS TERMINÉS"}</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>TRAITEMENTS TERMINÉS</Text>
                   <Text style={{ color: '#FFF', fontSize: 52, fontWeight: '950', marginTop: 4 }}>{stats?.completedToday ?? historyList.length}</Text>
                 </View>
                 <MaterialCommunityIcons name="check-decagram" size={70} color="rgba(255,255,255,0.2)" />
@@ -1438,8 +1431,8 @@ export default function SoinsScreen({ navigation, route }) {
               <View style={{ height: 1.5, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 18 }} />
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                 <View>
-                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Taux d'efficacité"] || "Taux d'efficacité"}</Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '600' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Basé sur les flux du jour"] || "Basé sur les flux du jour"}</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, fontWeight: '700' }}>{"Taux d'efficacité"</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '600' }}>Basé sur les flux du jour</Text>
                 </View>
                 <Text style={{ color: '#FFF', fontWeight: '950', fontSize: 18 }}>
                   {visits.length + historyList.length > 0
@@ -1463,8 +1456,8 @@ export default function SoinsScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="account-clock-outline" size={26} color={brandColor} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["EN ATTENTE (TRIAGE)"] || "EN ATTENTE (TRIAGE)"}</Text>
-                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{queueList.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["patients"] || "patients"}</Text></Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 4 }}>{"EN ATTENTE (TRIAGE)"</Text>
+                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{queueList.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>patients</Text></Text>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
             </View>
@@ -1475,8 +1468,8 @@ export default function SoinsScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="bed-outline" size={26} color="#22C55E" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', letterSpacing: 1.5, marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["HOSPITALISATIONS"] || "HOSPITALISATIONS"}</Text>
-                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{hospitalizations.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["patients internés"] || "patients internés"}</Text></Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', letterSpacing: 1.5, marginBottom: 4 }}>{"HOSPITALISATIONS"</Text>
+                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{hospitalizations.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>patients internés</Text></Text>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
             </View>

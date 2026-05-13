@@ -5,10 +5,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 export default function Footer({ darkMode }) {
   return (
     <View style={[styles.footer, { backgroundColor: darkMode ? '#1A1C1E' : '#F1F5F9' }]}>
-      <Text style={[styles.title, { color: darkMode ? '#FFF' : '#1A1A1A' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}</Text>
+      <Text style={[styles.title, { color: darkMode ? '#FFF' : '#1A1A1A' }]}>{"REHOBOTH"</Text>
       <View style={styles.info}>
-        <View style={styles.item}><MaterialCommunityIcons name="map-marker" size={12} color="#64748B" /><Text style={styles.text}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Lubumbashi, RDC"] || "Lubumbashi, RDC"}</Text></View>
-        <View style={styles.item}><MaterialCommunityIcons name="phone" size={12} color="#64748B" /><Text style={styles.text}>+243 81 000 00 00</Text></View>
+        <View style={styles.item}><MaterialCommunityIcons name="help-circle" size={12} color="#64748B" /><Text style={styles.text}>{"Lubumbashi, RDC"</Text></View>
+        <View style={styles.item}><MaterialCommunityIcons name="help-circle" size={12} color="#64748B" /><Text style={styles.text}>+243 81 000 00 00</Text></View>
       </View>
       <View style={styles.divider} />
       <Text style={styles.copy}>© {new Date().getFullYear()} JP SERVICES</Text>

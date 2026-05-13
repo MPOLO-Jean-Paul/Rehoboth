@@ -99,7 +99,7 @@ export default function PremiumLeftDrawer({
                   )}
                 </View>
                 <View style={{ marginLeft: 12 }}>
-                  <Text style={{ color: txt, fontSize: 16, fontWeight: '900', letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}</Text>
+                  <Text style={{ color: txt, fontSize: 16, fontWeight: '900', letterSpacing: 0 }}>{"REHOBOTH"</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
                     <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759', marginRight: 6 }} />
                     <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', letterSpacing: 0 }}>{safeRoleName}</Text>
@@ -107,14 +107,14 @@ export default function PremiumLeftDrawer({
                 </View>
               </View>
               <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', borderColor: divider }]}>
-                <MaterialIcons name="close" size={20} color={txt} />
+                <MaterialIcons name="help-circle" size={20} color={txt} />
               </TouchableOpacity>
             </View>
 
             {/* Section Title */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                <View style={{ width: 3, height: 24, backgroundColor: brandColor, borderRadius: 2, marginRight: 10 }} />
-               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Navigation"] || "Navigation"}</Text>
+               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>{"Navigation"</Text>
             </View>
           </LinearGradient>
 
@@ -182,7 +182,7 @@ export default function PremiumLeftDrawer({
                         style={{ width: 6, height: 6, borderRadius: 3, marginLeft: 8 }} 
                       />
                     ) : (
-                      <MaterialIcons name="chevron-right" size={20} color={dark ? '#3A3A3C' : '#C7C7CC'} />
+                      <MaterialIcons name="help-circle" size={20} color={dark ? '#3A3A3C' : '#C7C7CC'} />
                     )}
                   </TouchableOpacity>
                 );
