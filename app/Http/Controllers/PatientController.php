@@ -16,16 +16,28 @@ class PatientController extends Controller
     public function index(Request $request)
     {
         $query = Patient::query();
-        if ($request->has('q')) {
-            $search = $request->string('q')->toString();
+
+        if ($request->filled('q')) {
+            $search = trim($request->string('q')->toString());
             $query->where(function ($inner) use ($search) {
-                $inner->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%')
-                      ->orWhere('post_name', 'like', '%' . $search . '%')
+                $inner->where('first_name', 'like', $search . '%')
+                      ->orWhere('last_name', 'like', $search . '%')
+                      ->orWhere('post_name', 'like', $search . '%')
                       ->orWhere('contact_info', 'like', '%' . $search . '%');
             });
         }
-        return response()->json($query->orderBy('id', 'desc')->get());
+
+        // On ne récupère que les colonnes nécessaires pour la liste
+        $query->select(['id', 'first_name', 'last_name', 'post_name', 'is_insured', 'insurance_id', 'birth_year', 'created_at', 'pathology']);
+
+        // Limite de sécurité pour éviter de saturer la mémoire en cas de gros volume
+        $perPage = min(max($request->integer('per_page', 50), 10), 100);
+        
+        if ($request->boolean('nopaginate')) {
+            return response()->json($query->orderBy('id', 'desc')->limit(200)->get());
+        }
+
+        return response()->json($query->orderBy('id', 'desc')->paginate($perPage));
     }
 
     public function store(Request $request)
@@ -145,7 +157,7 @@ class PatientController extends Controller
 
     public function listInsurances()
     {
-        return response()->json(\App\Models\Insurance::all());
+        return response()->json(\App\Models\Insurance::select('id', 'name', 'status', 'monthly_flat_fee')->orderBy('name')->get());
     }
 
     public function verifyInsurance(Request $request)
@@ -178,11 +190,19 @@ class PatientController extends Controller
         $today = now()->startOfDay();
         $yesterday = now()->subDay()->startOfDay();
 
-        $todayCount = Patient::where('created_at', '>=', $today)->count();
-        $yesterdayCount = Patient::where('created_at', '>=', $yesterday)->where('created_at', '<', $today)->count();
+        $stats = Patient::where('created_at', '>=', $yesterday)
+            ->selectRaw('
+                SUM(CASE WHEN created_at >= ? THEN 1 ELSE 0 END) as today_count,
+                SUM(CASE WHEN created_at >= ? AND created_at < ? THEN 1 ELSE 0 END) as yesterday_count,
+                SUM(CASE WHEN created_at >= ? AND is_insured = 1 THEN 1 ELSE 0 END) as insured_count,
+                SUM(CASE WHEN created_at >= ? AND is_insured = 0 THEN 1 ELSE 0 END) as private_count
+            ', [$today, $yesterday, $today, $today, $today])
+            ->first();
 
-        $insuredCount = Patient::where('created_at', '>=', $today)->where('is_insured', true)->count();
-        $privateCount = Patient::where('created_at', '>=', $today)->where('is_insured', false)->count();
+        $todayCount = (int) $stats->today_count;
+        $yesterdayCount = (int) $stats->yesterday_count;
+        $insuredCount = (int) $stats->insured_count;
+        $privateCount = (int) $stats->private_count;
 
         return response()->json([
             'today_count' => $todayCount,

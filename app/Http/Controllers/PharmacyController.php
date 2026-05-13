@@ -13,9 +13,21 @@ use Illuminate\Support\Facades\DB;
 class PharmacyController extends Controller
 {
     use NotifiesUsers;
-    public function indexMedicines()
+    public function indexMedicines(Request $request)
     {
-        return response()->json(Medicine::orderBy('name')->get());
+        $query = Medicine::orderBy('name');
+        
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('dosage', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $perPage = min(max($request->integer('per_page', 20), 10), 100);
+
+        return response()->json($query->paginate($perPage));
     }
 
     public function addStock(Request $request)
@@ -86,36 +98,47 @@ class PharmacyController extends Controller
         return response()->json(['message' => 'Médicament ajouté au catalogue', 'medicine' => $medicine], 201);
     }
 
-    public function getPendingPrescriptions()
+    public function getPendingPrescriptions(Request $request)
     {
-        $prescriptions = \App\Models\Prescription::with(['patient.insurance', 'doctor', 'items.medicine'])
+        $query = \App\Models\Prescription::with(['patient.insurance', 'doctor', 'items.medicine'])
             ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function($p) {
-                return [
-                    'id' => $p->visit_id, // Identifiant de visite pour compatibilité UI
-                    'prescription_id' => $p->id,
-                    'patient' => $p->patient,
-                    'doctor' => $p->doctor?->name,
-                    'items' => $p->items->map(function($item) {
-                        return [
-                            'medicine_id' => $item->medicine_id,
-                            'name' => $item->medicine_name,
-                            'dosage' => $item->dosage,
-                            'quantity' => $item->quantity_prescribed,
-                            'instructions' => $item->instructions,
-                            'status' => $item->status, 
-                            'available_stock' => $item->medicine?->stock_quantity ?? 0,
-                            'price' => $item->medicine?->price ?? 0
-                        ];
-                    }),
-                    'notes' => $p->notes,
-                    'date' => $p->created_at->format('d/m/Y H:i'),
-                    'is_insured' => $p->patient?->is_insured ?? false,
-                    'insurance_name' => $p->patient?->insurance?->name
-                ];
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('patient', function($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%");
             });
+        }
+            
+        $perPage = min(max($request->integer('per_page', 20), 10), 100);
+        $prescriptions = $query->paginate($perPage);
+
+        $prescriptions->getCollection()->transform(function($p) {
+            return [
+                'id' => $p->visit_id, // Identifiant de visite pour compatibilité UI
+                'prescription_id' => $p->id,
+                'patient' => $p->patient,
+                'doctor' => $p->doctor?->name,
+                'items' => $p->items->map(function($item) {
+                    return [
+                        'medicine_id' => $item->medicine_id,
+                        'name' => $item->medicine_name,
+                        'dosage' => $item->dosage,
+                        'quantity' => $item->quantity_prescribed,
+                        'instructions' => $item->instructions,
+                        'status' => $item->status, 
+                        'available_stock' => $item->medicine?->stock_quantity ?? 0,
+                        'price' => $item->medicine?->price ?? 0
+                    ];
+                }),
+                'notes' => $p->notes,
+                'date' => $p->created_at->format('d/m/Y H:i'),
+                'is_insured' => $p->patient?->is_insured ?? false,
+                'insurance_name' => $p->patient?->insurance?->name
+            ];
+        });
             
         return response()->json($prescriptions);
     }
@@ -248,15 +271,16 @@ class PharmacyController extends Controller
     public function expiryStatus()
     {
         $soon = now()->addDays(30);
+        $today = now()->toDateString();
 
         $expiring = Medicine::whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '>', now())
-            ->whereDate('expiry_date', '<=', $soon)
+            ->where('expiry_date', '>', $today)
+            ->where('expiry_date', '<=', $soon->toDateString())
             ->orderBy('expiry_date')
             ->get();
 
         $expired = Medicine::whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '<=', now())
+            ->where('expiry_date', '<=', $today)
             ->orderBy('expiry_date')
             ->get();
 
@@ -266,24 +290,37 @@ class PharmacyController extends Controller
         ]);
     }
 
-    public function dispensedToday()
+    public function dispensedToday(Request $request)
     {
         $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
 
-        $invoices = \App\Models\Invoice::with('patient')
-            ->whereDate('created_at', $today)
+        $query = \App\Models\Invoice::with('patient')
+            ->where('created_at', '>=', $today)
+            ->where('created_at', '<', $tomorrow)
             ->where('service', 'pharmacie')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($invoice) {
-                return [
-                    'id' => $invoice->id,
-                    'patient' => $invoice->patient,
-                    'total' => $invoice->amount,
-                    'created_at' => $invoice->created_at,
-                    'items' => $invoice->metadata['items'] ?? []
-                ];
+            ->orderBy('created_at', 'desc');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('patient', function($q) use ($search) {
+                $q->where('first_name', 'LIKE', "%{$search}%")
+                  ->orWhere('last_name', 'LIKE', "%{$search}%");
             });
+        }
+
+        $perPage = min(max($request->integer('per_page', 20), 10), 100);
+        $invoices = $query->paginate($perPage);
+
+        $invoices->getCollection()->transform(function ($invoice) {
+            return [
+                'id' => $invoice->id,
+                'patient' => $invoice->patient,
+                'total' => $invoice->amount,
+                'created_at' => $invoice->created_at,
+                'items' => $invoice->metadata['items'] ?? []
+            ];
+        });
 
         return response()->json($invoices);
     }
@@ -333,19 +370,25 @@ class PharmacyController extends Controller
         $days = 30;
         $startDate = now()->subDays($days);
         
-        // Get all medicines
-        $medicines = Medicine::all();
+        $medicines = Medicine::select('id', 'name', 'stock_quantity', 'low_stock_threshold', 'created_at')
+            ->orderBy('name')
+            ->get();
         
         // Get sales volume per medicine in the last X days
         $sales = DB::table('invoices')
             ->where('service', 'pharmacie')
             ->where('created_at', '>=', $startDate)
+            ->select('metadata')
             ->get()
             ->flatMap(function($invoice) {
                 $metadata = json_decode($invoice->metadata, true);
-                return $metadata['items'] ?? [];
+                return collect($metadata['items'] ?? [])->map(function ($item) {
+                    $item['sold_id'] = $item['medicine_id'] ?? $item['id'] ?? null;
+                    return $item;
+                });
             })
-            ->groupBy('id')
+            ->filter(fn ($item) => !empty($item['sold_id']))
+            ->groupBy('sold_id')
             ->map(function($items) {
                 return collect($items)->sum('quantity');
             });
@@ -385,7 +428,7 @@ class PharmacyController extends Controller
     {
         $period = $request->query('period', 'day'); // day, week, month
         
-        $query = \App\Models\Invoice::with('patient')
+        $query = \App\Models\Invoice::with('patient:id,first_name,last_name,post_name')
             ->where('service', 'pharmacie')
             ->whereNotNull('metadata'); // invoices with metadata items
 
@@ -419,7 +462,9 @@ class PharmacyController extends Controller
             $query->whereBetween('created_at', [$startDate, now()->endOfDay()]);
         }
 
-        $invoices = $query->orderBy('created_at', 'desc')->get();
+        $invoices = $query->orderBy('created_at', 'desc')
+            ->limit($request->boolean('all') ? 1000 : 300)
+            ->get();
 
         $totalRevenue = $invoices->sum('amount');
         $itemsSold = [];
@@ -427,7 +472,7 @@ class PharmacyController extends Controller
         foreach ($invoices as $invoice) {
             $items = $invoice->metadata['items'] ?? [];
             foreach ($items as $item) {
-                $id = $item['medicine_id'] ?? null;
+                $id = $item['medicine_id'] ?? $item['id'] ?? null;
                 if (!$id) continue;
                 
                 if (!isset($itemsSold[$id])) {
@@ -520,8 +565,10 @@ class PharmacyController extends Controller
     public function sendDailyReport(Request $request)
     {
         $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
         $invoices = \App\Models\Invoice::where('service', 'pharmacie')
-            ->whereDate('created_at', $today)
+            ->where('created_at', '>=', $today)
+            ->where('created_at', '<', $tomorrow)
             ->where('status', 'paid')
             ->get();
 

@@ -17,13 +17,17 @@ class VisitController extends Controller
     {
         $user = $request->user();
         $role = $user->role;
+        $perPage = min(max($request->integer('per_page', 20), 10), 100);
 
-        $query = Visit::with(['patient', 'invoice', 'invoices']);
+        $query = Visit::with([
+            'patient:id,first_name,last_name,post_name,is_insured,insurance_id',
+            'invoice',
+        ]);
 
         // Filtrage par patient (Historique)
         if ($request->has('patient_id')) {
             $query->where('patient_id', $request->patient_id);
-            return response()->json($query->orderBy('created_at', 'desc')->get());
+            return response()->json($query->orderBy('created_at', 'desc')->paginate($perPage));
         }
 
         if ($role === 'medecin') {
@@ -39,13 +43,19 @@ class VisitController extends Controller
             $query->where('current_service', $role);
         }
 
-        return response()->json($query->orderBy('updated_at', 'desc')->get());
+        $query->orderBy('updated_at', 'desc');
+
+        if ($request->has('page') || $request->has('per_page')) {
+            return response()->json($query->paginate($perPage));
+        }
+
+        return response()->json($query->limit(100)->get());
     }
 
     public function forward(Request $request, $id): JsonResponse
     {
         $validated = $request->validate([
-            'next_service'              => 'required|string|in:medecin,labo,pharmacie,completed,soins',
+            'next_service'              => 'required|string|in:medecin,labo,pharmacie,maternite,completed,soins',
             'notes'                     => 'nullable|string',
             'diagnosis'                 => 'nullable|string',
             'consultation_notes'        => 'nullable|string',
@@ -329,6 +339,34 @@ class VisitController extends Controller
                     ]);
                 }
 
+                if ($nextService === 'maternite') {
+                    \App\Models\MaternityCase::firstOrCreate(
+                        ['visit_id' => $visit->id],
+                        [
+                            'patient_id' => $visit->patient_id,
+                            'status' => 'active',
+                            'pregnancy_status' => 'prenatal',
+                            'risk_level' => 'moderate',
+                            'doctor_id' => $user->role === 'medecin' ? $user->id : $visit->doctor_id,
+                            'midwife_id' => $user->role === 'soins' ? $user->id : null,
+                            'admission_date' => now(),
+                            'notes' => $notes ?: 'Orientation vers la maternité',
+                            'last_checked_at' => now(),
+                        ]
+                    );
+
+                    $visit->current_service = 'maternite';
+                    $visit->status = 'pending';
+                    $visit->save();
+
+                    $this->notifyRole('maternite', 'Patiente orientée en maternité', "La patiente {$visit->patient->first_name} {$visit->patient->last_name} est attendue en maternité.", ['type' => 'maternity', 'visit_id' => $visit->id]);
+
+                    return response()->json([
+                        'message' => 'Dossier transféré vers la maternité.',
+                        'visit' => $visit->fresh(['patient', 'invoice']),
+                    ]);
+                }
+
                 if ($nextService === 'completed') {
                     $visit->current_service = 'completed';
                     $visit->status = 'completed';
@@ -367,28 +405,33 @@ class VisitController extends Controller
 
     public function myToday(Request $request)
     {
-        $today = now()->toDateString();
+        $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
         $user = $request->user();
+        $perPage = min(max($request->integer('per_page', 30), 10), 100);
 
-        $visits = Visit::with(['patient'])
-            ->whereDate('updated_at', $today)
+        $visits = Visit::with(['patient:id,first_name,last_name'])
+            ->where('updated_at', '>=', $today)
+            ->where('updated_at', '<', $tomorrow)
             ->where(function ($q) use ($user) {
                 $q->where('current_service', $user->role)
                   ->orWhere('complaints_notes', 'like', '%[' . strtoupper($user->role) . ']%');
             })
             ->orderBy('updated_at', 'desc')
-            ->get();
+            ->paginate($perPage);
 
         return response()->json($visits);
     }
 
-    public function soinsPatients()
+    public function soinsPatients(Request $request)
     {
-        $visits = Visit::with(['patient'])
+        $perPage = min(max($request->integer('per_page', 50), 10), 100);
+
+        $visits = Visit::with(['patient:id,first_name,last_name,post_name,is_insured,insurance_id'])
             ->where('current_service', 'soins')
             ->where('status', '!=', 'completed')
             ->orderBy('updated_at', 'desc')
-            ->get();
+            ->paginate($perPage);
 
         return response()->json($visits);
     }
@@ -397,7 +440,7 @@ class VisitController extends Controller
     {
         $validated = $request->validate([
             'visit_id' => 'required|exists:visits,id',
-            'next_service' => 'nullable|string|in:medecin,completed,pharmacie',
+            'next_service' => 'nullable|string|in:medecin,completed,pharmacie,maternite',
             'doctor_id' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
             'vitals' => 'nullable|array',
@@ -423,10 +466,10 @@ class VisitController extends Controller
         $notes = trim((string) ($validated['notes'] ?? ''));
         $user = $request->user();
 
-        // Use the same logic as forward if it's pharmacie
-        if ($nextService === 'pharmacie') {
+        // Use the same transfer/facturation path for specialized services.
+        if (in_array($nextService, ['pharmacie', 'maternite'], true)) {
             // Repurpose forward logic for pharmacie
-            $request->request->add(['next_service' => 'pharmacie', 'notes' => $notes]);
+            $request->request->add(['next_service' => $nextService, 'notes' => $notes]);
             return $this->forward($request, $visit->id);
         }
 

@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\HospitalizationController;
 use App\Http\Controllers\InsuranceController;
 use App\Http\Controllers\NursingReportController;
+use App\Http\Controllers\MaternityController;
 use App\Http\Controllers\LaboController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PatientController;
@@ -57,7 +58,7 @@ Route::middleware(['auth:sanctum', 'role:admin,reception,soins,caisse'])->group(
     Route::get('/insurances', [App\Http\Controllers\InsuranceController::class, 'index']);
 });
 
-Route::middleware(['auth:sanctum', 'role:admin,caisse,medecin,labo,pharmacie,soins'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin,caisse,medecin,labo,pharmacie,soins,maternite'])->group(function () {
     // Workflow
     Route::get('/visits', [VisitController::class, 'index']);
     Route::get('/visits/my-today', [VisitController::class, 'myToday']);
@@ -67,8 +68,21 @@ Route::middleware(['auth:sanctum', 'role:admin,caisse,medecin,labo,pharmacie,soi
     Route::get('/doctors', [VisitController::class, 'getDoctors']);
 });
 
-Route::middleware(['auth:sanctum', 'role:admin,medecin,labo,soins'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin,medecin,labo,soins,maternite'])->group(function () {
     Route::post('/visits/{id}/forward', [VisitController::class, 'forward']); // Move to next service
+});
+
+// Maternité
+Route::middleware(['auth:sanctum', 'role:admin,maternite,soins,medecin'])->group(function () {
+    Route::get('/maternity/cases', [MaternityController::class, 'index']);
+    Route::post('/maternity/cases', [MaternityController::class, 'store']);
+    Route::get('/maternity/cases/{id}', [MaternityController::class, 'show']);
+    Route::put('/maternity/cases/{id}', [MaternityController::class, 'update']);
+    Route::post('/maternity/cases/{id}/follow-ups', [MaternityController::class, 'addFollowUp']);
+    Route::post('/maternity/cases/{id}/deliver', [MaternityController::class, 'deliver']);
+    Route::post('/maternity/cases/{id}/discharge', [MaternityController::class, 'discharge']);
+    Route::post('/maternity/cases/{id}/charge', [MaternityController::class, 'charge']);
+    Route::get('/maternity/stats', [MaternityController::class, 'stats']);
 });
 
 // Hospitalisation

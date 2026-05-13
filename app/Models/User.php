@@ -44,4 +44,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function maternityCasesAsMidwife()
+    {
+        return $this->hasMany(MaternityCase::class, 'midwife_id');
+    }
+
+    public function maternityCasesAsDoctor()
+    {
+        return $this->hasMany(MaternityCase::class, 'doctor_id');
+    }
 }

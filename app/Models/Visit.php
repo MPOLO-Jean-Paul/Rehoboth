@@ -59,4 +59,9 @@ class Visit extends Model
     {
         return $this->hasMany(LabOrder::class);
     }
+
+    public function maternityCases()
+    {
+        return $this->hasMany(MaternityCase::class);
+    }
 }

@@ -16,6 +16,8 @@ class SendMonthlyInsuranceReports extends Command
     public function handle()
     {
         $lastMonth = now()->subMonth();
+        $periodStart = $lastMonth->copy()->startOfMonth();
+        $periodEnd = $lastMonth->copy()->endOfMonth();
         $monthName = $lastMonth->translatedFormat('F Y');
         
         $insurances = \App\Models\Insurance::where('status', 'active')->whereNotNull('email')->get();
@@ -29,8 +31,7 @@ class SendMonthlyInsuranceReports extends Command
             $invoices = \App\Models\Invoice::with('patient')
                 ->where('insurance_id', $insurance->id)
                 ->where('status', 'paid')
-                ->whereMonth('updated_at', $lastMonth->month)
-                ->whereYear('updated_at', $lastMonth->year)
+                ->whereBetween('updated_at', [$periodStart, $periodEnd])
                 ->get();
 
             if ($invoices->count() > 0) {

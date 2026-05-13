@@ -16,12 +16,16 @@ class SendDailyPerformanceReport extends Command
     public function handle()
     {
         $today = \Carbon\Carbon::today();
+        $tomorrow = $today->copy()->addDay();
         
         $revenue = \App\Models\Invoice::where('status', 'paid')
-            ->whereDate('created_at', $today)
+            ->where('created_at', '>=', $today)
+            ->where('created_at', '<', $tomorrow)
             ->sum('amount');
 
-        $patientsCount = \App\Models\Visit::whereDate('created_at', $today)->count();
+        $patientsCount = \App\Models\Visit::where('created_at', '>=', $today)
+            ->where('created_at', '<', $tomorrow)
+            ->count();
 
         $admins = \App\Models\User::where('role', 'admin')
             ->whereNotNull('expo_push_token')

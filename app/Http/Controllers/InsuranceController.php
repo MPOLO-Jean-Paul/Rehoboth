@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Insurance;
 use App\Models\Invoice;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -23,13 +24,14 @@ class InsuranceController extends Controller
     public function getMonthlyReport(Request $request, $id)
     {
         $insurance = Insurance::findOrFail($id);
-        $month = $request->query('month', now()->month);
-        $year = $request->query('year', now()->year);
+        $month = (int) $request->query('month', now()->month);
+        $year = (int) $request->query('year', now()->year);
+        $periodStart = Carbon::create($year, $month, 1)->startOfMonth();
+        $periodEnd = $periodStart->copy()->endOfMonth();
 
         $invoices = Invoice::with(['patient', 'visit'])
             ->where('insurance_id', $id)
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
+            ->whereBetween('created_at', [$periodStart, $periodEnd])
             ->whereIn('status', ['paid', 'insurance_billed', 'settled'])
             ->orderBy('created_at', 'asc')
             ->get();
@@ -43,7 +45,7 @@ class InsuranceController extends Controller
             'settled_amount' => $settledAmount,
             'pending_amount' => $pendingAmount,
             'invoice_count' => $invoices->count(),
-            'period' => date('F Y', mktime(0, 0, 0, $month, 10, $year)),
+            'period' => $periodStart->translatedFormat('F Y'),
             'insurance_name' => $insurance->name,
             'insurance_email' => $insurance->email,
         ];

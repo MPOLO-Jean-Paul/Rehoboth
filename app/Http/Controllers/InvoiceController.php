@@ -38,9 +38,12 @@ class InvoiceController extends Controller
     public function index(Request $request)
     {
         $this->performAutoJournalCheck();
+        $limit = min(max($request->integer('limit', 200), 50), 500);
+
         $invoices = Invoice::with(['patient.insurance', 'visit'])
             ->whereIn('status', ['unpaid', 'insurance_billed'])
             ->orderBy('created_at', 'desc')
+            ->limit($limit)
             ->get();
             
         return response()->json($invoices);
@@ -54,7 +57,7 @@ class InvoiceController extends Controller
         ]);
 
         return DB::transaction(function () use ($request, $id) {
-            $invoice = Invoice::with('visit')->lockForUpdate()->findOrFail($id);
+            $invoice = Invoice::with(['visit.doctor', 'patient.insurance'])->lockForUpdate()->findOrFail($id);
 
             if ($invoice->status === 'paid') {
                 return response()->json([
@@ -133,7 +136,7 @@ class InvoiceController extends Controller
     public function getHistory(Request $request)
     {
         $period = $request->query('period', 'day');
-        $query = Invoice::with(['patient', 'visit'])->where('status', 'paid');
+        $query = Invoice::query()->where('status', 'paid');
         
         $monthStart = now()->startOfMonth();
         $startDate = match($period) {
@@ -150,27 +153,46 @@ class InvoiceController extends Controller
         }
         // If 'all', no date filter applied
 
-        $invoices = $query->orderBy('created_at', 'desc')->get();
-        
-        $total = $invoices->sum('amount');
-        $count = $invoices->count();
+        $summary = (clone $query)
+            ->selectRaw('COALESCE(SUM(amount), 0) as total, COUNT(*) as count')
+            ->first();
+
+        $invoices = (clone $query)
+            ->with(['patient:id,first_name,last_name,post_name,is_insured,insurance_id', 'visit:id,current_service'])
+            ->orderBy('created_at', 'desc')
+            ->limit($request->boolean('all') ? 1000 : 300)
+            ->get();
+
+        $total = (float) $summary->total;
+        $count = (int) $summary->count;
 
         return response()->json([
             'invoices' => $invoices,
             'total' => $total,
             'count' => $count,
-            'by_service' => $this->groupPaidInvoicesByService($invoices)
+            'by_service' => $this->paidInvoiceTotalsByServiceQuery($query)
         ]);
     }
 
     public function getDailySummary()
     {
         $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
         $yesterday = now()->subDay()->startOfDay();
+        $yesterdayEnd = $today->copy();
         
-        $todayInvoices = Invoice::whereDate('created_at', $today)->where('status', 'paid')->get();
-        $yesterdayTotal = Invoice::whereDate('created_at', $yesterday)->where('status', 'paid')->sum('amount');
-        $todayTotal = $todayInvoices->sum('amount');
+        $todaySummary = Invoice::where('status', 'paid')
+            ->where('created_at', '>=', $today)
+            ->where('created_at', '<', $tomorrow)
+            ->selectRaw('COALESCE(SUM(amount), 0) as total, COUNT(*) as count')
+            ->first();
+
+        $yesterdayTotal = Invoice::where('status', 'paid')
+            ->where('created_at', '>=', $yesterday)
+            ->where('created_at', '<', $yesterdayEnd)
+            ->sum('amount');
+
+        $todayTotal = (float) $todaySummary->total;
         
         $growth = $yesterdayTotal > 0 ? (($todayTotal - $yesterdayTotal) / $yesterdayTotal) * 100 : 0;
 
@@ -181,14 +203,14 @@ class InvoiceController extends Controller
         return response()->json([
             'today' => [
                 'total' => (int) $todayTotal,
-                'count' => $todayInvoices->count(),
+                'count' => (int) $todaySummary->count,
                 'growth' => round($growth, 1)
             ],
             'week' => [
                 'total' => (int) $thisWeekTotal,
                 'growth' => round($weekGrowth, 1)
             ],
-            'by_service' => $this->groupPaidInvoicesByService($todayInvoices)
+            'by_service' => $this->paidInvoiceTotalsByService($today, $tomorrow)
         ]);
     }
 
@@ -202,6 +224,7 @@ class InvoiceController extends Controller
                 'labo'      => 'Laboratoire',
                 'pharmacie' => 'Pharmacie',
                 'soins'     => 'Soins Infirmiers',
+                'maternite' => 'Maternité',
                 'caisse'    => 'Encaissements Directs',
                 'consultation' => 'Consultations Médicales'
             ];
@@ -210,6 +233,33 @@ class InvoiceController extends Controller
                 'total' => (int) $group->sum('amount')
             ];
         })->values();
+    }
+
+    private function paidInvoiceTotalsByServiceQuery($query)
+    {
+        $serviceNames = [
+            'reception' => 'Frais de Dossier',
+            'labo'      => 'Laboratoire',
+            'pharmacie' => 'Pharmacie',
+            'soins'     => 'Soins Infirmiers',
+            'maternite' => 'Maternité',
+            'caisse'    => 'Encaissements Directs',
+            'consultation' => 'Consultations Médicales'
+        ];
+
+        return (clone $query)
+            ->selectRaw("COALESCE(service, 'Autre') as service_key, SUM(amount) as total")
+            ->groupBy('service_key')
+            ->get()
+            ->map(function ($row) use ($serviceNames) {
+                $key = strtolower($row->service_key ?? 'autre');
+
+                return [
+                    'service' => $serviceNames[$key] ?? ucfirst($row->service_key ?? 'Autre'),
+                    'total' => (int) $row->total,
+                ];
+            })
+            ->values();
     }
 
     public function getAccountingStats(Request $request)
@@ -232,19 +282,53 @@ class InvoiceController extends Controller
         }
         // If 'all', no date filter applied
 
-        $paidInvoices = (clone $query)->where('status', 'paid')
+        $summary = (clone $query)->where('status', 'paid')
             ->whereNull('cashier_session_id') // Balance de la session en cours uniquement
-            ->get();
+            ->selectRaw("
+                COALESCE(SUM(CASE WHEN insurance_id IS NOT NULL THEN amount ELSE 0 END), 0) as insured,
+                COALESCE(SUM(CASE WHEN insurance_id IS NULL THEN amount ELSE 0 END), 0) as private,
+                COUNT(*) as count
+            ")
+            ->first();
         
-        $insuredTotal = $paidInvoices->whereNotNull('insurance_id')->sum('amount');
-        $privateTotal = $paidInvoices->whereNull('insurance_id')->sum('amount');
+        $insuredTotal = (float) $summary->insured;
+        $privateTotal = (float) $summary->private;
         
         return response()->json([
             'insured' => $insuredTotal,
             'private' => $privateTotal,
             'total'   => $insuredTotal + $privateTotal,
-            'count'   => $paidInvoices->count()
+            'count'   => (int) $summary->count
         ]);
+    }
+
+    private function paidInvoiceTotalsByService($start, $end)
+    {
+        $serviceNames = [
+            'reception' => 'Frais de Dossier',
+            'labo'      => 'Laboratoire',
+            'pharmacie' => 'Pharmacie',
+            'soins'     => 'Soins Infirmiers',
+            'maternite' => 'Maternité',
+            'caisse'    => 'Encaissements Directs',
+            'consultation' => 'Consultations Médicales'
+        ];
+
+        return Invoice::where('status', 'paid')
+            ->where('created_at', '>=', $start)
+            ->where('created_at', '<', $end)
+            ->selectRaw("COALESCE(service, 'Autre') as service_key, SUM(amount) as total")
+            ->groupBy('service_key')
+            ->get()
+            ->map(function ($row) use ($serviceNames) {
+                $key = strtolower($row->service_key ?? 'autre');
+
+                return [
+                    'service' => $serviceNames[$key] ?? ucfirst($row->service_key ?? 'Autre'),
+                    'total' => (int) $row->total,
+                ];
+            })
+            ->values();
     }
 
     public function getJournals()

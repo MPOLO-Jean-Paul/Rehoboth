@@ -11,14 +11,24 @@ class Setting extends Model
 
     protected $fillable = ['key', 'value'];
 
+    private static array $runtimeCache = [];
+
     public static function getValue($key, $default = null)
     {
-        $setting = self::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        if (array_key_exists($key, self::$runtimeCache)) {
+            return self::$runtimeCache[$key] ?? $default;
+        }
+
+        $value = self::where('key', $key)->value('value');
+        self::$runtimeCache[$key] = $value;
+
+        return $value ?? $default;
     }
 
     public static function setValue($key, $value)
     {
+        self::$runtimeCache[$key] = $value;
+
         return self::updateOrCreate(['key' => $key], ['value' => $value]);
     }
 }

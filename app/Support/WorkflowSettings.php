@@ -12,6 +12,8 @@ class WorkflowSettings
             'fiche_price' => (float) Setting::getValue('fiche_price', 5000),
             'soins_price' => (float) Setting::getValue('soins_price', 0),
             'consultation_price' => (float) Setting::getValue('consultation_price', 0),
+            'maternity_prenatal_fee' => (float) Setting::getValue('maternity_prenatal_fee', 0),
+            'maternity_delivery_fee' => (float) Setting::getValue('maternity_delivery_fee', 0),
         ];
     }
 

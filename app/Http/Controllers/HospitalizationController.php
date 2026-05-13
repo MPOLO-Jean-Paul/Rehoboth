@@ -19,7 +19,12 @@ class HospitalizationController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Hospitalization::with(['patient', 'doctor'])
+        $perPage = min(max($request->integer('per_page', 50), 10), 100);
+
+        $query = Hospitalization::with([
+                'patient:id,first_name,last_name,post_name,is_insured,insurance_id',
+                'doctor:id,name,specialty',
+            ])
             ->orderBy('admission_date', 'desc');
 
         if ($request->has('status')) {
@@ -32,7 +37,9 @@ class HospitalizationController extends Controller
             $query->where('ward', $request->ward);
         }
 
-        $hospitalizations = $query->get()->map(function ($h) {
+        $hospitalizations = $query->paginate($perPage);
+
+        $hospitalizations->getCollection()->transform(function ($h) {
             return array_merge($h->toArray(), [
                 'days_count'   => $h->days_count,
                 'total_amount' => $h->total_amount,

@@ -22,49 +22,57 @@ class AdminController extends Controller
     use \App\Traits\NotifiesUsers;
     public function dashboard(Request $request)
     {
-        $today = Carbon::today();
+        return response()->json($this->buildDashboardStats($request));
+    }
+
+    private function buildDashboardStats(Request $request): array
+    {
         $period = $request->get('period', 'day'); // day, week, month
 
-        $monthStart = Carbon::now()->startOfMonth();
-        $startDate = match($period) {
-            'week' => Carbon::now()->startOfWeek()->lt($monthStart) ? $monthStart : Carbon::now()->startOfWeek(),
+        $monthStart = Carbon::now()->startOfMonth()->startOfDay();
+        $startDate = match ($period) {
+            'week' => Carbon::now()->startOfWeek()->lt($monthStart) ? $monthStart : Carbon::now()->startOfWeek()->startOfDay(),
             'month' => $monthStart,
-            'semester' => Carbon::now()->month > 6 ? Carbon::now()->month(7)->startOfMonth() : Carbon::now()->startOfYear(),
-            'year' => Carbon::now()->startOfYear(),
-            default => Carbon::today()->lt($monthStart) ? $monthStart : Carbon::today(),
+            'semester' => Carbon::now()->month > 6 ? Carbon::now()->month(7)->startOfMonth()->startOfDay() : Carbon::now()->startOfYear()->startOfDay(),
+            'year' => Carbon::now()->startOfYear()->startOfDay(),
+            default => Carbon::today()->startOfDay()->lt($monthStart) ? $monthStart : Carbon::today()->startOfDay(),
         };
 
-        $revenueQuery = Invoice::whereIn('status', ['paid', 'insurance_billed', 'settled'])
-            ->whereDate('created_at', '>=', $startDate);
+        // Aggregated query for revenue by service - MUCH FASTER than get()->groupBy()
+        $revenueByServiceRaw = Invoice::whereIn('status', ['paid', 'insurance_billed', 'settled'])
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('LOWER(service) as service_slug, SUM(amount) as total')
+            ->groupBy('service_slug')
+            ->pluck('total', 'service_slug');
 
-        $totalRevenue = (clone $revenueQuery)->sum('amount');
+        $totalRevenue = $revenueByServiceRaw->sum();
 
-        $coreServices = ['reception', 'labo', 'pharmacie', 'soins', 'caisse', 'consultation'];
+        $coreServices = ['reception', 'labo', 'pharmacie', 'soins', 'maternite', 'caisse', 'consultation'];
         $serviceNames = [
             'reception' => 'Frais de Dossier',
             'labo'      => 'Laboratoire',
             'pharmacie' => 'Pharmacie',
             'soins'     => 'Soins Infirmiers',
+            'maternite' => 'Maternité',
             'caisse'    => 'Encaissements Directs',
             'consultation' => 'Consultations'
         ];
 
-        $grouped = (clone $revenueQuery)->get()->groupBy(fn($inv) => strtolower($inv->service ?: 'Autre'));
-        
-        $revenueByService = collect($coreServices)->map(function($slug) use ($grouped, $serviceNames) {
+        $revenueByService = collect($coreServices)->map(function($slug) use ($revenueByServiceRaw, $serviceNames) {
             return [
                 'service' => $serviceNames[$slug],
-                'total' => (int) ($grouped->has($slug) ? $grouped->get($slug)->sum('amount') : 0)
+                'total' => (int) ($revenueByServiceRaw->get($slug, 0))
             ];
         })->values();
 
-        $patientsCount = Patient::whereDate('created_at', '>=', $startDate)->count();
-        $visitsCount = Visit::whereDate('created_at', '>=', $startDate)->count();
+        // Optimized counts with indexed columns
+        $patientsCount = Patient::where('created_at', '>=', $startDate)->count();
+        $visitsCount = Visit::where('created_at', '>=', $startDate)->count();
         $labCount = Visit::where('current_service', 'labo')
-            ->whereDate('created_at', '>=', $startDate)
+            ->where('created_at', '>=', $startDate)
             ->count();
 
-        $stats = [
+        return [
             'total_patients_period' => $patientsCount,
             'total_visits_period' => $visitsCount,
             'revenue_period' => $totalRevenue,
@@ -89,22 +97,24 @@ class AdminController extends Controller
                                              ->select('name', 'stock_quantity')
                                              ->get(),
         ];
-        
-        return response()->json($stats);
     }
 
-    // GESTION DES ASSURANCES
+    // GESTION DES ASSURANCES - OPTIMIZED N+1
     public function getInsurances()
     {
+        // 1. Get base data
         $insurances = \App\Models\Insurance::withCount(['patients', 'insuredMembers'])->get();
         
-        $results = $insurances->map(function($ins) {
-            $consumption = \App\Models\Invoice::whereHas('patient', function($q) use ($ins) {
-                $q->where('insurance_id', $ins->id);
-            })->sum('amount');
-            
+        // 2. Get all consumptions in ONE query instead of N
+        $consumptions = \App\Models\Invoice::join('patients', 'invoices.patient_id', '=', 'patients.id')
+            ->whereNotNull('patients.insurance_id')
+            ->selectRaw('patients.insurance_id, SUM(invoices.amount) as total')
+            ->groupBy('patients.insurance_id')
+            ->pluck('total', 'insurance_id');
+
+        $results = $insurances->map(function($ins) use ($consumptions) {
             return array_merge($ins->toArray(), [
-                'real_consumption' => (int) $consumption,
+                'real_consumption' => (int) $consumptions->get($ins->id, 0),
                 'patients_count' => (int) $ins->patients_count,
                 'insured_members_count' => (int) $ins->insured_members_count
             ]);
@@ -338,15 +348,23 @@ class AdminController extends Controller
     public function markAllMessagesAsRead(Request $request)
     {
         $user = $request->user();
+        $now = now();
         $messageIds = StaffMessage::where(function ($query) use ($user) {
             $query->whereNull('target_role')
                 ->orWhere('target_role', $user->role);
         })->where('sender_id', '!=', $user->id)->pluck('id');
 
-        foreach ($messageIds as $messageId) {
-            StaffMessageRead::firstOrCreate(
-                ['staff_message_id' => $messageId, 'user_id' => $user->id],
-                ['read_at' => now()]
+        if ($messageIds->isNotEmpty()) {
+            \DB::table('staff_message_reads')->upsert(
+                $messageIds->map(fn ($messageId) => [
+                    'staff_message_id' => $messageId,
+                    'user_id' => $user->id,
+                    'read_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ])->all(),
+                ['staff_message_id', 'user_id'],
+                ['read_at', 'updated_at']
             );
         }
 
@@ -360,7 +378,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string',
             'message' => 'required|string',
-            'target_role' => 'nullable|string|in:reception,caisse,medecin,labo,soins,pharmacie,admin',
+            'target_role' => 'nullable|string|in:reception,caisse,medecin,labo,soins,pharmacie,maternite,admin',
             'priority' => 'nullable|string|in:normal,important,urgent',
         ]);
 
@@ -379,7 +397,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string',
             'message' => 'required|string',
-            'target_role' => 'nullable|string|in:reception,caisse,medecin,labo,soins,pharmacie,admin',
+            'target_role' => 'nullable|string|in:reception,caisse,medecin,labo,soins,pharmacie,maternite,admin',
             'priority' => 'nullable|string|in:normal,important,urgent',
         ]);
 
@@ -397,7 +415,7 @@ class AdminController extends Controller
 
         $roles = $targetRole
             ? [$targetRole]
-            : ['reception', 'caisse', 'medecin', 'labo', 'soins', 'pharmacie', 'admin'];
+            : ['reception', 'caisse', 'medecin', 'labo', 'soins', 'pharmacie', 'maternite', 'admin'];
 
         foreach ($roles as $role) {
             $this->notifyRole($role, '📢 ' . $validated['subject'], $validated['message'], [
@@ -412,7 +430,7 @@ class AdminController extends Controller
 
     public function getUsers()
     {
-        return response()->json(User::all());
+        return response()->json(User::select('id', 'name', 'postname', 'phone', 'email', 'role', 'specialty', 'profile_picture')->orderBy('role')->orderBy('name')->get());
     }
 
     public function createUser(Request $request)
@@ -423,7 +441,7 @@ class AdminController extends Controller
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6',
-            'role' => 'required|string|in:admin,reception,caisse,medecin,labo,soins,pharmacie',
+            'role' => 'required|string|in:admin,reception,caisse,medecin,labo,soins,pharmacie,maternite',
             'specialty' => 'nullable|string'
         ]);
 
@@ -448,7 +466,7 @@ class AdminController extends Controller
             'postname' => 'nullable|string',
             'phone' => 'nullable|string',
             'email' => 'required|email|unique:users,email,'.$id,
-            'role' => 'required|string|in:admin,reception,caisse,medecin,labo,soins,pharmacie',
+            'role' => 'required|string|in:admin,reception,caisse,medecin,labo,soins,pharmacie,maternite',
             'specialty' => 'nullable|string'
         ]);
 
@@ -498,7 +516,7 @@ class AdminController extends Controller
         $diseases = Visit::selectRaw('diagnosis as name, count(*) as count')
             ->whereNotNull('diagnosis')
             ->where('diagnosis', '!=', '')
-            ->whereDate('created_at', '>=', Carbon::now()->subDays($days))
+            ->where('created_at', '>=', Carbon::now()->subDays($days)->startOfDay())
             ->groupBy('diagnosis')
             ->orderByDesc('count')
             ->limit(10)
@@ -523,16 +541,17 @@ class AdminController extends Controller
     public function getStockExpiry()
     {
         $soon = Carbon::now()->addDays(30);
+        $now = Carbon::now();
 
         $expiring = Medicine::whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '>', Carbon::now())
-            ->whereDate('expiry_date', '<=', $soon)
+            ->where('expiry_date', '>', $now->toDateString())
+            ->where('expiry_date', '<=', $soon->toDateString())
             ->select('name', 'stock_quantity as quantity', 'expiry_date as expires_at')
             ->orderBy('expiry_date')
             ->get();
 
         $expired = Medicine::whereNotNull('expiry_date')
-            ->whereDate('expiry_date', '<=', Carbon::now())
+            ->where('expiry_date', '<=', $now->toDateString())
             ->select('name', 'stock_quantity as quantity', 'expiry_date as expires_at')
             ->orderBy('expiry_date')
             ->get();
@@ -558,31 +577,36 @@ class AdminController extends Controller
     public function getCashToday(Request $request)
     {
         $period = $request->get('period', 'day');
-        $monthStart = Carbon::now()->startOfMonth();
+        $monthStart = Carbon::now()->startOfMonth()->startOfDay();
         $startDate = match($period) {
-            'week' => Carbon::now()->startOfWeek()->lt($monthStart) ? $monthStart : Carbon::now()->startOfWeek(),
+            'week' => Carbon::now()->startOfWeek()->lt($monthStart) ? $monthStart : Carbon::now()->startOfWeek()->startOfDay(),
             'month' => $monthStart,
-            'semester' => Carbon::now()->month > 6 ? Carbon::now()->month(7)->startOfMonth() : Carbon::now()->startOfYear(),
-            'year' => Carbon::now()->startOfYear(),
-            default => Carbon::today()->lt($monthStart) ? $monthStart : Carbon::today(),
+            'semester' => Carbon::now()->month > 6 ? Carbon::now()->month(7)->startOfMonth()->startOfDay() : Carbon::now()->startOfYear()->startOfDay(),
+            'year' => Carbon::now()->startOfYear()->startOfDay(),
+            default => Carbon::today()->startOfDay()->lt($monthStart) ? $monthStart : Carbon::today()->startOfDay(),
         };
 
-        $byService = Invoice::whereDate('created_at', '>=', $startDate)
+        $byService = Invoice::where('created_at', '>=', $startDate)
             ->whereIn('status', ['paid', 'insurance_billed', 'settled'])
             ->selectRaw('service, SUM(amount) as amount, COUNT(*) as count')
             ->groupBy('service')
             ->orderByDesc('amount')
             ->get();
 
-        $patientCount = Patient::where('created_at', '>=', $startDate)->count();
-        $insuredCount = Patient::where('created_at', '>=', $startDate)->where('is_insured', true)->count();
-        $privateCount = Patient::where('created_at', '>=', $startDate)->where('is_insured', false)->count();
+        $patientStats = Patient::where('created_at', '>=', $startDate)
+            ->selectRaw('COUNT(*) as total, SUM(CASE WHEN is_insured = 1 THEN 1 ELSE 0 END) as insured, SUM(CASE WHEN is_insured = 0 THEN 1 ELSE 0 END) as private')
+            ->first();
+
+        $patientCount = (int) $patientStats->total;
+        $insuredCount = (int) $patientStats->insured;
+        $privateCount = (int) $patientStats->private;
 
         $serviceColors = [
             'reception' => '#3B82F6',
             'labo'      => '#F59E0B',
             'pharmacie' => '#8B5CF6',
             'soins'     => '#10B981',
+            'maternite' => '#EC4899',
             'caisse'    => '#FF385C',
             'consultation' => '#6366F1'
         ];
@@ -592,6 +616,7 @@ class AdminController extends Controller
             'labo'      => 'Laboratoire',
             'pharmacie' => 'Pharmacie',
             'soins'     => 'Soins Infirmiers',
+            'maternite' => 'Maternité',
             'caisse'    => 'Encaissements Directs',
             'consultation' => 'Consultations Médicales'
         ];
@@ -622,6 +647,8 @@ class AdminController extends Controller
             'fiche_price' => '5000',
             'soins_price' => '0',
             'consultation_price' => '0',
+            'maternity_prenatal_fee' => '0',
+            'maternity_delivery_fee' => '0',
             'lab_tests_catalog' => json_encode(WorkflowSettings::defaultLabTestsCatalog()),
         ];
 
@@ -707,6 +734,8 @@ class AdminController extends Controller
                 if ($type === 'Dossier') Setting::setValue('fiche_price', (string) $price);
                 if ($type === 'Consultation') Setting::setValue('consultation_price', (string) $price);
                 if ($type === 'Soins') Setting::setValue('soins_price', (string) $price);
+                if ($type === 'Maternité' || $type === 'Maternite') Setting::setValue('maternity_prenatal_fee', (string) $price);
+                if ($type === 'Accouchement') Setting::setValue('maternity_delivery_fee', (string) $price);
             }
 
             // Save the synchronized lab catalog
@@ -721,16 +750,17 @@ class AdminController extends Controller
 
     public function getBootstrap(Request $request)
     {
-        $period = $request->get('period', 'day');
         $user = $request->user();
 
-        // Use parallel logic (conceptual in PHP, but we combine into one response)
         return response()->json([
-            'stats' => $this->getDashboardStats($request)->original,
-            'users' => User::all(),
-            'patients' => \App\Models\Patient::latest()->take(100)->get(),
+            'stats' => $this->getDashboardStats($request),
+            'users' => User::select('id', 'name', 'role', 'profile_picture', 'specialty')->get(),
+            'patients' => \App\Models\Patient::select('id', 'first_name', 'last_name', 'is_insured', 'birth_year', 'created_at')
+                ->latest()
+                ->take(50)
+                ->get(),
             'messages' => $this->getMessages($request)->original,
-            'insurances' => \App\Models\Insurance::all(),
+            'insurances' => \App\Models\Insurance::select('id', 'name', 'status', 'monthly_flat_fee')->get(),
             'server_time' => now()->toDateTimeString()
         ]);
     }
@@ -742,7 +772,7 @@ class AdminController extends Controller
 
         // Cache for 1 minute to avoid heavy DB hits on every click
         return \Cache::remember($cacheKey, 60, function () use ($request) {
-            return $this->dashboard($request);
+            return $this->buildDashboardStats($request);
         });
     }
 }

@@ -36,4 +36,9 @@ class Patient extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function maternityCases()
+    {
+        return $this->hasMany(MaternityCase::class);
+    }
 }
