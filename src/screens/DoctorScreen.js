@@ -694,7 +694,7 @@ export default function DoctorScreen({ navigation, route }) {
                         <View style={[styles.labInputWrapper, { zIndex: activeSearchIndex === index && activeSearchType === 'lab' ? 10 : 1 }]}>
                           <TextInput
                             style={[styles.labInput, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code ou Nom de l"] || "Code ou Nom de l"}examen..."
+                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code ou Nom de l'examen..."] || "Code ou Nom de l'examen..."}
                             placeholderTextColor={isDark ? '#555' : '#94A3B8'}
                             value={test.code}
                             onChangeText={(v) => {
