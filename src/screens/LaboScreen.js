@@ -18,6 +18,8 @@ import PremiumFooter from '../components/PremiumFooter';
 import { Theme } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 
+import Storage from '../services/Storage';
+
 const { width, height } = Theme.layout;
 
 export default function LaboScreen({ navigation, route }) {
@@ -49,6 +51,7 @@ export default function LaboScreen({ navigation, route }) {
   const bottomPanelAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    loadCachedData();
     fetchVisits();
     fetchHistory();
 
@@ -97,6 +100,15 @@ export default function LaboScreen({ navigation, route }) {
     }
   }, [route.params?.visitId, route.params?.tab, visits]);
 
+  const loadCachedData = async () => {
+    const cached = await Storage.get('labo_data');
+    if (cached) {
+      setVisits(cached.visits || []);
+      setHistory(cached.history || []);
+      setLoading(false);
+    }
+  };
+
   const parseError = (e) => {
     if (e.response?.data?.errors) {
       const errors = e.response.data.errors;
@@ -107,22 +119,28 @@ export default function LaboScreen({ navigation, route }) {
   };
 
   const fetchVisits = async (isBg = false) => {
-    if (!isBg) setLoading(true);
+    if (!isBg && !visits.length) setLoading(true);
     try {
       const resp = await api.get('/labo/prescriptions');
+      const dataRaw = resp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
       // On convertit le format LabOrder en format compatible UI (Visit)
-      const mappedOrders = resp.data.map(order => ({
+      const mappedOrders = data.map(order => ({
         ...order,
         id: order.visit_id, // Identifiant de visite pour compatibilité
         lab_order_id: order.id,
-        lab_tests: order.items.map(item => ({
+        lab_tests: order.items ? order.items.map(item => ({
           id: item.id,
           label: item.test_name,
           category: item.category,
           status: item.status
-        }))
+        })) : []
       }));
       setVisits(mappedOrders);
+      
+      // Update cache
+      const currentCache = await Storage.get('labo_data') || {};
+      Storage.save('labo_data', { ...currentCache, visits: mappedOrders });
     } catch (e) { if (!isBg) showToast(t.error, 'error'); }
     finally { if (!isBg) setLoading(false); }
   };
@@ -131,10 +149,17 @@ export default function LaboScreen({ navigation, route }) {
     if (!isBg && (activeView === 'sent' || activeView === 'history')) setLoading(true);
     try {
       const resp = await api.get('/labo/history');
-      setHistory(resp.data);
+      const dataRaw = resp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
+      setHistory(data);
+      
+      // Update cache
+      const currentCache = await Storage.get('labo_data') || {};
+      Storage.save('labo_data', { ...currentCache, history: data });
+
       // Auto-expand today if it exists
       const todayStr = new Date().toISOString().split('T')[0];
-      if (!isBg && resp.data.some(v => v.updated_at && v.updated_at.startsWith(todayStr))) {
+      if (!isBg && data.some(v => v.updated_at && v.updated_at.startsWith(todayStr))) {
         setExpandedDates(prev => ({ ...prev, [todayStr]: true }));
       }
     } catch (e) { if (!isBg) showToast(t.error, 'error'); }

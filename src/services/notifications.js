@@ -79,7 +79,7 @@ export async function registerForPushNotificationsAsync() {
 
       try {
         token = (await Notifications.getExpoPushTokenAsync({
-          projectId: '84879c3f-025e-4cf3-9104-5763f203e56a',
+          projectId: '5bb3b737-f28d-4602-acad-3de60369af1a',
         })).data;
         console.log('[Rehoboth] Push Token enregistré:', token);
       } catch (firebaseError) {

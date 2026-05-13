@@ -16,6 +16,7 @@ import FloatingActionDock from '../components/FloatingActionDock';
 import PremiumFooter from '../components/PremiumFooter';
 import ProfileView from '../components/ProfileView';
 import { Theme } from '../constants/theme';
+import Storage from '../services/Storage';
 import { useTheme } from '../hooks/useTheme';
 
 const { width, height } = Theme.layout;
@@ -62,6 +63,7 @@ export default function PharmacyScreen({ navigation, route }) {
 
    const [searchQuery, setSearchQuery] = useState('');
    const [stockSearch, setStockSearch] = useState('');
+   const [modalSearch, setModalSearch] = useState('');
 
    // Panel States
    const [isRightOpen, setIsRightOpen] = useState(false);
@@ -72,19 +74,8 @@ export default function PharmacyScreen({ navigation, route }) {
    const [problemData, setProblemData] = useState({ type: 'rupture', medicine_id: null, message: '' });
    const bottomPanelAnim = useRef(new Animated.Value(0)).current;
 
-   const handleReportProblem = async () => {
-      if (!problemData.medicine_id) return showToast("Sélectionnez un médicament", 'error');
-      setIsSubmitting(true);
-      try {
-         await api.post('/pharmacy/report-problem', problemData);
-         showToast("Alerte envoyée", 'success');
-         setShowProblemModal(false);
-         setProblemData({ type: 'rupture', medicine_id: null, message: '' });
-      } catch (e) { showToast(parseError(e), 'error'); }
-      finally { setIsSubmitting(false); }
-   };
-
    useEffect(() => {
+      loadCachedData();
       fetchData();
       if (activeView === 'sales') fetchSales();
 
@@ -114,6 +105,13 @@ export default function PharmacyScreen({ navigation, route }) {
    }, [activeView, salesPeriod]);
 
    useEffect(() => {
+      const timer = setTimeout(() => {
+         fetchData(true);
+      }, 500);
+      return () => clearTimeout(timer);
+   }, [searchQuery, stockSearch]);
+
+   useEffect(() => {
       const requestedTab = route.params?.tab;
       if (requestedTab && ['dispense', 'stock', 'history', 'prices', 'sales'].includes(requestedTab)) {
          setActiveView(requestedTab);
@@ -133,44 +131,63 @@ export default function PharmacyScreen({ navigation, route }) {
       }
    }, [route.params?.visitId, route.params?.tab, visits]);
 
+   const loadCachedData = async () => {
+      const cached = await Storage.get('pharmacy_data');
+      if (cached) {
+         setVisits(cached.visits || []);
+         setMedicines(cached.medicines || []);
+         setInsights(cached.insights || { fast_movers: [], slow_movers: [], to_renew: [], all: [] });
+         setLoading(false);
+      }
+   };
+
+   const fetchData = async (isBg = false) => {
+      if (!isBg && !visits.length) setLoading(true);
+      try {
+         const [prescResp, medsResp, insightsResp] = await Promise.all([
+            api.get('/pharmacy/prescriptions', { params: { search: searchQuery } }),
+            api.get('/pharmacy/medicines', { params: { search: stockSearch } }),
+            api.get('/pharmacy/inventory-insights')
+         ]);
+         
+         const data = {
+            visits: prescResp.data.data || prescResp.data,
+            medicines: medsResp.data.data || medsResp.data,
+            insights: insightsResp.data
+         };
+
+         setVisits(data.visits);
+         setMedicines(data.medicines);
+         setInsights(data.insights);
+
+         // Sync to local storage
+         Storage.save('pharmacy_data', data);
+      } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
+      finally { if (!isBg) setLoading(false); }
+   };
+
    const fetchDeliveryHistory = async (isBg = false) => {
+      if (!isBg) setLoading(true);
       try {
          const resp = await api.get('/pharmacy/dispensed-today');
-         setDeliveryHistory(resp.data || []);
-      } catch (e) { if (!isBg) setDeliveryHistory([]); }
+         setDeliveryHistory(resp.data.data || resp.data);
+      } catch (e) {
+         if (!isBg) showToast("Erreur historique", 'error');
+      } finally {
+         if (!isBg) setLoading(false);
+      }
    };
 
    const fetchSales = async (isBg = false) => {
       if (!isBg) setLoading(true);
       try {
-         const resp = await api.get(`/pharmacy/sales?period=${salesPeriod}`);
+         const resp = await api.get('/pharmacy/sales', { params: { period: salesPeriod } });
          setSalesData(resp.data);
-      } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
-      finally { if (!isBg) setLoading(false); }
-   };
-
-   const parseError = (e) => {
-      if (e.response?.data?.errors) {
-         const errors = e.response.data.errors;
-         const firstKey = Object.keys(errors)[0];
-         return errors[firstKey][0];
+      } catch (e) {
+         if (!isBg) showToast("Erreur ventes", 'error');
+      } finally {
+         if (!isBg) setLoading(false);
       }
-      return e.response?.data?.message || t.error;
-   };
-
-   const fetchData = async (isBg = false) => {
-      if (!isBg) setLoading(true);
-      try {
-         const [prescResp, medsResp, insightsResp] = await Promise.all([
-            api.get('/pharmacy/prescriptions'),
-            api.get('/pharmacy/medicines'),
-            api.get('/pharmacy/inventory-insights')
-         ]);
-         setVisits(prescResp.data);
-         setMedicines(medsResp.data);
-         setInsights(insightsResp.data);
-      } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
-      finally { if (!isBg) setLoading(false); }
    };
 
    const fetchExpiry = async () => {
@@ -470,8 +487,22 @@ export default function PharmacyScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                               <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ORDONNANCES À TRAITER</Text>
-                              <TouchableOpacity onPress={fetchData}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
+                              <TouchableOpacity onPress={() => fetchData(false)}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
+
+                           <View style={{ marginBottom: 20 }}>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, paddingHorizontal: 15, height: 50, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
+                                 <MaterialIcons name="search" size={22} color={brandColor} />
+                                 <TextInput
+                                    style={{ flex: 1, marginLeft: 10, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '600' }}
+                                    placeholder="Rechercher une ordonnance..."
+                                    placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                                    value={searchQuery}
+                                    onChangeText={setSearchQuery}
+                                 />
+                              </View>
+                           </View>
+
                            {loading ? (
                               <View>{[1, 2, 3].map(i => <SkeletonItem key={i} height={100} style={{ marginBottom: 16, borderRadius: 28 }} />)}</View>
                            ) : (
@@ -550,7 +581,8 @@ export default function PharmacyScreen({ navigation, route }) {
                            {loading ? (
                               <View>{[1, 2, 3].map(i => <SkeletonItem key={i} height={80} style={{ marginBottom: 12, borderRadius: 24 }} />)}</View>
                            ) : (
-                              medicines.filter(m => m.name.toLowerCase().includes(stockSearch.toLowerCase())).map((m, i) => {
+                               medicines.map((m, i) => {
+
                                  const isLow = m.stock_quantity <= (m.low_stock_threshold || 10);
                                  const isCritical = m.stock_quantity <= 2;
                                  const statusColor = isCritical ? '#EF4444' : (isLow ? '#F59E0B' : '#10B981');
@@ -823,17 +855,18 @@ export default function PharmacyScreen({ navigation, route }) {
                               style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 15 }]}
                               placeholder="Rechercher un produit..."
                               placeholderTextColor="#94A3B8"
-                              onChangeText={(text) => setSearchQuery(text)}
+                              onChangeText={(text) => setModalSearch(text)}
+                              value={modalSearch}
                            />
-                           {medicines.filter(m => !searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
-                              medicines.filter(m => !searchQuery || m.name.toLowerCase().includes(searchQuery.toLowerCase())).map(m => (
-                                 <TouchableOpacity key={m.id} onPress={() => { setSelectedMed(m); setStockAddStep(2); setFormThreshold(String(m.low_stock_threshold || '')); setSearchQuery(''); }} style={{ padding: 20, borderRadius: 20, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', marginBottom: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
+                           {medicines.filter(m => !modalSearch || m.name.toLowerCase().includes(modalSearch.toLowerCase())).length > 0 ? (
+                              medicines.filter(m => !modalSearch || m.name.toLowerCase().includes(modalSearch.toLowerCase())).map(m => (
+                                 <TouchableOpacity key={m.id} onPress={() => { setSelectedMed(m); setStockAddStep(2); setFormThreshold(String(m.low_stock_threshold || '')); setModalSearch(''); }} style={{ padding: 20, borderRadius: 20, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', marginBottom: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                     <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{m.name}</Text>
                                     <Text style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>{m.dosage} • Actuel: {m.stock_quantity}</Text>
                                  </TouchableOpacity>
                               ))
                            ) : (
-                              <Text style={{ textAlign: 'center', color: '#94A3B8', marginTop: 20 }}>Aucun produit trouvé dans le catalogue.</Text>
+                              <Text style={{ textAlign: 'center', color: '#94A3B8', marginTop: 20 }}>Aucun produit trouvé</Text>
                            )}
                         </View>
                      ) : (

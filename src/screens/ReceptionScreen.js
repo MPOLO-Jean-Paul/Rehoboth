@@ -166,6 +166,9 @@ export default function ReceptionScreen({ navigation, route }) {
    const filteredPatients = (patients || [])
       .filter(p => {
          if (!p) return false;
+         // Si la recherche est vide, on garde tout le lot (déjà filtré par le serveur si search existe)
+         if (!search) return true;
+         // Fallback local pour les petits lots
          const matchSearch = `${p.first_name} ${p.last_name} ${p.pathology || ''}`.toLowerCase().includes(search.toLowerCase());
          const matchType = filterType === 'all' || (filterType === 'insured' ? p.is_insured : !p.is_insured);
          return matchSearch && matchType;
@@ -221,8 +224,12 @@ export default function ReceptionScreen({ navigation, route }) {
    const fetchPatients = async (isBg = false) => {
       if (!isBg) setLoading(true);
       try {
-         const resp = await api.get('/patients');
-         setPatients(Array.isArray(resp.data) ? resp.data : []);
+         // Best practice: Server-side search for performance
+         const url = search.length > 2 ? `/patients?q=${encodeURIComponent(search)}` : '/patients';
+         const resp = await api.get(url);
+         const data = resp.data;
+         // Support both raw array and Laravel paginated object
+         setPatients(Array.isArray(data) ? data : (data.data || []));
       } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
       finally { if (!isBg) setLoading(false); }
    };
