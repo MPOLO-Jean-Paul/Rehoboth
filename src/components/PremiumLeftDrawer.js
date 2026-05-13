@@ -99,7 +99,7 @@ export default function PremiumLeftDrawer({
                   )}
                 </View>
                 <View style={{ marginLeft: 12 }}>
-                  <Text style={{ color: txt, fontSize: 16, fontWeight: '900', letterSpacing: 0 }}>REHOBOTH</Text>
+                  <Text style={{ color: txt, fontSize: 16, fontWeight: '900', letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}</Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
                     <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#34C759', marginRight: 6 }} />
                     <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', letterSpacing: 0 }}>{safeRoleName}</Text>
@@ -114,9 +114,7 @@ export default function PremiumLeftDrawer({
             {/* Section Title */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                <View style={{ width: 3, height: 24, backgroundColor: brandColor, borderRadius: 2, marginRight: 10 }} />
-               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>
-                 Navigation
-               </Text>
+               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Navigation"] || "Navigation"}</Text>
             </View>
           </LinearGradient>
 
@@ -200,9 +198,7 @@ export default function PremiumLeftDrawer({
             borderTopWidth: 0.5, borderTopColor: divider,
             alignItems: 'center',
           }}>
-            <Text style={{ fontSize: 10, fontWeight: '700', color: sub, letterSpacing: 0 }}>
-              MDCD MD-ERP V3.0 PRO
-            </Text>
+            <Text style={{ fontSize: 10, fontWeight: '700', color: sub, letterSpacing: 0 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MDCD MD-ERP V3.0 PRO"] || "MDCD MD-ERP V3.0 PRO"}</Text>
           </View>
 
         </View>

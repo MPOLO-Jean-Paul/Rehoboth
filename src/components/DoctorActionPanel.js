@@ -50,8 +50,8 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
               <MaterialCommunityIcons name="clipboard-pulse" size={20} color="#FFF" />
             </LinearGradient>
             <View>
-              <Text style={[styles.title, { color: C.text }]}>MODÈLES CLINIQUES</Text>
-              <Text style={{ fontSize: 10, color: C.sub, fontWeight: '700' }}>Saisie rapide intelligente</Text>
+              <Text style={[styles.title, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MODÈLES CLINIQUES"] || "MODÈLES CLINIQUES"}</Text>
+              <Text style={{ fontSize: 10, color: C.sub, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Saisie rapide intelligente"] || "Saisie rapide intelligente"}</Text>
             </View>
           </View>
           <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: C.closeBg }]}>
@@ -63,7 +63,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
           {/* Diagnostics */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
              <MaterialCommunityIcons name="tag-outline" size={16} color={brandColor} />
-             <Text style={[styles.sectionTitle, { color: C.sub, marginBottom: 0, marginLeft: 8 }]}>DIAGNOSTICS FRÉQUENTS</Text>
+             <Text style={[styles.sectionTitle, { color: C.sub, marginBottom: 0, marginLeft: 8 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DIAGNOSTICS FRÉQUENTS"] || "DIAGNOSTICS FRÉQUENTS"}</Text>
           </View>
           <View style={styles.chipContainer}>
             {DIAGNOSES.map(diag => (
@@ -80,7 +80,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
           {/* Quick Notes */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 32 }}>
              <MaterialCommunityIcons name="notebook-outline" size={16} color={brandColor} />
-             <Text style={[styles.sectionTitle, { color: C.sub, marginBottom: 0, marginLeft: 8 }]}>NOTES & CONDUITES À TENIR</Text>
+             <Text style={[styles.sectionTitle, { color: C.sub, marginBottom: 0, marginLeft: 8 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTES & CONDUITES À TENIR"] || "NOTES & CONDUITES À TENIR"}</Text>
           </View>
           <View style={{ gap: 10 }}>
             {QUICK_NOTES.map((note, index) => (
@@ -100,7 +100,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
         </ScrollView>
 
         <View style={[styles.footer, { borderTopColor: C.divider }]}>
-           <Text style={{ fontSize: 10, color: C.sub, textAlign: 'center', fontWeight: '800' }}>APPUIE SUR UN MODÈLE POUR L'INSERER</Text>
+           <Text style={{ fontSize: 10, color: C.sub, textAlign: 'center', fontWeight: '800' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["APPUIE SUR UN MODÈLE POUR L'INSERER"] || "APPUIE SUR UN MODÈLE POUR L'INSERER"}</Text>
         </View>
       </Animated.View>
     </>

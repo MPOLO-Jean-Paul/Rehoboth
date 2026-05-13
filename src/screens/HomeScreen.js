@@ -319,7 +319,7 @@ export default function HomeScreen({ navigation }) {
               </LinearGradient>
               <View>
                 <Text style={[tw`font-black mb-0.5`, { fontSize: S.fs(9), color: C.textSecondary, letterSpacing: 0 }]}>{lang === 'en' ? 'WELCOME TO' : 'BIENVENUE SUR'}</Text>
-                <Text style={[tw`font-black leading-7`, { fontSize: S.fs(20), color: C.text, letterSpacing: 0 }]}>REHOBOTH</Text>
+                <Text style={[tw`font-black leading-7`, { fontSize: S.fs(20), color: C.text, letterSpacing: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}</Text>
               </View>
             </View>
 

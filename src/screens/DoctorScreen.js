@@ -472,7 +472,7 @@ export default function DoctorScreen({ navigation, route }) {
       <PremiumHeader
         onLeftPress={() => toggleNavPanel(true)}
         onRightPress={() => toggleRight(true)}
-        title="REHOBOTH"
+        title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
         subtitle={user?.specialty ? `Dr. ${user.specialty}` : (doctorMenu.find(m => m.id === activeView)?.label || 'ESPACE MÉDICAL')}
         icon="stethoscope"
         isDark={isDark}
@@ -511,9 +511,9 @@ export default function DoctorScreen({ navigation, route }) {
 
               {activeView === 'appointments' && (
                 <FadeInView style={[styles.rdvCard, { backgroundColor: brandColor + '10', borderColor: brandColor + '30' }]}>
-                  <Text style={[styles.rdvTitle, { color: brandColor }]}>PLANIFIER UN RENDEZ-VOUS</Text>
+                  <Text style={[styles.rdvTitle, { color: brandColor }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PLANIFIER UN RENDEZ-VOUS"] || "PLANIFIER UN RENDEZ-VOUS"}</Text>
 
-                  <Text style={[styles.inputLabel, { color: isDark ? '#AAAAAA' : '#64748B' }]}>SÉLECTIONNER UN PATIENT</Text>
+                  <Text style={[styles.inputLabel, { color: isDark ? '#AAAAAA' : '#64748B' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SÉLECTIONNER UN PATIENT"] || "SÉLECTIONNER UN PATIENT"}</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
                     {[...visits, ...history].map((v, idx) => (
                       <TouchableOpacity
@@ -531,11 +531,11 @@ export default function DoctorScreen({ navigation, route }) {
                   </ScrollView>
 
                   <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder="Date (JJ/MM/AAAA)" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.date} onChangeText={v => setRdvForm(prev => ({ ...prev, date: v }))} />
-                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder="Heure (HH:MM)" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.time} onChangeText={v => setRdvForm(prev => ({ ...prev, time: v }))} />
+                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Date (JJ/MM/AAAA)"] || "Date (JJ/MM/AAAA)"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.date} onChangeText={v => setRdvForm(prev => ({ ...prev, date: v }))} />
+                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Heure (HH:MM)"] || "Heure (HH:MM)"} placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.time} onChangeText={v => setRdvForm(prev => ({ ...prev, time: v }))} />
                   </View>
                   <TouchableOpacity onPress={() => showToast("Rendez-vous planifié", 'success')} style={styles.rdvSubmit}>
-                    <Text style={{ color: '#FFF', fontWeight: '900' }}>VALIDER LE RENDEZ-VOUS</Text>
+                    <Text style={{ color: '#FFF', fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDER LE RENDEZ-VOUS"] || "VALIDER LE RENDEZ-VOUS"}</Text>
                   </TouchableOpacity>
                 </FadeInView>
               )}
@@ -546,7 +546,7 @@ export default function DoctorScreen({ navigation, route }) {
                 currentList.length > 0 ? currentList.map(renderVisitCard) : (
                   <View style={styles.emptyContainer}>
                     <MaterialCommunityIcons name="stethoscope-variant" size={64} color={brandColor} style={{ opacity: 0.3 }} />
-                    <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>Aucun patient dans cette file</Text>
+                    <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun patient dans cette file"] || "Aucun patient dans cette file"}</Text>
                   </View>
                 )
               )}
@@ -555,7 +555,7 @@ export default function DoctorScreen({ navigation, route }) {
             <FadeInView style={{ paddingTop: 10 }}>
               <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedVisit(null)}>
                 <MaterialIcons name="arrow-back" size={20} color={brandColor} />
-                <Text style={[styles.backBtnText, { color: brandColor }]}>RETOUR À LA LISTE</Text>
+                <Text style={[styles.backBtnText, { color: brandColor }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR À LA LISTE"] || "RETOUR À LA LISTE"}</Text>
               </TouchableOpacity>
 
               <View style={[styles.patientHeader, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }]}>
@@ -588,7 +588,7 @@ export default function DoctorScreen({ navigation, route }) {
 
               {/* PATIENT HISTORY */}
               <TouchableOpacity style={[styles.sectionHeader, { marginTop: 0 }]} activeOpacity={0.7}>
-                <Text style={styles.fieldHeading}>HISTORIQUE MÉDICAL</Text>
+                <Text style={styles.fieldHeading}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["HISTORIQUE MÉDICAL"] || "HISTORIQUE MÉDICAL"}</Text>
                 <MaterialIcons name="history" size={16} color="#64748B" />
               </TouchableOpacity>
               <View style={[styles.historyContainer, { backgroundColor: isDark ? '#111827' : '#F1F5F9' }]}>
@@ -602,7 +602,7 @@ export default function DoctorScreen({ navigation, route }) {
                         </View>
                       ))}
                     </ScrollView>
-                  ) : <Text style={{ color: '#64748B', fontSize: 11, fontStyle: 'italic' }}>Aucun antécédent enregistré dans le système.</Text>
+                  ) : <Text style={{ color: '#64748B', fontSize: 11, fontStyle: 'italic' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun antécédent enregistré dans le système."] || "Aucun antécédent enregistré dans le système."}</Text>
                 }
               </View>
 
@@ -612,7 +612,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                   <MaterialCommunityIcons name="thermometer" size={18} color="#EF4444" />
                   <TextInput editable={false} style={[styles.vitalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} value={vitals.temp} />
-                  <Text style={styles.vitalUnit}>°C</Text>
+                  <Text style={styles.vitalUnit}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["°C"] || "°C"}</Text>
                 </View>
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                   <MaterialCommunityIcons name="heart-pulse" size={18} color="#3B82F6" />
@@ -627,7 +627,7 @@ export default function DoctorScreen({ navigation, route }) {
               <View style={[styles.nursingBox, { backgroundColor: isDark ? '#111827' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                   <MaterialCommunityIcons name="comment-text-outline" size={14} color="#64748B" />
-                  <Text style={styles.nursingLabel}>NOTE DE TRIAGE</Text>
+                  <Text style={styles.nursingLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOTE DE TRIAGE"] || "NOTE DE TRIAGE"}</Text>
                 </View>
                 <Text style={[styles.nursingText, { color: isDark ? '#E2E8F0' : '#1A1A1A' }]}>
                   {selectedVisit.nursing_notes || 'Le patient n\'a pas de notes spécifiques de l\'infirmier.'}
@@ -639,7 +639,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={[styles.resultsBox, { backgroundColor: brandColor + '10', borderColor: brandColor + '30' }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                     <MaterialCommunityIcons name="flask" size={18} color={brandColor} />
-                    <Text style={[styles.resultsTitle, { color: brandColor }]}>RÉSULTATS DU LABORATOIRE</Text>
+                    <Text style={[styles.resultsTitle, { color: brandColor }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSULTATS DU LABORATOIRE"] || "RÉSULTATS DU LABORATOIRE"}</Text>
                   </View>
                   <View style={[styles.resultsContent, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                     <Text style={{ color: isDark ? '#E2E8F0' : '#1A1A1A', lineHeight: 22, fontSize: 14 }}>
@@ -651,17 +651,17 @@ export default function DoctorScreen({ navigation, route }) {
 
               {/* DIAGNOSIS */}
               <View style={styles.formHeader}>
-                <Text style={[styles.fieldHeading, { marginBottom: 0 }]}>DIAGNOSTIC & OBSERVATIONS</Text>
+                <Text style={[styles.fieldHeading, { marginBottom: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DIAGNOSTIC & OBSERVATIONS"] || "DIAGNOSTIC & OBSERVATIONS"}</Text>
                 <TouchableOpacity onPress={() => toggleActionPanel(true)} style={styles.modelBtn}>
                   <MaterialCommunityIcons name="clipboard-pulse" size={14} color={brandColor} />
-                  <Text style={styles.modelBtnText}>MODÈLES</Text>
+                  <Text style={styles.modelBtnText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["MODÈLES"] || "MODÈLES"}</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={[styles.textAreaContainer, { borderColor: isDark ? '#2E2E2E' : '#E2E8F0', backgroundColor: isDark ? '#1A1A1A' : '#FFF' }]}>
                 <TextInput
                   style={[styles.textArea, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                  placeholder="Diagnostic principal..."
+                  placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Diagnostic principal..."] || "Diagnostic principal..."}
                   placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                   multiline
                   value={diagnosis}
@@ -672,7 +672,7 @@ export default function DoctorScreen({ navigation, route }) {
               <View style={[styles.textAreaContainer, { height: 130, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', backgroundColor: isDark ? '#1A1A1A' : '#FFF' }]}>
                 <TextInput
                   style={[styles.textArea, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                  placeholder="Conduite à tenir / Observations cliniques..."
+                  placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Conduite à tenir / Observations cliniques..."] || "Conduite à tenir / Observations cliniques..."}
                   placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                   multiline
                   value={consultationNotes}
@@ -685,7 +685,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={[brandColor + '15', brandColor + '05']} style={styles.ordonnanceHeader}>
                     <MaterialCommunityIcons name="flask" size={20} color={brandColor} />
-                    <Text style={[styles.ordonnanceTitle, { color: brandColor }]}>BON DE LABORATOIRE</Text>
+                    <Text style={[styles.ordonnanceTitle, { color: brandColor }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BON DE LABORATOIRE"] || "BON DE LABORATOIRE"}</Text>
                   </LinearGradient>
                   
                   <View style={styles.ordonnanceBody}>
@@ -694,7 +694,7 @@ export default function DoctorScreen({ navigation, route }) {
                         <View style={[styles.labInputWrapper, { zIndex: activeSearchIndex === index && activeSearchType === 'lab' ? 10 : 1 }]}>
                           <TextInput
                             style={[styles.labInput, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                            placeholder="Code ou Nom de l'examen..."
+                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code ou Nom de l"] || "Code ou Nom de l"}examen..."
                             placeholderTextColor={isDark ? '#555' : '#94A3B8'}
                             value={test.code}
                             onChangeText={(v) => {
@@ -721,7 +721,7 @@ export default function DoctorScreen({ navigation, route }) {
                       style={[styles.ordonnanceAddBtn, { borderColor: brandColor + '30' }]}
                     >
                       <MaterialIcons name="add-circle-outline" size={20} color={brandColor} />
-                      <Text style={[styles.ordonnanceAddText, { color: brandColor }]}>AJOUTER UN EXAMEN</Text>
+                      <Text style={[styles.ordonnanceAddText, { color: brandColor }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER UN EXAMEN"] || "AJOUTER UN EXAMEN"}</Text>
                     </TouchableOpacity>
                   </View>
                 </FadeInView>
@@ -731,7 +731,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={['#10B98115', '#10B98105']} style={styles.ordonnanceHeader}>
                     <MaterialCommunityIcons name="pill" size={20} color="#10B981" />
-                    <Text style={[styles.ordonnanceTitle, { color: '#10B981' }]}>ORDONNANCE MÉDICALE</Text>
+                    <Text style={[styles.ordonnanceTitle, { color: '#10B981' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ORDONNANCE MÉDICALE"] || "ORDONNANCE MÉDICALE"}</Text>
                   </LinearGradient>
 
                   <View style={styles.ordonnanceBody}>
@@ -741,7 +741,7 @@ export default function DoctorScreen({ navigation, route }) {
                           <View style={{ flex: 1, zIndex: activeSearchIndex === index && activeSearchType === 'med' ? 10 : 1 }}>
                             <TextInput
                               style={[styles.medNameInput, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                              placeholder="Nom du médicament..."
+                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Nom du médicament..."] || "Nom du médicament..."}
                               placeholderTextColor={isDark ? '#555' : '#94A3B8'}
                               value={item.name}
                               onChangeText={(v) => { 
@@ -759,19 +759,19 @@ export default function DoctorScreen({ navigation, route }) {
                         
                         <View style={styles.medCardBody}>
                           <View style={{ flex: 1 }}>
-                            <Text style={styles.medInputLabel}>DOSAGE (EX: 500MG)</Text>
+                            <Text style={styles.medInputLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DOSAGE (EX: 500MG)"] || "DOSAGE (EX: 500MG)"}</Text>
                             <TextInput
                               style={[styles.medQtyInput, { color: isDark ? '#FFF' : '#0A0A0A', width: '100%', marginBottom: 10 }]}
-                              placeholder="500mg, 1 amp, etc."
+                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["500mg, 1 amp, etc."] || "500mg, 1 amp, etc."}
                               placeholderTextColor={isDark ? '#444' : '#CBD5E1'}
                               value={item.dosage}
                               onChangeText={(v) => { const n = [...prescriptionItems]; n[index].dosage = v; setPrescriptionItems(n); }}
                             />
                             
-                            <Text style={styles.medInputLabel}>POSOLOGIE / INSTRUCTIONS</Text>
+                            <Text style={styles.medInputLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["POSOLOGIE / INSTRUCTIONS"] || "POSOLOGIE / INSTRUCTIONS"}</Text>
                             <TextInput
                               style={[styles.medInstructionInput, { color: isDark ? '#E2E8F0' : '#475569', minHeight: 60 }]}
-                              placeholder="1 comp x 3 / jour pendant 5 jours..."
+                              placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["1 comp x 3 / jour pendant 5 jours..."] || "1 comp x 3 / jour pendant 5 jours..."}
                               placeholderTextColor={isDark ? '#444' : '#CBD5E1'}
                               value={item.instructions}
                               onChangeText={(v) => { const n = [...prescriptionItems]; n[index].instructions = v; setPrescriptionItems(n); }}
@@ -779,7 +779,7 @@ export default function DoctorScreen({ navigation, route }) {
                             />
                           </View>
                           <View style={[styles.medQtyGroup, { marginLeft: 10 }]}>
-                            <Text style={styles.medInputLabel}>QTÉ</Text>
+                            <Text style={styles.medInputLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["QTÉ"] || "QTÉ"}</Text>
                             <TextInput
                               style={[styles.medQtyInput, { color: isDark ? '#FFF' : '#0A0A0A' }]}
                               keyboardType="numeric"
@@ -796,14 +796,14 @@ export default function DoctorScreen({ navigation, route }) {
                       style={[styles.ordonnanceAddBtn, { borderColor: '#10B98130' }]}
                     >
                       <MaterialIcons name="add-circle-outline" size={20} color="#10B981" />
-                      <Text style={[styles.ordonnanceAddText, { color: '#10B981' }]}>AJOUTER UN PRODUIT</Text>
+                      <Text style={[styles.ordonnanceAddText, { color: '#10B981' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER UN PRODUIT"] || "AJOUTER UN PRODUIT"}</Text>
                     </TouchableOpacity>
                   </View>
                 </FadeInView>
               )}
 
               {/* ORIENTATION */}
-              <Text style={styles.fieldHeading}>ORIENTATION DU PATIENT</Text>
+              <Text style={styles.fieldHeading}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ORIENTATION DU PATIENT"] || "ORIENTATION DU PATIENT"}</Text>
               <View style={styles.serviceSelector}>
                 {[
                   { id: 'pharmacie', label: 'PHARMACIE', icon: 'pill' },
@@ -832,7 +832,7 @@ export default function DoctorScreen({ navigation, route }) {
                   {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                     <>
                       <MaterialIcons name="done-all" size={24} color="#FFF" style={{ marginRight: 10 }} />
-                      <Text style={styles.submitText}>VALIDER & TRANSMETTRE</Text>
+                      <Text style={styles.submitText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["VALIDER & TRANSMETTRE"] || "VALIDER & TRANSMETTRE"}</Text>
                     </>
                   )}
                 </LinearGradient>

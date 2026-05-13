@@ -435,7 +435,7 @@ export default function ReceptionScreen({ navigation, route }) {
          <PremiumHeader
             onLeftPress={() => toggleLeft(true)}
             onRightPress={() => toggleRight(true)}
-            title="REHOBOTH"
+            title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
             subtitle={menuItems.find(m => m.id === activeView)?.label || 'RECEPTION'}
             icon="hospital-building"
             isDark={isDark}
@@ -497,7 +497,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, padding: 10, backgroundColor: brandColor + '10', borderRadius: 12, alignSelf: 'flex-start' }}
                                  >
                                     <MaterialIcons name="arrow-back" size={18} color={brandColor} />
-                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX DOSSIERS</Text>
+                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR AUX DOSSIERS"] || "RETOUR AUX DOSSIERS"}</Text>
                                  </TouchableOpacity>
 
                                  {groupedByDate[selectedDateFolder]?.filter(p => `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase())).map((p, i) => (
@@ -577,7 +577,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     <View style={{ height: 50, backgroundColor: C.bg, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, borderWidth: 1, borderColor: brandColor }}>
                                        <MaterialIcons name="search" size={18} color={brandColor} />
                                        <TextInput
-                                          placeholder="Taper nom, postnom ou prénom..."
+                                          placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Taper nom, postnom ou prénom..."] || "Taper nom, postnom ou prénom..."}
                                           placeholderTextColor={C.placeholder}
                                           style={{ flex: 1, marginLeft: 10, color: C.text, fontWeight: '700' }}
                                           value={searchDossierQuery}
@@ -620,7 +620,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                                          <Text style={{ fontSize: 9, color: brandColor, fontWeight: '900' }}>{p.age} ANS • Né(e) en {p.birth_year}</Text>
                                                       </View>
                                                       <View style={{ backgroundColor: brandColor + '15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
-                                                         <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>SÉLECTIONNER</Text>
+                                                         <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SÉLECTIONNER"] || "SÉLECTIONNER"}</Text>
                                                       </View>
                                                    </TouchableOpacity>
                                                 ))
@@ -637,7 +637,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                        <MaterialIcons name="check-circle" size={24} color="#FFF" />
                                     </View>
                                     <View style={{ flex: 1, marginLeft: 16 }}>
-                                       <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>DOSSIER CHARGÉ</Text>
+                                       <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DOSSIER CHARGÉ"] || "DOSSIER CHARGÉ"}</Text>
                                        <Text style={{ color: C.text, fontSize: 15, fontWeight: '800' }}>{form.first_name} {form.last_name}</Text>
                                     </View>
                                     <TouchableOpacity onPress={() => setForm({ ...form, id: null, complaints: '' })} style={{ padding: 8 }}>
@@ -647,15 +647,15 @@ export default function ReceptionScreen({ navigation, route }) {
                               )}
 
                               <Text style={styles.label}>{t.lastName.toUpperCase()}</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Mukendi" placeholderTextColor={C.placeholder} value={form.last_name} onChangeText={v => setForm({ ...form, last_name: v })} />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Mukendi"] || "Ex: Mukendi"} placeholderTextColor={C.placeholder} value={form.last_name} onChangeText={v => setForm({ ...form, last_name: v })} />
 
-                              <Text style={styles.label}>POSTNOM</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Kalonji" placeholderTextColor={C.placeholder} value={form.post_name} onChangeText={v => setForm({ ...form, post_name: v })} />
+                              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["POSTNOM"] || "POSTNOM"}</Text>
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Kalonji"] || "Ex: Kalonji"} placeholderTextColor={C.placeholder} value={form.post_name} onChangeText={v => setForm({ ...form, post_name: v })} />
 
                               <Text style={styles.label}>{t.firstName.toUpperCase()}</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Jean" placeholderTextColor={C.placeholder} value={form.first_name} onChangeText={v => setForm({ ...form, first_name: v })} />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Jean"] || "Ex: Jean"} placeholderTextColor={C.placeholder} value={form.first_name} onChangeText={v => setForm({ ...form, first_name: v })} />
 
-                              <Text style={styles.label}>SEXE</Text>
+                              <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SEXE"] || "SEXE"}</Text>
                               <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
                                  {['M', 'F'].map(g => (
                                     <TouchableOpacity
@@ -680,21 +680,21 @@ export default function ReceptionScreen({ navigation, route }) {
                               <View style={{ flexDirection: 'row', gap: 12 }}>
                                  <View style={{ flex: 1 }}>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                       <Text style={styles.label}>ANNÉE DE NAISSANCE</Text>
+                                       <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANNÉE DE NAISSANCE"] || "ANNÉE DE NAISSANCE"}</Text>
                                        {form.birth_year?.length === 4 && (
                                           <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor }}>{new Date().getFullYear() - parseInt(form.birth_year)} ANS</Text>
                                        )}
                                     </View>
-                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="1990" keyboardType="numeric" value={form.birth_year} onChangeText={v => setForm({ ...form, birth_year: v })} />
+                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["1990"] || "1990"} keyboardType="numeric" value={form.birth_year} onChangeText={v => setForm({ ...form, birth_year: v })} />
                                  </View>
                                  <View style={{ flex: 1 }}>
-                                    <Text style={styles.label}>PATHOLOGIE (SI CONNUE)</Text>
-                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Diabète" value={form.pathology} onChangeText={v => setForm({ ...form, pathology: v })} />
+                                    <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PATHOLOGIE (SI CONNUE)"] || "PATHOLOGIE (SI CONNUE)"}</Text>
+                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Diabète"] || "Ex: Diabète"} value={form.pathology} onChangeText={v => setForm({ ...form, pathology: v })} />
                                  </View>
                               </View>
 
                               <Text style={styles.label}>{t.phone.toUpperCase()}</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: +243..." placeholderTextColor={C.placeholder} value={form.contact_info} onChangeText={v => setForm({ ...form, contact_info: v })} keyboardType="phone-pad" />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: +243..."] || "Ex: +243..."} placeholderTextColor={C.placeholder} value={form.contact_info} onChangeText={v => setForm({ ...form, contact_info: v })} keyboardType="phone-pad" />
                               
                               {(form.contact_info || '').length >= 2 && (
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: -12, marginBottom: 15, marginLeft: 5 }}>
@@ -708,7 +708,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                   ) : form.contact_info.length >= 9 && (
                                     <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
                                       <MaterialCommunityIcons name="alert-circle" size={10} color="#EF4444" />
-                                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>NUMÉRO INVALIDE</Text>
+                                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NUMÉRO INVALIDE"] || "NUMÉRO INVALIDE"}</Text>
                                     </View>
                                   )}
                                 </View>
@@ -747,11 +747,11 @@ export default function ReceptionScreen({ navigation, route }) {
                                        ))}
                                     </View>
 
-                                    <Text style={styles.label}>CODE D'ASSURÉ</Text>
+                                    <Text style={styles.label}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CODE D'ASSURÉ"] || "CODE D'ASSURÉ"}</Text>
                                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                                        <TextInput
                                           style={[styles.input, { flex: 1, color: C.text, backgroundColor: C.bg, borderColor: C.border, marginBottom: 0 }]}
-                                          placeholder="Ex: MERY-123"
+                                          placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: MERY-123"] || "Ex: MERY-123"}
                                           placeholderTextColor={C.placeholder}
                                           value={form.insurance_code}
                                           onChangeText={v => { setForm({ ...form, insurance_code: v }); setVerifiedMember(null); }}
@@ -791,7 +791,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                      {activeView === 'patients_all' && (
                         <FadeInView>
-                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>ARCHIVE PAR ANNÉE</Text>
+                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVE PAR ANNÉE"] || "ARCHIVE PAR ANNÉE"}</Text>
 
                            {selectedYearFolder ? (
                               <View>
@@ -800,7 +800,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, padding: 10, backgroundColor: brandColor + '10', borderRadius: 12, alignSelf: 'flex-start' }}
                                  >
                                     <MaterialIcons name="arrow-back" size={18} color={brandColor} />
-                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX ARCHIVES</Text>
+                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR AUX ARCHIVES"] || "RETOUR AUX ARCHIVES"}</Text>
                                  </TouchableOpacity>
 
                                  <Text style={{ fontSize: 14, fontWeight: '900', color: brandColor, marginBottom: 15 }}>LISTE DES PATIENTS NÉS EN {selectedYearFolder}</Text>
@@ -850,7 +850,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                      {activeView === 'insurances_all' && (
                         <FadeInView>
-                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>ANALYSE RENTABILITÉ ASSURANCES</Text>
+                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANALYSE RENTABILITÉ ASSURANCES"] || "ANALYSE RENTABILITÉ ASSURANCES"}</Text>
                            {(insurances || []).map(ins => {
                               const patientCount = ins.patients_count || 0;
                               const consumption = ins.real_consumption || 0;
@@ -872,11 +872,11 @@ export default function ReceptionScreen({ navigation, route }) {
 
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
                                        <View>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>FORFAIT MENSUEL</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FORFAIT MENSUEL"] || "FORFAIT MENSUEL"}</Text>
                                           <Text style={{ fontSize: 15, fontWeight: '900', color: C.text }}>{flatFee.toLocaleString()} FC</Text>
                                        </View>
                                        <View style={{ alignItems: 'flex-end' }}>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>CONSOMMATION RÉELLE</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["CONSOMMATION RÉELLE"] || "CONSOMMATION RÉELLE"}</Text>
                                           <Text style={{ fontSize: 15, fontWeight: '900', color: C.text }}>{consumption.toLocaleString()} FC</Text>
                                        </View>
                                     </View>
@@ -896,7 +896,7 @@ export default function ReceptionScreen({ navigation, route }) {
                      {activeView === 'bilan_day' && (
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>BILAN D'ACTIVITÉ</Text>
+                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BILAN D'ACTIVITÉ"] || "BILAN D'ACTIVITÉ"}</Text>
                               <TouchableOpacity onPress={() => fetchServiceRevenues(false, bilanPeriod)}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
 
@@ -931,7 +931,7 @@ export default function ReceptionScreen({ navigation, route }) {
                            </View>
 
                            <View style={{ backgroundColor: C.surface, borderRadius: 32, padding: 24, borderWidth: 1, borderColor: C.divider, marginBottom: 25 }}>
-                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>DÉTAILS DES RECETTES PAR SERVICE</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAILS DES RECETTES PAR SERVICE"] || "DÉTAILS DES RECETTES PAR SERVICE"}</Text>
 
                               {serviceRevenues.length > 0 ? serviceRevenues.map((item, i) => {
                                  const icons = {
@@ -962,13 +962,13 @@ export default function ReceptionScreen({ navigation, route }) {
                               }) : (
                                  <View style={{ alignItems: 'center', padding: 20 }}>
                                     <MaterialCommunityIcons name="cash-off" size={40} color={C.divider} />
-                                    <Text style={{ color: C.sub, fontSize: 12, marginTop: 10, fontWeight: '700' }}>Aucune recette aujourd'hui</Text>
+                                    <Text style={{ color: C.sub, fontSize: 12, marginTop: 10, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune recette aujourd'hui"] || "Aucune recette aujourd'hui"}</Text>
                                  </View>
                               )}
                            </View>
 
                            <View style={{ backgroundColor: C.surface, borderRadius: 32, padding: 24, borderWidth: 1, borderColor: C.divider, marginBottom: 25 }}>
-                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>RÉPARTITION PAR PRISE EN CHARGE</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPARTITION PAR PRISE EN CHARGE"] || "RÉPARTITION PAR PRISE EN CHARGE"}</Text>
 
                               {[
                                  { label: "Assurés (Contrats)", count: insuredCount, color: brandColor },
@@ -991,12 +991,12 @@ export default function ReceptionScreen({ navigation, route }) {
                      {activeView === 'catalog' && (
                         <FadeInView>
                            <View style={{ marginBottom: 25 }}>
-                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>NOUVEAU SERVICE / EXAMEN</Text>
-                              <Text style={{ color: C.sub, marginTop: 4 }}>Ajoutez un nouvel élément au catalogue. L'administrateur pourra le modifier.</Text>
+                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOUVEAU SERVICE / EXAMEN"] || "NOUVEAU SERVICE / EXAMEN"}</Text>
+                              <Text style={{ color: C.sub, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ajoutez un nouvel élément au catalogue. L'administrateur pourra le modifier."] || "Ajoutez un nouvel élément au catalogue. L'administrateur pourra le modifier."}</Text>
                            </View>
 
                            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 24, borderWidth: 1, borderColor: C.divider, elevation: 4 }}>
-                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>TYPE DE SERVICE</Text>
+                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TYPE DE SERVICE"] || "TYPE DE SERVICE"}</Text>
                               <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
                                  {['Examen', 'Autre'].map(type => (
                                     <TouchableOpacity
@@ -1020,19 +1020,19 @@ export default function ReceptionScreen({ navigation, route }) {
                                  ))}
                               </View>
 
-                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>LIBELLÉ DU SERVICE / EXAMEN</Text>
+                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["LIBELLÉ DU SERVICE / EXAMEN"] || "LIBELLÉ DU SERVICE / EXAMEN"}</Text>
                               <TextInput
                                  style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
-                                 placeholder="Ex: Échographie, Test Goutte Epaisse..."
+                                 placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Échographie, Test Goutte Epaisse..."] || "Ex: Échographie, Test Goutte Epaisse..."}
                                  placeholderTextColor={C.placeholder}
                                  value={newCatalogItem.label}
                                  onChangeText={v => setNewCatalogItem({ ...newCatalogItem, label: v })}
                               />
 
-                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>PRIX (FC)</Text>
+                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PRIX (FC)"] || "PRIX (FC)"}</Text>
                               <TextInput
                                  style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
-                                 placeholder="Ex: 5000"
+                                 placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: 5000"] || "Ex: 5000"}
                                  placeholderTextColor={C.placeholder}
                                  keyboardType="numeric"
                                  value={newCatalogItem.price}
@@ -1041,10 +1041,10 @@ export default function ReceptionScreen({ navigation, route }) {
 
                               {newCatalogItem.type === 'Autre' && (
                                  <FadeInView>
-                                    <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>NOM DU SERVICE CONCERNÉ</Text>
+                                    <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["NOM DU SERVICE CONCERNÉ"] || "NOM DU SERVICE CONCERNÉ"}</Text>
                                     <TextInput
                                        style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
-                                       placeholder="Ex: Soins, Maternité, Chirurgie..."
+                                       placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Ex: Soins, Maternité, Chirurgie..."] || "Ex: Soins, Maternité, Chirurgie..."}
                                        placeholderTextColor={C.placeholder}
                                        value={newCatalogItem.service}
                                        onChangeText={v => setNewCatalogItem({ ...newCatalogItem, service: v })}
@@ -1057,7 +1057,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                                        <>
                                           <MaterialIcons name="add-circle-outline" size={20} color="#FFF" style={{ marginRight: 10 }} />
-                                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 15, letterSpacing: 1 }}>AJOUTER AU CATALOGUE</Text>
+                                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 15, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AJOUTER AU CATALOGUE"] || "AJOUTER AU CATALOGUE"}</Text>
                                        </>
                                     )}
                                  </LinearGradient>

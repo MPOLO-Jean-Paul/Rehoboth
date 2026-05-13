@@ -347,9 +347,7 @@ export default function LoginScreen({ navigation }) {
                 {t.loginTitle || 'REHOBOTH'}
               </Text>
               <View style={[tw`px-5 py-1.5 mb-3 border`, { borderRadius: 999, backgroundColor: C.brandLight, borderColor: C.brandMedium }]}>
-                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>
-                  ESPACE HOSPITALIER SÉCURISÉ
-                </Text>
+                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ESPACE HOSPITALIER SÉCURISÉ"] || "ESPACE HOSPITALIER SÉCURISÉ"}</Text>
               </View>
               <Text style={[tw`text-sm text-center leading-5 px-3`, { color: isDark ? '#CBD5E1' : '#475569' }]}>
                 {t.loginSubtitle || 'Accédez à votre espace sécurisé Rehoboth'}
@@ -375,7 +373,7 @@ export default function LoginScreen({ navigation }) {
                   <Feather name="mail" size={20} color={emailFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder="agent@mdcd.com"
+                    placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["agent@mdcd.com"] || "agent@mdcd.com"}
                     placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                     value={email}
                     onChangeText={setEmail}
@@ -405,7 +403,7 @@ export default function LoginScreen({ navigation }) {
                   <Feather name="shield" size={20} color={passFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder="••••••••"
+                    placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["••••••••"] || "••••••••"}
                     placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
                     value={password}
                     onChangeText={setPassword}
@@ -450,9 +448,7 @@ export default function LoginScreen({ navigation }) {
                   {biometricsChecked && isBiometricSupported && hasStoredSession ? (
                     <TouchableOpacity onPress={handleBiometricLogin} style={tw`flex-row items-center`}>
                       <MaterialCommunityIcons name={biometricType === 'face' ? 'face-recognition' : 'fingerprint'} size={18} color={brandColor} style={tw`mr-1`} />
-                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>
-                        Biométrie
-                      </Text>
+                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Biométrie"] || "Biométrie"}</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity onPress={showLoginHelp}>
@@ -486,9 +482,7 @@ export default function LoginScreen({ navigation }) {
                   {loading ? (
                     <View style={tw`flex-row items-center`}>
                       <ActivityIndicator color="#FFF" style={tw`mr-3`} />
-                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>
-                        AUTHENTIFICATION...
-                      </Text>
+                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["AUTHENTIFICATION..."] || "AUTHENTIFICATION..."}</Text>
                     </View>
                   ) : (
                     <>
@@ -504,7 +498,7 @@ export default function LoginScreen({ navigation }) {
               
               <FadeInView delay={500}>
                 <View style={tw`items-center mt-1`}>
-                  <Text style={tw`text-xs font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'} mb-3`}>© 2026 REHOBOTH SYSTEM</Text>
+                  <Text style={tw`text-xs font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'} mb-3`}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["© 2026 REHOBOTH SYSTEM"] || "© 2026 REHOBOTH SYSTEM"}</Text>
                 </View>
               </FadeInView>
 

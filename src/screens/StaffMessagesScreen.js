@@ -156,7 +156,7 @@ export default function StaffMessagesScreen({ navigation }) {
           {item.target_role ? (
             <Text style={[styles.targetText, { color: C.sub }]}>{item.target_role.toUpperCase()}</Text>
           ) : (
-            <Text style={[styles.targetText, { color: C.sub }]}>TOUS LES SERVICES</Text>
+            <Text style={[styles.targetText, { color: C.sub }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TOUS LES SERVICES"] || "TOUS LES SERVICES"}</Text>
           )}
           {isUnread && <View style={[styles.unreadDot, { backgroundColor: brandColor }]} />}
         </View>
@@ -202,7 +202,7 @@ export default function StaffMessagesScreen({ navigation }) {
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator size="large" color={brandColor} />
-            <Text style={[styles.loadingText, { color: C.sub }]}>Chargement des messages...</Text>
+            <Text style={[styles.loadingText, { color: C.sub }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Chargement des messages..."] || "Chargement des messages..."}</Text>
           </View>
         ) : (
             <FlatList
@@ -220,7 +220,7 @@ export default function StaffMessagesScreen({ navigation }) {
                     <MaterialCommunityIcons name="email-multiple-outline" size={28} color="#FFF" />
                   </View>
                   <View style={styles.summaryTextWrap}>
-                    <Text style={styles.summaryLabel}>BOÎTE DE RÉCEPTION</Text>
+                    <Text style={styles.summaryLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["BOÎTE DE RÉCEPTION"] || "BOÎTE DE RÉCEPTION"}</Text>
                     <Text style={styles.summaryTitle}>
                       {unreadCount} non lu{unreadCount > 1 ? 's' : ''}
                     </Text>
@@ -250,8 +250,8 @@ export default function StaffMessagesScreen({ navigation }) {
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <MaterialCommunityIcons name="email-open-outline" size={64} color={C.divider} />
-                <Text style={[styles.emptyTitle, { color: C.text }]}>Aucun message</Text>
-                <Text style={[styles.emptyText, { color: C.sub }]}>Les communications de l'administration apparaîtront ici.</Text>
+                <Text style={[styles.emptyTitle, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun message"] || "Aucun message"}</Text>
+                <Text style={[styles.emptyText, { color: C.sub }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Les communications de l'administration apparaîtront ici."] || "Les communications de l'administration apparaîtront ici."}</Text>
               </View>
             }
           />

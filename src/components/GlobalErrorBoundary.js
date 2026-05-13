@@ -46,16 +46,14 @@ class GlobalErrorBoundary extends React.Component {
               </LinearGradient>
             </View>
 
-            <Text style={styles.oopsText}>SYSTÈME INTERROMPU</Text>
-            <Text style={styles.title}>Une erreur critique est survenue</Text>
-            <Text style={styles.description}>
-              L'application a rencontré un problème technique inattendu. Vos données de session sont probablement en sécurité, mais l'interface doit être réinitialisée.
-            </Text>
+            <Text style={styles.oopsText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SYSTÈME INTERROMPU"] || "SYSTÈME INTERROMPU"}</Text>
+            <Text style={styles.title}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Une erreur critique est survenue"] || "Une erreur critique est survenue"}</Text>
+            <Text style={styles.description}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["L'application a rencontré un problème technique inattendu. Vos données de session sont probablement en sécurité, mais l'interface doit être réinitialisée."] || "L'application a rencontré un problème technique inattendu. Vos données de session sont probablement en sécurité, mais l'interface doit être réinitialisée."}</Text>
 
             <View style={styles.errorCard}>
               <View style={styles.errorHeader}>
                 <MaterialCommunityIcons name="code-tags" size={16} color="#EF4444" />
-                <Text style={styles.errorLabel}>DÉTAILS TECHNIQUES</Text>
+                <Text style={styles.errorLabel}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉTAILS TECHNIQUES"] || "DÉTAILS TECHNIQUES"}</Text>
               </View>
               <ScrollView style={styles.errorScroll} showsVerticalScrollIndicator={false}>
                 <Text style={styles.errorText}>
@@ -81,11 +79,11 @@ class GlobalErrorBoundary extends React.Component {
                 style={styles.btnGradient}
               >
                 <MaterialCommunityIcons name="refresh" size={24} color="#FFF" />
-                <Text style={styles.btnText}>REDÉMARRER L'APPLICATION</Text>
+                <Text style={styles.btnText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REDÉMARRER L'APPLICATION"] || "REDÉMARRER L'APPLICATION"}</Text>
               </LinearGradient>
             </TouchableOpacity>
 
-            <Text style={styles.footerText}>REHOBOTH MEDICAL CENTER • V2.5.0</Text>
+            <Text style={styles.footerText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH MEDICAL CENTER • V2.5.0"] || "REHOBOTH MEDICAL CENTER • V2.5.0"}</Text>
           </View>
         </View>
       );

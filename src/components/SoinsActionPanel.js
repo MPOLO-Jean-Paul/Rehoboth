@@ -73,7 +73,7 @@ export default function SoinsActionPanel({ isOpen, anim, onClose, isDark: _ignor
             <LinearGradient colors={Theme.colors.brandGradient} style={styles.iconBox}>
               <MaterialCommunityIcons name="toolbox" size={20} color="#FFF" />
             </LinearGradient>
-            <Text style={[styles.title, { color: C.text }]}>ACTES & SOINS</Text>
+            <Text style={[styles.title, { color: C.text }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTES & SOINS"] || "ACTES & SOINS"}</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: C.closeBg }]}>
             <MaterialIcons name="close" size={20} color={C.closeIc} />
@@ -82,7 +82,7 @@ export default function SoinsActionPanel({ isOpen, anim, onClose, isDark: _ignor
 
         <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
           {/* Actes infirmiers */}
-          <Text style={[styles.sectionTitle, { color: C.sub }]}>ACTES INFIRMIERS RAPIDES</Text>
+          <Text style={[styles.sectionTitle, { color: C.sub }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTES INFIRMIERS RAPIDES"] || "ACTES INFIRMIERS RAPIDES"}</Text>
           <View style={styles.grid}>
             {ACTES_INFIRMIERS.map(acte => {
               const isSelected = selectedActes.includes(acte.id);
@@ -115,7 +115,7 @@ export default function SoinsActionPanel({ isOpen, anim, onClose, isDark: _ignor
           </View>
 
           {/* Observations */}
-          <Text style={[styles.sectionTitle, { color: C.sub, marginTop: 24 }]}>OBSERVATIONS CLINIQUES</Text>
+          <Text style={[styles.sectionTitle, { color: C.sub, marginTop: 24 }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["OBSERVATIONS CLINIQUES"] || "OBSERVATIONS CLINIQUES"}</Text>
           <View style={styles.grid}>
             {OBSERVATIONS.map(obs => {
               const isSelected = selectedObs.includes(obs.id);
@@ -174,7 +174,7 @@ export default function SoinsActionPanel({ isOpen, anim, onClose, isDark: _ignor
               style={styles.validateGrad}
             >
               <MaterialCommunityIcons name="clipboard-check-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
-              <Text style={styles.validateText}>GÉNÉRER LES NOTES</Text>
+              <Text style={styles.validateText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GÉNÉRER LES NOTES"] || "GÉNÉRER LES NOTES"}</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

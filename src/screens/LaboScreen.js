@@ -270,7 +270,7 @@ export default function LaboScreen({ navigation, route }) {
       <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12, textAlign: 'center', letterSpacing: 0.5 }}>{title}</Text>
       <Text style={{ fontSize: 14, color: isDark ? '#888888' : '#64748B', textAlign: 'center', lineHeight: 24, fontWeight: '600', paddingHorizontal: 20 }}>{message}</Text>
       <TouchableOpacity onPress={() => { fetchVisits(); fetchHistory(); }} style={{ marginTop: 32, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 20, backgroundColor: brandColor, elevation: 4, shadowColor: brandColor, shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}>
-        <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 1 }}>ACTUALISER</Text>
+        <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ACTUALISER"] || "ACTUALISER"}</Text>
       </TouchableOpacity>
     </FadeInView>
   );
@@ -282,7 +282,7 @@ export default function LaboScreen({ navigation, route }) {
       <PremiumHeader
         onLeftPress={() => toggleLeft(true)}
         onRightPress={() => toggleRight(true)}
-        title="REHOBOTH"
+        title={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["REHOBOTH"] || "REHOBOTH"}
         subtitle={laboMenu.find(m => m.id === activeView)?.label || 'LABORATOIRE'}
         icon="flask"
         isDark={isDark}
@@ -326,7 +326,7 @@ export default function LaboScreen({ navigation, route }) {
           {activeView === 'pending' && !selectedVisit && (
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ANALYSES EN ATTENTE</Text>
+                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANALYSES EN ATTENTE"] || "ANALYSES EN ATTENTE"}</Text>
                 <TouchableOpacity onPress={fetchVisits}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
@@ -336,7 +336,7 @@ export default function LaboScreen({ navigation, route }) {
                   <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 28, padding: 20, marginBottom: 20, elevation: 6 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                       <View>
-                        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>FILE D'ATTENTE</Text>
+                        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FILE D'ATTENTE"] || "FILE D'ATTENTE"}</Text>
                         <Text style={{ color: '#FFF', fontSize: 36, fontWeight: '900' }}>{visits.length}</Text>
                       </View>
                       <View style={{ width: 56, height: 56, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
@@ -344,7 +344,7 @@ export default function LaboScreen({ navigation, route }) {
                       </View>
                     </View>
                     <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
-                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '700' }}>Appuyez sur un dossier pour saisir les résultats</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Appuyez sur un dossier pour saisir les résultats"] || "Appuyez sur un dossier pour saisir les résultats"}</Text>
                   </LinearGradient>
                   {visits.map((v, idx) => {
                     const isUrgent = v.complaints_notes?.toLowerCase().includes('urgent');
@@ -359,7 +359,7 @@ export default function LaboScreen({ navigation, route }) {
                           {isUrgent && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start', marginBottom: 12 }}>
                               <MaterialCommunityIcons name="alert-circle" size={12} color="#EF4444" />
-                              <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>URGENT</Text>
+                              <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENT"] || "URGENT"}</Text>
                             </View>
                           )}
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -410,7 +410,7 @@ export default function LaboScreen({ navigation, route }) {
           {activeView === 'sent' && (
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>RÉSULTATS ENVOYÉS AUJOURD'HUI</Text>
+                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSULTATS ENVOYÉS AUJOURD'HUI"] || "RÉSULTATS ENVOYÉS AUJOURD'HUI"}</Text>
                 <TouchableOpacity onPress={fetchHistory}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
@@ -424,7 +424,7 @@ export default function LaboScreen({ navigation, route }) {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: 16, fontWeight: '800', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{v.patient?.first_name} {v.patient?.last_name}</Text>
-                        <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', marginTop: 2 }}>RÉSULTATS TRANSMIS AU MÉDECIN</Text>
+                        <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', marginTop: 2 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉSULTATS TRANSMIS AU MÉDECIN"] || "RÉSULTATS TRANSMIS AU MÉDECIN"}</Text>
                       </View>
                     </View>
                     {v.lab_results && <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontSize: 12, marginTop: 10, lineHeight: 18 }} numberOfLines={2}>{v.lab_results}</Text>}
@@ -444,14 +444,14 @@ export default function LaboScreen({ navigation, route }) {
           {activeView === 'stats' && (
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>TABLEAU DE BORD</Text>
+                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TABLEAU DE BORD"] || "TABLEAU DE BORD"}</Text>
                 <TouchableOpacity onPress={() => { fetchHistory(); fetchVisits(); }}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
               </View>
 
               <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 32, padding: 28, marginBottom: 16, elevation: 8, shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 15, shadowOffset: { width: 0, height: 8 } }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <View>
-                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '900', letterSpacing: 1 }}>ANALYSES TRAITÉES (AUJOURD'HUI)</Text>
+                    <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '900', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANALYSES TRAITÉES (AUJOURD'HUI)"] || "ANALYSES TRAITÉES (AUJOURD'HUI)"}</Text>
                     <Text style={{ color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 4 }}>{sentTodayList.length}</Text>
                   </View>
                   <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
@@ -460,8 +460,8 @@ export default function LaboScreen({ navigation, route }) {
                 </View>
                 <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 16 }} />
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600' }}>Taux de traitement quotidien</Text>
-                  <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>Excellent</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '600' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Taux de traitement quotidien"] || "Taux de traitement quotidien"}</Text>
+                  <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Excellent"] || "Excellent"}</Text>
                 </View>
               </LinearGradient>
 
@@ -471,7 +471,7 @@ export default function LaboScreen({ navigation, route }) {
                     <MaterialCommunityIcons name="flask-empty-outline" size={22} color="#805AD5" />
                   </View>
                   <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{visits.length}</Text>
-                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#805AD5', marginTop: 2, letterSpacing: 0.5 }}>FILE D'ATTENTE</Text>
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#805AD5', marginTop: 2, letterSpacing: 0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["FILE D'ATTENTE"] || "FILE D'ATTENTE"}</Text>
                 </View>
 
                 <View style={{ flex: 1, padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2, shadowColor: '#000', shadowOpacity: 0.05 }}>
@@ -479,7 +479,7 @@ export default function LaboScreen({ navigation, route }) {
                     <MaterialCommunityIcons name="alert-decagram-outline" size={22} color="#F59E0B" />
                   </View>
                   <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{sentTodayList.filter(v => v.complaints_notes?.toLowerCase().includes('urgent')).length}</Text>
-                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#F59E0B', marginTop: 2, letterSpacing: 0.5 }}>URGENCES TRAITÉES</Text>
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#F59E0B', marginTop: 2, letterSpacing: 0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENCES TRAITÉES"] || "URGENCES TRAITÉES"}</Text>
                 </View>
               </View>
 
@@ -489,8 +489,8 @@ export default function LaboScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="archive-check-outline" size={28} color="#22C55E" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#22C55E', letterSpacing: 1, marginBottom: 4 }}>ARCHIVES GLOBALES</Text>
-                  <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{history.length} <Text style={{ fontSize: 14, fontWeight: '600', color: isDark ? '#AAAAAA' : '#64748B' }}>Dossiers</Text></Text>
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: '#22C55E', letterSpacing: 1, marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVES GLOBALES"] || "ARCHIVES GLOBALES"}</Text>
+                  <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{history.length} <Text style={{ fontSize: 14, fontWeight: '600', color: isDark ? '#AAAAAA' : '#64748B' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Dossiers"] || "Dossiers"}</Text></Text>
                 </View>
               </View>
             </FadeInView>
@@ -500,7 +500,7 @@ export default function LaboScreen({ navigation, route }) {
           {activeView === 'history' && (
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ARCHIVES DES ANALYSES</Text>
+                <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVES DES ANALYSES"] || "ARCHIVES DES ANALYSES"}</Text>
                 <TouchableOpacity onPress={fetchHistory}><MaterialIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
@@ -540,7 +540,7 @@ export default function LaboScreen({ navigation, route }) {
                                 <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '700', marginTop: 2 }}>TERMINÉ • {(v.lab_tests || []).length} examen(s)</Text>
                               </View>
                               <View style={{ backgroundColor: '#22C55E15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
-                                <Text style={{ color: '#22C55E', fontSize: 9, fontWeight: '900' }}>DONE</Text>
+                                <Text style={{ color: '#22C55E', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DONE"] || "DONE"}</Text>
                               </View>
                             </FadeInView>
                           ))}
@@ -564,7 +564,7 @@ export default function LaboScreen({ navigation, route }) {
             <FadeInView style={{ paddingTop: 10 }}>
               <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }} onPress={() => setSelectedVisit(null)}>
                 <MaterialIcons name="arrow-back" size={20} color={brandColor} />
-                <Text style={{ color: brandColor, fontWeight: '900', marginLeft: 8, fontSize: 13 }}>RETOUR AUX DOSSIERS</Text>
+                <Text style={{ color: brandColor, fontWeight: '900', marginLeft: 8, fontSize: 13 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RETOUR AUX DOSSIERS"] || "RETOUR AUX DOSSIERS"}</Text>
               </TouchableOpacity>
 
               {/* Patient document card */}
@@ -582,11 +582,11 @@ export default function LaboScreen({ navigation, route }) {
                   <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 18 }} />
                   <View style={{ flexDirection: 'row', gap: 24 }}>
                     <View>
-                      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>ÂGE / SEXE</Text>
+                      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ÂGE / SEXE"] || "ÂGE / SEXE"}</Text>
                       <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedVisit.patient?.age || '—'} Ans • {selectedVisit.patient?.gender === 'M' ? 'Masculin' : 'Féminin'}</Text>
                     </View>
                     <View>
-                      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>PRISE EN CHARGE</Text>
+                      <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["PRISE EN CHARGE"] || "PRISE EN CHARGE"}</Text>
                       <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedVisit.patient?.is_insured ? 'Assurance' : 'Cash'}</Text>
                     </View>
                   </View>
@@ -594,10 +594,10 @@ export default function LaboScreen({ navigation, route }) {
 
                 <View style={{ padding: 20 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888' : '#64748B', letterSpacing: 1 }}>SAISIE DES RÉSULTATS</Text>
+                    <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888' : '#64748B', letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["SAISIE DES RÉSULTATS"] || "SAISIE DES RÉSULTATS"}</Text>
                     <TouchableOpacity onPress={prefillTemplate} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 }}>
                       <MaterialCommunityIcons name="auto-fix" size={14} color={brandColor} />
-                      <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', marginLeft: 6 }}>RÉPONDRE "NÉGATIF"</Text>
+                      <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPONDRE \"NÉGATIF\""] || "RÉPONDRE \"NÉGATIF\""}</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -614,7 +614,7 @@ export default function LaboScreen({ navigation, route }) {
                           </View>
                           <TextInput
                             style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '800', fontSize: 15, borderWidth: 1, borderColor: structuredResults[test.label] ? brandColor + '40' : (isDark ? '#2E2E2E' : '#E2E8F0') }}
-                            placeholder="Entrez le résultat..."
+                            placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Entrez le résultat..."] || "Entrez le résultat..."}
                             placeholderTextColor={isDark ? '#444' : '#94A3B8'}
                             value={structuredResults[test.label] || ''}
                             onChangeText={(val) => setStructuredResults(prev => ({ ...prev, [test.label]: val }))}
@@ -626,7 +626,7 @@ export default function LaboScreen({ navigation, route }) {
                     <View style={{ borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', padding: 18, height: 180, marginBottom: 20 }}>
                       <TextInput
                         style={{ flex: 1, color: isDark ? '#FFF' : '#0A0A0A', fontSize: 16, fontWeight: '700', textAlignVertical: 'top' }}
-                        placeholder="Saisissez les résultats détaillés ici..."
+                        placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Saisissez les résultats détaillés ici..."] || "Saisissez les résultats détaillés ici..."}
                         placeholderTextColor={isDark ? '#444' : '#94A3B8'}
                         multiline
                         value={results}
@@ -649,7 +649,7 @@ export default function LaboScreen({ navigation, route }) {
                       {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                         <>
                           <MaterialIcons name="send" size={22} color="#FFF" style={{ marginRight: 12 }} />
-                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>TRANSMETTRE LES RÉSULTATS</Text>
+                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TRANSMETTRE LES RÉSULTATS"] || "TRANSMETTRE LES RÉSULTATS"}</Text>
                         </>
                       )}
                     </LinearGradient>
@@ -694,8 +694,8 @@ export default function LaboScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="chart-arc" size={24} color="#FFF" />
               </LinearGradient>
               <View>
-                <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.5 }}>STATISTIQUES LABO</Text>
-                <Text style={{ fontSize: 11, color: isDark ? '#555555' : '#94A3B8', fontWeight: '700' }}>Résumé en temps réel</Text>
+                <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["STATISTIQUES LABO"] || "STATISTIQUES LABO"}</Text>
+                <Text style={{ fontSize: 11, color: isDark ? '#555555' : '#94A3B8', fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Résumé en temps réel"] || "Résumé en temps réel"}</Text>
               </View>
             </View>
             <TouchableOpacity onPress={() => toggleBottomTab('stats')} style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
@@ -714,7 +714,7 @@ export default function LaboScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="flask-outline" size={20} color={brandColor} />
                 </View>
                 <Text style={{ fontSize: 32, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{stats?.total_pending ?? visits.length}</Text>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginTop: 4 }}>EN ATTENTE</Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["EN ATTENTE"] || "EN ATTENTE"}</Text>
               </View>
 
               <View style={{ flex: 1, padding: 20, backgroundColor: '#EF444408', borderRadius: 24, borderWidth: 1, borderColor: '#EF444425' }}>
@@ -722,7 +722,7 @@ export default function LaboScreen({ navigation, route }) {
                   <MaterialCommunityIcons name="alert-decagram-outline" size={20} color="#EF4444" />
                 </View>
                 <Text style={{ fontSize: 32, fontWeight: '900', color: '#EF4444' }}>{stats?.urgent ?? visits.filter(v => v.complaints_notes?.toLowerCase().includes('urgent')).length}</Text>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1, marginTop: 4 }}>URGENCES</Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1, marginTop: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["URGENCES"] || "URGENCES"}</Text>
               </View>
             </View>
 
@@ -730,15 +730,15 @@ export default function LaboScreen({ navigation, route }) {
             <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 28, padding: 24, marginBottom: 12, elevation: 6 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <View>
-                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>ANALYSES COMPLÉTÉES</Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: '700' }}>Aujourd'hui</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ANALYSES COMPLÉTÉES"] || "ANALYSES COMPLÉTÉES"}</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aujourd'hui"] || "Aujourd'hui"}</Text>
                   <Text style={{ color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 4 }}>{stats?.completed ?? sentTodayList.length}</Text>
                 </View>
                 <MaterialCommunityIcons name="flask-check" size={64} color="rgba(255,255,255,0.2)" />
               </View>
               <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Taux de traitement</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Taux de traitement"] || "Taux de traitement"}</Text>
                 <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>
                   {visits.length + sentTodayList.length > 0
                     ? Math.round((sentTodayList.length / (visits.length + sentTodayList.length)) * 100)
@@ -761,8 +761,8 @@ export default function LaboScreen({ navigation, route }) {
                 <MaterialCommunityIcons name="archive-check-outline" size={26} color="#22C55E" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', letterSpacing: 1.5, marginBottom: 4 }}>ARCHIVES GLOBALES</Text>
-                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{history.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>dossiers traités</Text></Text>
+                <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', letterSpacing: 1.5, marginBottom: 4 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["ARCHIVES GLOBALES"] || "ARCHIVES GLOBALES"}</Text>
+                <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{history.length} <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#888888' : '#94A3B8' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["dossiers traités"] || "dossiers traités"}</Text></Text>
               </View>
               <MaterialIcons name="chevron-right" size={24} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
             </View>
