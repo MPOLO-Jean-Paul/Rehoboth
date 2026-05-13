@@ -6,6 +6,7 @@ const ROLE_ROUTE_MAP = {
   labo: 'LaboDashboard',
   pharmacie: 'PharmacyDashboard',
   soins: 'SoinsDashboard',
+  maternite: 'MaternityDashboard',
 };
 
 const TYPE_ROUTE_MAP = {
@@ -17,6 +18,7 @@ const TYPE_ROUTE_MAP = {
   insurance: { route: 'Cashier', tab: 'insurances' },
   lab_order: { route: 'LaboDashboard', tab: 'pending' },
   lab_result: { route: 'DoctorDashboard', tab: 'results' },
+  maternity: { route: 'MaternityDashboard', tab: 'cases' },
   message: { route: 'StaffMessages' },
   new_patient: { route: 'Reception', tab: 'patients' },
   nursing_report: { route: 'SoinsDashboard', tab: 'rapport' },
@@ -75,6 +77,7 @@ const inferTarget = (payload, fallbackRole) => {
   if (textIncludes(text, ['examen', 'labo', 'laboratoire'])) return TYPE_ROUTE_MAP.lab_order;
   if (textIncludes(text, ['resultat', 'résultat'])) return TYPE_ROUTE_MAP.lab_result;
   if (textIncludes(text, ['ordonnance', 'pharmacie', 'médicament', 'medicament'])) return TYPE_ROUTE_MAP.pharmacy_order;
+  if (textIncludes(text, ['maternité', 'maternite', 'grossesse', 'accouchement'])) return TYPE_ROUTE_MAP.maternity;
   if (textIncludes(text, ['stock', 'rupture', 'expiration', 'péremption', 'peremption'])) return TYPE_ROUTE_MAP.stock_alert;
   if (textIncludes(text, ['hospitalisation', 'hospitalization'])) return TYPE_ROUTE_MAP.hospitalization;
   if (textIncludes(text, ['rapport de garde', 'rapport'])) return TYPE_ROUTE_MAP.nursing_report;
@@ -84,6 +87,7 @@ const inferTarget = (payload, fallbackRole) => {
   if (role === 'labo') return TYPE_ROUTE_MAP.lab_order;
   if (role === 'medecin') return { route: 'DoctorDashboard', tab: 'queue' };
   if (role === 'pharmacie') return TYPE_ROUTE_MAP.pharmacy_order;
+  if (role === 'maternite') return TYPE_ROUTE_MAP.maternity;
   if (role === 'soins') return { route: 'SoinsDashboard', tab: 'queue' };
   if (role === 'reception') return { route: 'Reception', tab: 'patients' };
   if (role === 'admin') return { route: 'AdminDashboard' };

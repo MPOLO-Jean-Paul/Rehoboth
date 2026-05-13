@@ -17,9 +17,11 @@ import FloatingActionDock from '../components/FloatingActionDock';
 import ProfileView from '../components/ProfileView';
 import { Theme } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
+import Storage from '../services/Storage';
 import { isValidPhone, detectOperator, operatorColor } from '../utils/phoneValidator';
 
 const { width, height } = Theme.layout;
+const ADMIN_REFRESH_INTERVAL_MS = 60000;
 
 export default function AdminScreen({ navigation }) {
   const { themeMode, toggleTheme, lang, toggleLang, isOnline, brandColor, C, S, isDark } = useTheme();
@@ -91,13 +93,14 @@ export default function AdminScreen({ navigation }) {
   const [isRightOpen, setIsRightOpen] = useState(false);
 
   useEffect(() => {
+    loadCachedData();
     fetchGlobalData();
     fetchSettings();
     const interval = setInterval(() => {
       if (AppState.currentState === 'active') {
         fetchGlobalData(revenuePeriod, true);
       }
-    }, 10000);
+    }, ADMIN_REFRESH_INTERVAL_MS);
 
     const subscription = AppState.addEventListener('change', nextAppState => {
       if (nextAppState === 'active') {
@@ -111,8 +114,20 @@ export default function AdminScreen({ navigation }) {
     };
   }, [revenuePeriod]);
 
+  const loadCachedData = async () => {
+    const cached = await Storage.get('admin_bootstrap');
+    if (cached) {
+      setStats(cached.stats);
+      setUsers(cached.users);
+      setPatients(cached.patients);
+      setMessages(Array.isArray(cached.messages) ? cached.messages : cached.messages.data || []);
+      setInsurances(cached.insurances);
+      setLoading(false);
+    }
+  };
+
   const fetchGlobalData = async (period = revenuePeriod, isBg = false) => {
-    if (!isBg) setLoading(true);
+    if (!isBg && !stats) setLoading(true);
     try {
       const resp = await api.get(`/admin/bootstrap?period=${period}`);
       const data = resp.data;
@@ -122,6 +137,9 @@ export default function AdminScreen({ navigation }) {
       setPatients(data.patients);
       setMessages(Array.isArray(data.messages) ? data.messages : data.messages.data || []);
       setInsurances(data.insurances);
+      
+      // Save for next time
+      Storage.save('admin_bootstrap', data);
     } catch (e) {
       console.error('[AdminScreen] Bootstrap error:', e);
       if (!stats) setStats({ total_patients_period: 0, total_visits_period: 0, revenue_period: 0, lab_period_count: 0 });
@@ -655,7 +673,7 @@ export default function AdminScreen({ navigation }) {
                            <FadeInView key={i} delay={i * 100}>
                               <View style={{ width: 140, padding: 16, borderRadius: 24, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, marginRight: 15, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
                                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                                    <MaterialCommunityIcons name={rev.service.toLowerCase().includes('labo') ? 'flask' : rev.service.toLowerCase().includes('pharmacie') ? 'pill' : rev.service.toLowerCase().includes('soins') ? 'medical-bag' : 'cash-register'} size={18} color={brandColor} />
+                                    <MaterialCommunityIcons name={rev.service.toLowerCase().includes('labo') ? 'flask' : rev.service.toLowerCase().includes('pharmacie') ? 'pill' : rev.service.toLowerCase().includes('soins') ? 'medical-bag' : rev.service.toLowerCase().includes('matern') ? 'mother-heart' : 'cash-register'} size={18} color={brandColor} />
                                  </View>
                                  <Text style={{ color: C.sub, fontSize: 10, fontWeight: '800', marginBottom: 4 }} numberOfLines={1}>{rev.service.toUpperCase()}</Text>
                                  <Text style={{ color: C.text, fontSize: 16, fontWeight: '900' }}>{rev.total.toLocaleString()} FC</Text>
@@ -833,6 +851,7 @@ export default function AdminScreen({ navigation }) {
                               { id: 'labo', label: 'Labo' },
                               { id: 'soins', label: 'Soins' },
                               { id: 'pharmacie', label: 'Pharmacie' },
+                              { id: 'maternite', label: 'Maternité' },
                               { id: 'admin', label: 'Admin' },
                            ].map(role => {
                               const selected = broadcast.target_role === role.id;
@@ -1628,7 +1647,7 @@ export default function AdminScreen({ navigation }) {
                   
                   <Text style={styles.label}>{t.users.roleAccess}</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                     {['reception', 'caisse', 'medecin', 'labo', 'pharmacie', 'soins', 'admin'].map(r => {
+                     {['reception', 'caisse', 'medecin', 'labo', 'pharmacie', 'soins', 'maternite', 'admin'].map(r => {
                         const isSel = (showEditModal ? editingUser?.role : newUser.role) === r;
                         return (
                            <TouchableOpacity 
@@ -2118,7 +2137,7 @@ export default function AdminScreen({ navigation }) {
                     <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, marginBottom: 12, borderRadius: 20, backgroundColor: C.input, borderWidth: 1, borderColor: C.border }}>
                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                           <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                             <MaterialCommunityIcons name={rev.service.toLowerCase().includes('labo') ? 'flask' : rev.service.toLowerCase().includes('pharmacie') ? 'pill' : rev.service.toLowerCase().includes('soins') ? 'medical-bag' : 'cash-register'} size={20} color={brandColor} />
+                             <MaterialCommunityIcons name={rev.service.toLowerCase().includes('labo') ? 'flask' : rev.service.toLowerCase().includes('pharmacie') ? 'pill' : rev.service.toLowerCase().includes('soins') ? 'medical-bag' : rev.service.toLowerCase().includes('matern') ? 'mother-heart' : 'cash-register'} size={20} color={brandColor} />
                           </View>
                           <Text style={{ color: C.text, fontWeight: '800', fontSize: 14 }}>{rev.service}</Text>
                        </View>

@@ -82,6 +82,7 @@ export default function ProfileView({ onBack }) {
     'medecin': 'Médecin',
     'infirmier': 'Infirmier',
     'soins': 'Infirmier / Soins',
+    'maternite': 'Maternité',
     'labo': 'Laborantin',
     'pharmacie': 'Pharmacien',
     'caisse': 'Caissier'

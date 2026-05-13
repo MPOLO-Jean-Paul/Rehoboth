@@ -186,6 +186,7 @@ export default function LoginScreen({ navigation }) {
       labo: 'LaboDashboard',
       pharmacie: 'PharmacyDashboard',
       soins: 'SoinsDashboard',
+      maternite: 'MaternityDashboard',
     };
 
     const targetRoute = routeMap[role] || 'Home';

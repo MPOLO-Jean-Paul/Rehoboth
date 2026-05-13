@@ -29,6 +29,7 @@ import DoctorScreen from './src/screens/DoctorScreen';
 import LaboScreen from './src/screens/LaboScreen';
 import PharmacyScreen from './src/screens/PharmacyScreen';
 import SoinsScreen from './src/screens/SoinsScreen';
+import MaternityScreen from './src/screens/MaternityScreen';
 import NotificationScreen from './src/screens/NotificationScreen';
 import StaffMessagesScreen from './src/screens/StaffMessagesScreen';
 import RoleGuard from './src/components/RoleGuard';
@@ -296,7 +297,8 @@ export default function App() {
             'medecin': 'DoctorDashboard',
             'labo': 'LaboDashboard',
             'pharmacie': 'PharmacyDashboard',
-            'soins': 'SoinsDashboard'
+            'soins': 'SoinsDashboard',
+            'maternite': 'MaternityDashboard'
           };
 
               if (networkState.isConnected) {
@@ -326,7 +328,8 @@ export default function App() {
               'medecin': 'DoctorDashboard',
               'labo': 'LaboDashboard',
               'pharmacie': 'PharmacyDashboard',
-              'soins': 'SoinsDashboard'
+              'soins': 'SoinsDashboard',
+              'maternite': 'MaternityDashboard'
             };
             targetRoute = routeMap[role] || 'Home';
           }
@@ -497,6 +500,10 @@ export default function App() {
 
               <Stack.Screen name="SoinsDashboard">
                 {props => <RoleGuard allowedRoles={['admin', 'soins']}><SoinsScreen {...props} /></RoleGuard>}
+              </Stack.Screen>
+
+              <Stack.Screen name="MaternityDashboard">
+                {props => <RoleGuard allowedRoles={['admin', 'maternite', 'soins', 'medecin']}><MaternityScreen {...props} /></RoleGuard>}
               </Stack.Screen>
 
               <Stack.Screen name="Notification" component={NotificationScreen} options={{ headerShown: false }} />

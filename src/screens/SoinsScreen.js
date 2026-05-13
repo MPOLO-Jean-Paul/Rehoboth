@@ -19,6 +19,8 @@ import SoinsActionPanel from '../components/SoinsActionPanel';
 import { Theme } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 
+import Storage from '../services/Storage';
+
 const { width, height } = Theme.layout;
 
 export default function SoinsScreen({ navigation, route }) {
@@ -122,6 +124,7 @@ export default function SoinsScreen({ navigation, route }) {
   const [medResults, setMedResults] = useState([]);
 
   useEffect(() => {
+    loadCachedData();
     fetchVisits();
     fetchDoctors();
   }, []);
@@ -180,10 +183,27 @@ export default function SoinsScreen({ navigation, route }) {
     };
   }, []);
 
+  const loadCachedData = async () => {
+    const cached = await Storage.get('soins_data');
+    if (cached) {
+      setVisits(cached.visits || []);
+      setHistory(cached.history || []);
+      setHospitalizations(cached.hospitalizations || []);
+      setAlerts(cached.alerts || { alerts: [], total: 0, critical: 0 });
+      setLoading(false);
+    }
+  };
+
+  const syncCache = async (key, val) => {
+    const current = await Storage.get('soins_data') || {};
+    Storage.save('soins_data', { ...current, [key]: val });
+  };
+
   const fetchInsurances = async () => {
     try {
       const resp = await api.get('/insurances');
-      setInsurances(Array.isArray(resp.data) ? resp.data : []);
+      const data = resp.data;
+      setInsurances(Array.isArray(data) ? data : (data.data || []));
     } catch (e) { console.log(e); }
   };
 
@@ -198,7 +218,10 @@ export default function SoinsScreen({ navigation, route }) {
     setHospLoading(true);
     try {
       const resp = await api.get('/hospitalizations');
-      setHospitalizations(Array.isArray(resp.data) ? resp.data : []);
+      const dataRaw = resp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
+      setHospitalizations(data);
+      syncCache('hospitalizations', data);
     } catch (e) { showToast('Erreur chargement hospitalisation', 'error'); }
     finally { setHospLoading(false); }
   };
@@ -209,7 +232,9 @@ export default function SoinsScreen({ navigation, route }) {
     setSearchingPatient(true);
     try {
       const resp = await api.get('/patients', { params: { q } });
-      setPatientResults(resp.data.slice(0, 5));
+      const data = resp.data;
+      const results = Array.isArray(data) ? data : (data.data || []);
+      setPatientResults(results.slice(0, 5));
     } catch (e) { }
     finally { setSearchingPatient(false); }
   };
@@ -266,7 +291,9 @@ export default function SoinsScreen({ navigation, route }) {
     setAlertsLoading(true);
     try {
       const resp = await api.get('/nursing/alerts');
-      setAlerts(resp.data && resp.data.alerts ? resp.data : { alerts: [], total: 0, critical: 0 });
+      const data = resp.data && resp.data.alerts ? resp.data : { alerts: [], total: 0, critical: 0 };
+      setAlerts(data);
+      syncCache('alerts', data);
     } catch (e) { /* silently handle alert fetch error */ }
     finally { setAlertsLoading(false); }
   };
@@ -340,15 +367,21 @@ export default function SoinsScreen({ navigation, route }) {
   };
 
   const fetchVisits = async (isBg = false) => {
-    if (!isBg) setLoading(true);
+    if (!isBg && !visits.length) setLoading(true);
     try {
       // Fetch patients first
       const prescResp = await api.get('/soins/patients');
-      setVisits(Array.isArray(prescResp.data) ? prescResp.data : []);
+      const dataRaw = prescResp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
+      setVisits(data);
+      syncCache('visits', data);
       
       // Separately fetch medicines to avoid blocking the whole screen if pharmacy API fails
       api.get('/pharmacy/medicines')
-        .then(resp => setMedicines(Array.isArray(resp.data) ? resp.data : []))
+        .then(resp => {
+           const medData = resp.data;
+           setMedicines(Array.isArray(medData) ? medData : (medData.data || []));
+        })
         .catch(e => console.log('[Soins] Pharmacy access denied or error:', e.message));
 
     } catch (e) { 
@@ -359,11 +392,14 @@ export default function SoinsScreen({ navigation, route }) {
   };
 
   const fetchHistory = async (isBg = false) => {
-    if (!isBg) setLoading(true);
+    if (!isBg && !history.length) setLoading(true);
     try {
       // For now, reuse my-today or similar if available
       const resp = await api.get('/visits/my-today');
-      setHistory(Array.isArray(resp.data) ? resp.data : []);
+      const dataRaw = resp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
+      setHistory(data);
+      syncCache('history', data);
     } catch (e) {
       console.log('[Soins] Fetch History Error:', e);
       if (!isBg) showToast(t.error, 'error');
@@ -1209,6 +1245,13 @@ export default function SoinsScreen({ navigation, route }) {
                 >
                   <MaterialCommunityIcons name="pill" size={20} color={transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
                   <Text style={{ color: transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>PHARMACIE</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setTransferDestination('maternite')}
+                  style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
+                >
+                  <MaterialCommunityIcons name="mother-heart" size={20} color={transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <Text style={{ color: transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>MATERNITÉ</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('completed')}

@@ -150,7 +150,8 @@ export default function DoctorScreen({ navigation, route }) {
     if (!isBg) setLoading(true);
     try {
       const resp = await api.get('/visits');
-      setVisits(Array.isArray(resp.data) ? resp.data : []);
+      const data = resp.data;
+      setVisits(Array.isArray(data) ? data : (data.data || []));
     } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
     finally { if (!isBg) setLoading(false); }
   };
@@ -175,7 +176,8 @@ export default function DoctorScreen({ navigation, route }) {
     if (!isBg) setLoading(true);
     try {
       const resp = await api.get('/visits/my-today');
-      setHistory(Array.isArray(resp.data) ? resp.data : []);
+      const data = resp.data;
+      setHistory(Array.isArray(data) ? data : (data.data || []));
     } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
     finally { if (!isBg) setLoading(false); }
   };
@@ -184,7 +186,9 @@ export default function DoctorScreen({ navigation, route }) {
     setHistLoading(true);
     try {
       const resp = await api.get('/visits', { params: { patient_id: patientId } });
-      setPatientHistory((Array.isArray(resp.data) ? resp.data : []).filter(v => v?.status === 'completed'));
+      const data = resp.data;
+      const results = Array.isArray(data) ? data : (data.data || []);
+      setPatientHistory(results.filter(v => v?.status === 'completed'));
     } catch (e) { }
     finally { setHistLoading(false); }
   };
@@ -193,7 +197,8 @@ export default function DoctorScreen({ navigation, route }) {
     setBottomLoading(true);
     try {
       const resp = await api.get('/visits/my-today');
-      const data = Array.isArray(resp.data) ? resp.data : [];
+      const dataRaw = resp.data;
+      const data = Array.isArray(dataRaw) ? dataRaw : (dataRaw.data || []);
       setStats({
         count: data.length,
         mostFrequent: data.length > 0 ? "Paludisme" : "Aucun cas",
@@ -309,6 +314,22 @@ export default function DoctorScreen({ navigation, route }) {
           diagnosis,
           consultation_notes: 'DEMANDE HOSPITALISATION: ' + hospForm.ward + '\n' + consultationNotes,
           notes: 'Admission prévue en ' + hospForm.ward
+        });
+      } else if (nextService === 'maternite') {
+        await api.post('/maternity/cases', {
+          patient_id: selectedVisit.patient_id,
+          visit_id: selectedVisit.id,
+          pregnancy_status: 'prenatal',
+          risk_level: 'moderate',
+          notes: consultationNotes || diagnosis,
+          doctor_id: selectedVisit.doctor_id || user?.id,
+        });
+
+        await api.post(`/visits/${selectedVisit.id}/forward`, {
+          next_service: 'maternite',
+          diagnosis,
+          consultation_notes: consultationNotes,
+          notes: soinsNotes || 'Orientation maternité'
         });
       } else {
         await api.post(`/visits/${selectedVisit.id}/forward`, {
@@ -788,6 +809,7 @@ export default function DoctorScreen({ navigation, route }) {
                   { id: 'pharmacie', label: 'PHARMACIE', icon: 'pill' },
                   { id: 'labo', label: 'LABORATOIRE', icon: 'flask' },
                   { id: 'soins', label: 'SOINS / INJ', icon: 'medical-bag' },
+                  { id: 'maternite', label: 'MATERNITÉ', icon: 'mother-heart' },
                   { id: 'hospitalisation', label: 'HOSPIT.', icon: 'bed-outline' },
                   { id: 'completed', label: 'TERMINER', icon: 'check-all' }
                 ].map(s => (
