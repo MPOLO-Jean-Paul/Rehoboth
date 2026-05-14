@@ -33,8 +33,8 @@ class User extends Authenticatable
     public function getProfilePhotoAttribute()
     {
         if (!$this->profile_picture) return null;
-        $baseUrl = str_replace('/api', '', url('/'));
-        return $baseUrl . '/storage/' . $this->profile_picture;
+
+        return route('media.public', ['path' => $this->profile_picture]);
     }
 
     protected function casts(): array

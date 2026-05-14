@@ -17,6 +17,9 @@ class Invoice extends Model
         'metadata',
         'payment_method',
         'payment_phone',
+        'payment_reference',
+        'payment_currency',
+        'payment_status',
         'insurance_id',
     ];
 

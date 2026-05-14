@@ -174,11 +174,16 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/admin/insurances', [AdminController::class, 'getInsurances']);
     Route::post('/admin/insurances', [AdminController::class, 'createInsurance']);
     Route::put('/admin/insurances/{id}', [AdminController::class, 'updateInsurance']);
+    Route::post('/admin/insurances/{id}/renew', [AdminController::class, 'renewInsurance']);
     Route::delete('/admin/insurances/{id}', [AdminController::class, 'deleteInsurance']);
     Route::get('/admin/insurances/{id}/members', [AdminController::class, 'getInsuredMembers']);
     Route::post('/admin/insurances/members', [AdminController::class, 'addInsuredMember']);
     Route::put('/admin/insurances/members/{id}', [AdminController::class, 'updateInsuredMember']);
     Route::delete('/admin/insurances/members/{id}', [AdminController::class, 'deleteInsuredMember']);
+    Route::get('/admin/patient-records', [AdminController::class, 'getPatientRecords']);
+    Route::put('/admin/patient-records/{id}', [AdminController::class, 'updatePatientRecord']);
+    Route::delete('/admin/patient-records/{id}', [AdminController::class, 'deletePatientRecord']);
+    Route::get('/admin/data/export', [AdminController::class, 'exportHospitalData']);
     
     // Settings
     Route::get('/admin/settings', [AdminController::class, 'getSettings']);

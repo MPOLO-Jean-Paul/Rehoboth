@@ -32,7 +32,7 @@ class LaboController extends Controller
             'item_results' => 'nullable|array', // results for individual items
         ]);
 
-        $visit = Visit::with('patient:id,first_name,last_name,is_insured,insurance_id')->findOrFail($id);
+        $visit = Visit::with('patient.insurance')->findOrFail($id);
         $visit->lab_results = $data['results'];
         $visit->lab_order_status = 'completed';
         
@@ -62,7 +62,8 @@ class LaboController extends Controller
         }
 
         // Logic based on insurance
-        $isInsured = $visit->patient?->is_insured;
+        $visit->patient?->insurance?->markExpiredIfNeeded();
+        $isInsured = $visit->patient?->is_insured && $visit->patient?->insurance?->is_operational;
         
         if ($isInsured) {
             $visit->current_service = 'medecin';

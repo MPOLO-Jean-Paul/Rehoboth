@@ -74,7 +74,7 @@ class VisitController extends Controller
             'lab_tests.*.price'         => 'nullable|numeric',
         ]);
 
-        $visit = Visit::with('patient')->findOrFail($id);
+        $visit = Visit::with('patient.insurance')->findOrFail($id);
         $user = $request->user();
 
         if ($user->role !== 'admin' && $visit->current_service !== $user->role) {
@@ -88,6 +88,9 @@ class VisitController extends Controller
         try {
             return DB::transaction(function () use ($validated, $visit, $user) {
                 $nextService = $validated['next_service'];
+                $insurance = $visit->patient?->insurance;
+                $insurance?->markExpiredIfNeeded();
+                $isInsuranceOperational = $visit->patient?->is_insured && $insurance?->is_operational;
                 $notes = trim((string) ($validated['notes'] ?? ''));
                 $consultationNotes = trim((string) ($validated['consultation_notes'] ?? ''));
                 $diagnosis = trim((string) ($validated['diagnosis'] ?? ''));
@@ -161,11 +164,11 @@ class VisitController extends Controller
                     Invoice::updateOrCreate([
                         'visit_id' => $visit->id,
                         'service' => 'labo',
-                        'status' => $visit->patient?->is_insured ? 'insurance_billed' : 'unpaid',
+                        'status' => $isInsuranceOperational ? 'insurance_billed' : 'unpaid',
                     ], [
                         'visit_id' => $visit->id,
                         'patient_id' => $visit->patient_id,
-                        'insurance_id' => $visit->patient?->is_insured ? $visit->patient->insurance_id : null,
+                        'insurance_id' => $isInsuranceOperational ? $visit->patient->insurance_id : null,
                         'amount' => $amount,
                         'details' => 'Bon de laboratoire: ' . implode(', ', array_column($labTests, 'label')),
                         'service' => 'labo',
@@ -237,7 +240,7 @@ class VisitController extends Controller
 
                     $visit->prescription_notes = $prescriptionNotes;
                     $visit->prescription_items = $prescriptionItems;
-                    $visit->pharmacy_order_status = $visit->patient?->is_insured ? 'insurance_billed' : 'pending_payment';
+                    $visit->pharmacy_order_status = $isInsuranceOperational ? 'insurance_billed' : 'pending_payment';
                     $visit->current_service = 'pharmacie';
                     $visit->status = 'pending';
                     $visit->save();
@@ -313,9 +316,9 @@ class VisitController extends Controller
                             \App\Models\Invoice::create([
                                 'visit_id' => $visit->id,
                                 'patient_id' => $visit->patient_id,
-                                'insurance_id' => $visit->patient?->is_insured ? $visit->patient->insurance_id : null,
+                                'insurance_id' => $isInsuranceOperational ? $visit->patient->insurance_id : null,
                                 'amount' => $totalPharmacyAmount,
-                                'status' => $visit->patient?->is_insured ? 'insurance_billed' : 'unpaid',
+                                'status' => $isInsuranceOperational ? 'insurance_billed' : 'unpaid',
                                 'details' => 'Pharmacie: ' . count($billedItems) . ' produits (Auto)',
                                 'service' => 'pharmacie',
                                 'item_count' => count($billedItems),
@@ -327,7 +330,7 @@ class VisitController extends Controller
                     }
 
                     // Notification
-                    if ($visit->patient?->is_insured) {
+                    if ($isInsuranceOperational) {
                         $this->notifyRole('pharmacie', '💊 Nouvelle Ordonnance', "Une ordonnance est prête pour {$visit->patient->first_name} {$visit->patient->last_name}.", ['visit_id' => $visit->id]);
                     } else {
                         $this->notifyRole('pharmacie', '💊 Nouvelle Ordonnance', "Une ordonnance est en attente pour {$visit->patient->first_name} {$visit->patient->last_name}.", ['visit_id' => $visit->id]);

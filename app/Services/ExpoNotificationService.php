@@ -32,6 +32,10 @@ class ExpoNotificationService
 
         $messages = [];
         foreach ($tokens as $token) {
+            $channelId = in_array(($data['priority'] ?? $data['type'] ?? null), ['urgent', 'emergency'], true)
+                ? 'medical-alerts'
+                : 'default';
+
             $messages[] = [
                 'to' => $token,
                 'title' => $title,
@@ -39,7 +43,7 @@ class ExpoNotificationService
                 'data' => $data,
                 'sound' => 'default',
                 'priority' => $priority,
-                'channelId' => 'default', // For Android
+                'channelId' => $channelId,
             ];
         }
 

@@ -23,6 +23,7 @@ class HospitalizationController extends Controller
 
         $query = Hospitalization::with([
                 'patient:id,first_name,last_name,post_name,is_insured,insurance_id',
+                'patient.insurance',
                 'doctor:id,name,specialty',
             ])
             ->orderBy('admission_date', 'desc');
@@ -127,13 +128,16 @@ class HospitalizationController extends Controller
      */
     public function discharge(Request $request, $id): JsonResponse
     {
-        $hospitalization = Hospitalization::with('patient')->findOrFail($id);
+        $hospitalization = Hospitalization::with('patient.insurance')->findOrFail($id);
 
         if ($hospitalization->status !== 'active') {
             return response()->json(['message' => 'Ce patient est déjà sorti.'], 409);
         }
 
         return DB::transaction(function () use ($hospitalization) {
+            $hospitalization->patient?->insurance?->markExpiredIfNeeded();
+            $isInsuranceOperational = $hospitalization->patient?->is_insured && $hospitalization->patient?->insurance?->is_operational;
+
             $hospitalization->update([
                 'status'         => 'discharged',
                 'discharge_date' => now()->toDateString(),
@@ -150,9 +154,9 @@ class HospitalizationController extends Controller
                 $invoice = Invoice::create([
                     'patient_id' => $hospitalization->patient_id,
                     'visit_id'   => $hospitalization->visit_id,
-                    'insurance_id' => $hospitalization->patient->is_insured ? $hospitalization->patient->insurance_id : null,
+                    'insurance_id' => $isInsuranceOperational ? $hospitalization->patient->insurance_id : null,
                     'amount'     => $amount,
-                    'status'     => $hospitalization->patient->is_insured ? 'insurance_billed' : 'unpaid',
+                    'status'     => $isInsuranceOperational ? 'insurance_billed' : 'unpaid',
                     'details'    => "Frais d'hospitalisation finale ({$daysPending} jours restants) - Chambre {$hospitalization->room_number}",
                     'service'    => 'hospitalisation',
                     'item_count' => $daysPending,
@@ -187,7 +191,7 @@ class HospitalizationController extends Controller
         $billed   = 0;
         $total    = 0;
 
-        $active = Hospitalization::with('patient')
+        $active = Hospitalization::with('patient.insurance')
             ->where('status', 'active')
             ->get();
 
@@ -198,13 +202,15 @@ class HospitalizationController extends Controller
             }
 
             $amount = (float) $h->daily_rate;
+            $h->patient?->insurance?->markExpiredIfNeeded();
+            $isInsuranceOperational = $h->patient?->is_insured && $h->patient?->insurance?->is_operational;
 
             Invoice::create([
                 'patient_id' => $h->patient_id,
                 'visit_id'   => $h->visit_id,
-                'insurance_id' => $h->patient->is_insured ? $h->patient->insurance_id : null,
+                'insurance_id' => $isInsuranceOperational ? $h->patient->insurance_id : null,
                 'amount'     => $amount,
-                'status'     => $h->patient->is_insured ? 'insurance_billed' : 'unpaid',
+                'status'     => $isInsuranceOperational ? 'insurance_billed' : 'unpaid',
                 'details'    => "Frais d'hospitalisation journaliers du {$today} - Chambre {$h->room_number} ({$h->ward})",
                 'service'    => 'hospitalisation',
                 'item_count' => 1,

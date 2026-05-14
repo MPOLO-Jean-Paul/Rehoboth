@@ -59,9 +59,21 @@ class PatientController extends Controller
         ]);
 
         // LOGIQUE DE VÉRIFICATION D'ASSURANCE
+        if ($request->input('is_insured')) {
+            $insurance = \App\Models\Insurance::find($data['insurance_id'] ?? null);
+            $insurance?->markExpiredIfNeeded();
+
+            if (!$insurance || !$insurance->is_operational) {
+                return response()->json([
+                    'message' => "Le contrat de cette assurance est expiré ou inactif. Le patient ne peut pas être pris en charge par cette assurance."
+                ], 422);
+            }
+        }
+
         if ($request->input('is_insured') && $request->filled('insurance_code')) {
             $insured = \App\Models\InsuredMember::where('insurance_id', $data['insurance_id'])
                 ->where('membership_code', $data['insurance_code'])
+                ->where('is_active', true)
                 ->first();
 
             if (!$insured) {
@@ -157,7 +169,8 @@ class PatientController extends Controller
 
     public function listInsurances()
     {
-        return response()->json(\App\Models\Insurance::select('id', 'name', 'status', 'monthly_flat_fee')->orderBy('name')->get());
+        \App\Models\Insurance::syncExpiredContracts();
+        return response()->json(\App\Models\Insurance::select('id', 'name', 'status', 'contract_end_date', 'monthly_flat_fee')->orderBy('name')->get());
     }
 
     public function verifyInsurance(Request $request)
@@ -167,8 +180,20 @@ class PatientController extends Controller
             'code' => 'required|string'
         ]);
 
+        $insurance = \App\Models\Insurance::findOrFail($request->insurance_id);
+        $insurance->markExpiredIfNeeded();
+
+        if (!$insurance->is_operational) {
+            return response()->json([
+                'success' => false,
+                'status' => $insurance->status,
+                'message' => "Le contrat {$insurance->name} est expiré ou inactif. Cette assurance ne peut plus couvrir les patients."
+            ], 422);
+        }
+
         $member = \App\Models\InsuredMember::where('insurance_id', $request->insurance_id)
             ->where('membership_code', $request->code)
+            ->where('is_active', true)
             ->first();
 
         if ($member) {

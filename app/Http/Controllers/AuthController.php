@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -65,19 +66,18 @@ class AuthController extends Controller
         
         if ($request->hasFile('image')) {
             // Delete old picture if exists
-            if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
-                \Storage::disk('public')->delete($user->profile_picture);
+            if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
             }
 
             $path = $request->file('image')->store('profiles', 'public');
             $user->profile_picture = $path;
             $user->save();
-            
-            $baseUrl = str_replace('/api', '', url('/'));
+
             return response()->json([
                 'message' => 'Photo de profil mise à jour',
-                'user' => $user,
-                'url' => $baseUrl . '/storage/' . $path
+                'user' => $user->fresh(),
+                'url' => route('media.public', ['path' => $path])
             ]);
         }
 

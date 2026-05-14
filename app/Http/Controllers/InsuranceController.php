@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Insurance;
 use App\Models\Invoice;
+use App\Mail\MonthlyInsuranceReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class InsuranceController extends Controller
 {
@@ -15,6 +17,7 @@ class InsuranceController extends Controller
      */
     public function index()
     {
+        Insurance::syncExpiredContracts();
         return response()->json(Insurance::orderBy('name')->get());
     }
 
@@ -82,18 +85,35 @@ class InsuranceController extends Controller
     }
 
     /**
-     * Envoi simulé du rapport mensuel
+     * Envoi réel du rapport mensuel
      */
     public function sendMonthlyReport(Request $request, $id)
     {
         $insurance = Insurance::findOrFail($id);
+        $month = (int) $request->input('month', now()->month);
+        $year = (int) $request->input('year', now()->year);
+        $periodStart = Carbon::create($year, $month, 1)->startOfMonth();
+        $periodEnd = $periodStart->copy()->endOfMonth();
         
         if (!$insurance->email) {
             return response()->json(['message' => 'Aucune adresse e-mail configurée pour cette assurance.'], 422);
         }
 
-        // Simulation d'envoi d'e-mail
-        // \Mail::to($insurance->email)->send(new \App\Mail\MonthlyInsuranceReport($insurance));
+        $invoices = Invoice::with(['patient', 'visit'])
+            ->where('insurance_id', $id)
+            ->whereBetween('created_at', [$periodStart, $periodEnd])
+            ->whereIn('status', ['paid', 'insurance_billed', 'settled'])
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        if ($invoices->isEmpty()) {
+            return response()->json([
+                'message' => "Aucune facture à envoyer pour {$periodStart->translatedFormat('F Y')}."
+            ], 422);
+        }
+
+        Mail::to($insurance->email)
+            ->send(new MonthlyInsuranceReport($insurance, $periodStart->translatedFormat('F Y'), $invoices));
 
         return response()->json([
             'message' => "Le relevé mensuel a été envoyé avec succès à {$insurance->email}."

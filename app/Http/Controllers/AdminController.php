@@ -16,6 +16,7 @@ use App\Models\Insurance;
 use App\Models\InsuredMember;
 use App\Support\WorkflowSettings;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Response;
 
 class AdminController extends Controller
 {
@@ -102,6 +103,8 @@ class AdminController extends Controller
     // GESTION DES ASSURANCES - OPTIMIZED N+1
     public function getInsurances()
     {
+        \App\Models\Insurance::syncExpiredContracts();
+
         // 1. Get base data
         $insurances = \App\Models\Insurance::withCount(['patients', 'insuredMembers'])->get();
         
@@ -129,25 +132,15 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'contract_date' => 'nullable|string',
+            'contract_end_date' => 'nullable|string',
             'monthly_flat_fee' => 'required|numeric|min:0',
             'contact_info' => 'nullable|string',
             'contract_type' => 'nullable|string|in:mensuel,trimestriel,annuel',
-            'status' => 'nullable|string|in:active,suspended,terminated'
+            'status' => 'nullable|string|in:active,suspended,terminated,expired'
         ]);
 
-        if ($request->filled('contract_date')) {
-            try {
-                if (str_contains($data['contract_date'], '/')) {
-                    $data['contract_date'] = \Carbon\Carbon::createFromFormat('d/m/Y', $data['contract_date'])->format('Y-m-d');
-                } else {
-                    $data['contract_date'] = \Carbon\Carbon::parse($data['contract_date'])->format('Y-m-d');
-                }
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'Format de date invalide (Attendu: JJ/MM/AAAA)'], 422);
-            }
-        } else {
-            $data['contract_date'] = null;
-        }
+        $dateError = $this->normalizeInsuranceDates($data);
+        if ($dateError) return $dateError;
 
         $insurance = \App\Models\Insurance::create($data);
         return response()->json(['message' => 'Assurance créée avec succès', 'insurance' => $insurance]);
@@ -160,28 +153,46 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'contract_date' => 'nullable|string',
+            'contract_end_date' => 'nullable|string',
             'monthly_flat_fee' => 'required|numeric|min:0',
             'contact_info' => 'nullable|string',
             'contract_type' => 'nullable|string|in:mensuel,trimestriel,annuel',
-            'status' => 'nullable|string|in:active,suspended,terminated'
+            'status' => 'nullable|string|in:active,suspended,terminated,expired'
         ]);
 
-        if ($request->filled('contract_date')) {
-            try {
-                if (str_contains($data['contract_date'], '/')) {
-                    $data['contract_date'] = \Carbon\Carbon::createFromFormat('d/m/Y', $data['contract_date'])->format('Y-m-d');
-                } else {
-                    $data['contract_date'] = \Carbon\Carbon::parse($data['contract_date'])->format('Y-m-d');
-                }
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'Format de date invalide (Attendu: JJ/MM/AAAA)'], 422);
-            }
-        } else {
-            $data['contract_date'] = null;
-        }
+        $dateError = $this->normalizeInsuranceDates($data);
+        if ($dateError) return $dateError;
 
         $insurance->update($data);
         return response()->json(['message' => 'Assurance mise à jour', 'insurance' => $insurance]);
+    }
+
+    public function renewInsurance(Request $request, $id)
+    {
+        $insurance = \App\Models\Insurance::findOrFail($id);
+        $data = $request->validate([
+            'contract_date' => 'nullable|string',
+            'contract_end_date' => 'required|string',
+            'monthly_flat_fee' => 'nullable|numeric|min:0',
+            'contract_type' => 'nullable|string|in:mensuel,trimestriel,annuel',
+        ]);
+
+        $data['contract_date'] = $data['contract_date'] ?? now()->toDateString();
+        $dateError = $this->normalizeInsuranceDates($data);
+        if ($dateError) return $dateError;
+
+        $insurance->update(array_filter([
+            'contract_date' => $data['contract_date'],
+            'contract_end_date' => $data['contract_end_date'],
+            'monthly_flat_fee' => $data['monthly_flat_fee'] ?? null,
+            'contract_type' => $data['contract_type'] ?? null,
+            'status' => 'active',
+        ], fn ($value) => $value !== null));
+
+        return response()->json([
+            'message' => "Contrat {$insurance->name} renouvelé et réactivé.",
+            'insurance' => $insurance->fresh(),
+        ]);
     }
 
     public function addInsuredMember(Request $request)
@@ -751,18 +762,130 @@ class AdminController extends Controller
     public function getBootstrap(Request $request)
     {
         $user = $request->user();
+        \App\Models\Insurance::syncExpiredContracts();
 
         return response()->json([
             'stats' => $this->getDashboardStats($request),
             'users' => User::select('id', 'name', 'role', 'profile_picture', 'specialty')->get(),
-            'patients' => \App\Models\Patient::select('id', 'first_name', 'last_name', 'is_insured', 'birth_year', 'created_at')
+            'patients' => \App\Models\Patient::with('insurance:id,name,status,contract_end_date')
+                ->select('id', 'first_name', 'last_name', 'post_name', 'is_insured', 'insurance_id', 'insurance_code', 'contact_info', 'birth_year', 'pathology', 'gender', 'created_at')
                 ->latest()
-                ->take(50)
+                ->take(200)
                 ->get(),
             'messages' => $this->getMessages($request)->original,
-            'insurances' => \App\Models\Insurance::select('id', 'name', 'status', 'monthly_flat_fee')->get(),
+            'insurances' => \App\Models\Insurance::select('id', 'name', 'email', 'status', 'contract_date', 'contract_end_date', 'contract_type', 'monthly_flat_fee', 'contact_info')->get(),
             'server_time' => now()->toDateTimeString()
         ]);
+    }
+
+    public function getPatientRecords(Request $request)
+    {
+        $query = \App\Models\Patient::with('insurance:id,name,status,contract_end_date')
+            ->select('id', 'first_name', 'last_name', 'post_name', 'is_insured', 'insurance_id', 'insurance_code', 'contact_info', 'birth_year', 'pathology', 'gender', 'created_at');
+
+        if ($request->filled('q')) {
+            $search = trim($request->string('q')->toString());
+            $query->where(function ($inner) use ($search) {
+                $inner->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('post_name', 'like', "%{$search}%")
+                    ->orWhere('insurance_code', 'like', "%{$search}%")
+                    ->orWhere('contact_info', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('birth_year')) {
+            $query->where('birth_year', (int) $request->birth_year);
+        }
+
+        return response()->json($query->latest()->limit(min($request->integer('limit', 500), 1000))->get());
+    }
+
+    public function updatePatientRecord(Request $request, $id)
+    {
+        $patient = \App\Models\Patient::findOrFail($id);
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'post_name' => 'nullable|string|max:255',
+            'birth_year' => 'nullable|integer|min:1900|max:2100',
+            'pathology' => 'nullable|string|max:255',
+            'gender' => 'nullable|string|max:10',
+            'contact_info' => 'nullable|string',
+            'is_insured' => 'sometimes|boolean',
+            'insurance_id' => 'nullable|exists:insurances,id',
+            'insurance_code' => 'nullable|string',
+        ]);
+
+        if (($data['is_insured'] ?? false) && !empty($data['insurance_id'])) {
+            $insurance = \App\Models\Insurance::find($data['insurance_id']);
+            $insurance?->markExpiredIfNeeded();
+            if (!$insurance || !$insurance->is_operational) {
+                return response()->json(['message' => "Cette assurance n'est pas opérationnelle pour les patients."], 422);
+            }
+        }
+
+        $patient->update($data);
+
+        return response()->json([
+            'message' => 'Dossier patient mis à jour.',
+            'patient' => $patient->fresh('insurance'),
+        ]);
+    }
+
+    public function deletePatientRecord($id)
+    {
+        $patient = \App\Models\Patient::findOrFail($id);
+        $patient->delete();
+
+        return response()->json(['message' => 'Dossier patient supprimé.']);
+    }
+
+    public function exportHospitalData(Request $request)
+    {
+        \App\Models\Insurance::syncExpiredContracts();
+
+        $payload = [
+            'generated_at' => now()->toIso8601String(),
+            'patients' => \App\Models\Patient::with('insurance:id,name,status,contract_end_date')->latest()->get(),
+            'insurances' => \App\Models\Insurance::withCount(['patients', 'insuredMembers'])->orderBy('name')->get(),
+            'invoices_summary' => \App\Models\Invoice::selectRaw('service, status, COUNT(*) as count, COALESCE(SUM(amount), 0) as total')
+                ->groupBy('service', 'status')
+                ->get(),
+        ];
+
+        if ($request->query('download') === '1') {
+            $filename = 'rehoboth-data-' . now()->format('Ymd-His') . '.json';
+            return Response::make(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), 200, [
+                'Content-Type' => 'application/json',
+                'Content-Disposition' => "attachment; filename={$filename}",
+            ]);
+        }
+
+        return response()->json($payload);
+    }
+
+    private function normalizeInsuranceDates(array &$data)
+    {
+        foreach (['contract_date', 'contract_end_date'] as $field) {
+            if (array_key_exists($field, $data) && filled($data[$field])) {
+                try {
+                    $data[$field] = str_contains($data[$field], '/')
+                        ? \Carbon\Carbon::createFromFormat('d/m/Y', $data[$field])->format('Y-m-d')
+                        : \Carbon\Carbon::parse($data[$field])->format('Y-m-d');
+                } catch (\Exception $e) {
+                    return response()->json(['message' => 'Format de date invalide (Attendu: JJ/MM/AAAA)'], 422);
+                }
+            } else {
+                $data[$field] = null;
+            }
+        }
+
+        if (!empty($data['contract_date']) && !empty($data['contract_end_date']) && $data['contract_end_date'] < $data['contract_date']) {
+            return response()->json(['message' => 'La date de fin doit être postérieure à la date de début.'], 422);
+        }
+
+        return null;
     }
 
     private function getDashboardStats(Request $request)

@@ -35,4 +35,35 @@ return [
         ],
     ],
 
+    'mobile_money' => [
+        'timeout' => env('MOBILE_MONEY_TIMEOUT', 30),
+        'callback_url' => env('MOBILE_MONEY_CALLBACK_URL'),
+        'providers' => [
+            'orange' => [
+                'endpoint' => env('ORANGE_MONEY_ENDPOINT'),
+                'client_id' => env('ORANGE_MONEY_CLIENT_ID', 'orange-client-id-demo'),
+                'client_secret' => env('ORANGE_MONEY_CLIENT_SECRET', 'orange-client-secret-demo'),
+                'merchant_id' => env('ORANGE_MONEY_MERCHANT_ID', 'orange-merchant-demo'),
+                'cdf_account' => env('ORANGE_MONEY_CDF_ACCOUNT', 'orange-cdf-account-demo'),
+                'usd_account' => env('ORANGE_MONEY_USD_ACCOUNT', 'orange-usd-account-demo'),
+            ],
+            'airtel' => [
+                'endpoint' => env('AIRTEL_MONEY_ENDPOINT'),
+                'client_id' => env('AIRTEL_MONEY_CLIENT_ID', 'airtel-client-id-demo'),
+                'client_secret' => env('AIRTEL_MONEY_CLIENT_SECRET', 'airtel-client-secret-demo'),
+                'merchant_id' => env('AIRTEL_MONEY_MERCHANT_ID', 'airtel-merchant-demo'),
+                'cdf_account' => env('AIRTEL_MONEY_CDF_ACCOUNT', 'airtel-cdf-account-demo'),
+                'usd_account' => env('AIRTEL_MONEY_USD_ACCOUNT', 'airtel-usd-account-demo'),
+            ],
+            'mpesa' => [
+                'endpoint' => env('MPESA_ENDPOINT'),
+                'client_id' => env('MPESA_CLIENT_ID', 'mpesa-client-id-demo'),
+                'client_secret' => env('MPESA_CLIENT_SECRET', 'mpesa-client-secret-demo'),
+                'merchant_id' => env('MPESA_MERCHANT_ID', 'mpesa-merchant-demo'),
+                'cdf_account' => env('MPESA_CDF_ACCOUNT', 'mpesa-cdf-account-demo'),
+                'usd_account' => env('MPESA_USD_ACCOUNT', 'mpesa-usd-account-demo'),
+            ],
+        ],
+    ],
+
 ];

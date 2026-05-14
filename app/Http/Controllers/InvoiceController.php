@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Visit;
+use App\Services\MobileMoneyPaymentService;
 use App\Traits\NotifiesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,8 @@ class InvoiceController extends Controller
         }
 
         $insurance = $invoice->patient->insurance;
-        $isActive = $insurance->status === 'active';
+        $insurance->markExpiredIfNeeded();
+        $isActive = $insurance->is_operational;
 
         return response()->json([
             'success' => $isActive,
@@ -31,7 +33,7 @@ class InvoiceController extends Controller
             'company' => $insurance->name,
             'message' => $isActive 
                 ? "Le contrat avec {$insurance->name} est actif. Vous pouvez procéder à la prise en charge." 
-                : "Le contrat avec {$insurance->name} est actuellement " . ($insurance->status === 'suspended' ? 'suspendu' : 'rompu') . "."
+                : "Le contrat avec {$insurance->name} est actuellement " . ($insurance->status === 'expired' ? 'expiré' : ($insurance->status === 'suspended' ? 'suspendu' : 'rompu')) . "."
         ]);
     }
 
@@ -52,8 +54,9 @@ class InvoiceController extends Controller
     public function pay(Request $request, $id)
     {
         $request->validate([
-            'payment_method' => 'required|string',
+            'payment_method' => 'required|string|in:cash,insurance,orange,airtel,mpesa',
             'payment_phone' => 'nullable|string',
+            'payment_currency' => 'nullable|string|in:CDF,USD,FC',
         ]);
 
         return DB::transaction(function () use ($request, $id) {
@@ -68,8 +71,10 @@ class InvoiceController extends Controller
 
             // Vérification de l'état du contrat d'assurance si paiement par assurance
             if ($request->payment_method === 'insurance' && $invoice->patient && $invoice->patient->insurance) {
-                if ($invoice->patient->insurance->status !== 'active') {
+                $invoice->patient->insurance->markExpiredIfNeeded();
+                if (!$invoice->patient->insurance->is_operational) {
                     $statusLabel = match($invoice->patient->insurance->status) {
+                        'expired' => 'expiré',
                         'suspended' => 'suspendu (Arrêté)',
                         'terminated' => 'rompu (Terminé)',
                         default => 'inactif'
@@ -80,9 +85,61 @@ class InvoiceController extends Controller
                 }
             }
 
+            $method = $request->payment_method;
+            $currency = strtoupper($request->input('payment_currency', 'CDF')) === 'FC' ? 'CDF' : strtoupper($request->input('payment_currency', 'CDF'));
+            $metadata = $invoice->metadata ?? [];
+
+            if (in_array($method, ['orange', 'airtel', 'mpesa'], true)) {
+                if (!$request->filled('payment_phone')) {
+                    return response()->json(['message' => 'Numéro mobile money requis.'], 422);
+                }
+
+                try {
+                    $payment = app(MobileMoneyPaymentService::class)->charge(
+                        $method,
+                        $request->payment_phone,
+                        (float) $invoice->amount,
+                        $currency,
+                        "Facture #{$invoice->id} - {$invoice->service}"
+                    );
+                } catch (\Throwable $e) {
+                    return response()->json(['message' => $e->getMessage()], 422);
+                }
+
+                $invoice->payment_method = $method;
+                $invoice->payment_phone = $request->payment_phone;
+                $invoice->payment_currency = $currency;
+                $invoice->payment_status = $payment['status'];
+                $invoice->payment_reference = $payment['reference'] ?? null;
+                $invoice->metadata = array_merge($metadata, ['mobile_money' => $payment]);
+
+                if ($payment['status'] === 'pending') {
+                    $invoice->save();
+
+                    return response()->json([
+                        'message' => $payment['message'],
+                        'payment_status' => 'pending',
+                        'invoice' => $invoice->fresh(),
+                    ], 202);
+                }
+
+                if ($payment['status'] !== 'succeeded') {
+                    $invoice->save();
+
+                    return response()->json([
+                        'message' => $payment['message'],
+                        'payment_status' => 'failed',
+                        'invoice' => $invoice->fresh(),
+                    ], 422);
+                }
+            } else {
+                $invoice->payment_method = $method;
+                $invoice->payment_phone = $request->payment_phone;
+                $invoice->payment_currency = $currency;
+                $invoice->payment_status = 'succeeded';
+            }
+
             $invoice->status = 'paid';
-            $invoice->payment_method = $request->payment_method;
-            $invoice->payment_phone = $request->payment_phone;
 
             $session = \App\Models\CashierSession::where('status', 'open')->first();
             if ($session) {
@@ -128,6 +185,7 @@ class InvoiceController extends Controller
 
             return response()->json([
                 'message' => 'Facture validée et payée. Le dossier a été transféré vers le service suivant.',
+                'payment_status' => 'succeeded',
                 'invoice' => $invoice
             ]);
         });
@@ -509,11 +567,43 @@ class InvoiceController extends Controller
 
     public function exportAccountingData(Request $request)
     {
-        // Simulation d'exportation PDF/Excel
+        $period = $request->query('period', 'day');
+        $history = $this->getHistory(new Request(['period' => $period, 'all' => true]))->getData(true);
+        $rows = collect($history['invoices'] ?? [])->map(function ($invoice) {
+            return [
+                'id' => $invoice['id'],
+                'date' => $invoice['updated_at'] ?? $invoice['created_at'],
+                'patient' => trim(($invoice['patient']['first_name'] ?? '') . ' ' . ($invoice['patient']['last_name'] ?? '')),
+                'service' => $invoice['service'] ?? '',
+                'amount' => $invoice['amount'] ?? 0,
+                'currency' => $invoice['payment_currency'] ?? 'CDF',
+                'method' => $invoice['payment_method'] ?? 'cash',
+                'reference' => $invoice['payment_reference'] ?? '',
+            ];
+        })->values();
+
+        if ($request->query('download') === '1') {
+            $csv = "ID,Date,Patient,Service,Montant,Devise,Methode,Reference\n";
+            foreach ($rows as $row) {
+                $csv .= collect($row)->map(fn ($value) => '"' . str_replace('"', '""', (string) $value) . '"')->implode(',') . "\n";
+            }
+
+            return response($csv, 200, [
+                'Content-Type' => 'text/csv; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename=rapport-comptable-' . now()->format('Ymd-His') . '.csv',
+            ]);
+        }
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Le rapport comptable a été généré et envoyé vers l\'imprimante/e-mail.',
-            'download_url' => '#'
+            'message' => 'Le rapport comptable réel a été généré.',
+            'period' => $period,
+            'summary' => [
+                'total' => $history['total'] ?? 0,
+                'count' => $history['count'] ?? 0,
+                'by_service' => $history['by_service'] ?? [],
+            ],
+            'rows' => $rows,
         ]);
     }
 }
