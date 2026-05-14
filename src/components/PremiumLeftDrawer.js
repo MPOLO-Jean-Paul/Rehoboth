@@ -21,7 +21,7 @@ export default function PremiumLeftDrawer({
   t,
 }) {
   const { themeMode, user } = useContext(AppContext);
-  const { isDark: dark, brandColor } = useTheme();
+  const { isDark: dark, S, brandColor } = useTheme();
   const insets = useSafeAreaInsets();
 
   if (!isOpen) return null;

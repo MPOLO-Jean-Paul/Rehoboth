@@ -20,7 +20,7 @@ export default function PremiumRightPanel({
   setActiveView,
 }) {
   const { themeMode, setThemeMode, notificationsEnabled, toggleNotifications, lang, setLang, user } = useContext(AppContext);
-  const { isDark: dark, brandColor } = useTheme();
+  const { isDark: dark, S, brandColor } = useTheme();
   const insets = useSafeAreaInsets();
 
   if (!isOpen) return null;

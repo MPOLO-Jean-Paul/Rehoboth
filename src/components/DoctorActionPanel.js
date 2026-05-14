@@ -27,7 +27,7 @@ const QUICK_NOTES = [
 ];
 
 export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _ignored, onAppendDiagnosis, onAppendNotes }) {
-  const { isDark, C, brandColor } = useTheme();
+  const { isDark, C, S, brandColor } = useTheme();
   const styles = createStyles(C, brandColor);
 
   return (
@@ -100,7 +100,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
         </ScrollView>
 
         <View style={[styles.footer, { borderTopColor: C.divider }]}>
-           <Text style={{ fontSize: 10, color: C.sub, textAlign: 'center', fontWeight: '800' }}>"APPUIE SUR UN MODÈLE POUR L'INSERER"</Text>
+           <Text style={{ fontSize: 10, color: C.sub, textAlign: 'center', fontWeight: '800' }}>APPUIE SUR UN MODÈLE POUR L'INSERER</Text>
         </View>
       </Animated.View>
     </>

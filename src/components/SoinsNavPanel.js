@@ -8,7 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 const { width } = Theme.layout;
 
 export default function SoinsNavPanel({ isOpen, anim, onClose, isDark: _ignored, activeView, setActiveView }) {
-  const { isDark, C, brandColor } = useTheme();
+  const { isDark, C, S, brandColor } = useTheme();
   const styles = createStyles(C, brandColor);
 
   const menuItems = [
@@ -16,7 +16,7 @@ export default function SoinsNavPanel({ isOpen, anim, onClose, isDark: _ignored,
     { id: 'queue', title: 'Triage & Accueil', icon: 'heart-pulse', desc: "File d'attente standard" },
     { id: 'urgencies', title: 'Urgences', icon: 'ambulance', desc: 'Prise en charge rapide' },
     { id: 'control', title: 'Contrôle & Suivi', icon: 'radar', desc: 'État des malades transférés' },
-    { id: 'history', title: 'Historique Transferts', icon: 'history', desc: 'Registre de vos transferts" },
+    { id: 'history', title: 'Historique Transferts', icon: 'history', desc: 'Registre de vos transferts' },
   ];
 
   return (

@@ -8,7 +8,7 @@ import { useTheme } from '../hooks/useTheme';
 const { width } = Theme.layout;
 
 export default function DoctorNavPanel({ isOpen, anim, onClose, activeView, setActiveView }) {
-  const { isDark, C, brandColor } = useTheme();
+  const { isDark, C, S, brandColor } = useTheme();
   const styles = createStyles(C, brandColor);
 
   const menuItems = [
