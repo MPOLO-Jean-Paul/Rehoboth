@@ -81,21 +81,39 @@ export default function PremiumLeftDrawer({
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <View style={styles.logoBox}>
-                  {user?.profile_photo ? (
-                     <Image
-                       key={`${user.profile_photo}-${user.updated_at}`}
-                       source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
-                       style={{ width: '100%', height: '100%', borderRadius: 14 }}
-                       resizeMode="cover"
-                     />
-                  ) : (
-                     <LinearGradient 
-                        colors={Theme.colors.brandGradient} 
-                        start={{x:0, y:0}} end={{x:1, y:1}}
-                        style={{ width: '100%', height: '100%', borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}
-                     >
-                        <MaterialCommunityIcons name="hospital-building" size={22} color="#FFF" />
-                     </LinearGradient>
+                  <LinearGradient 
+                    colors={Theme.colors.brandGradient} 
+                    start={{x:0, y:0}} end={{x:1, y:1}}
+                    style={{ width: '100%', height: '100%', borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <MaterialCommunityIcons name="account-circle-outline" size={S.ms(26)} color="#FFF" />
+                  </LinearGradient>
+                  
+                  {user?.profile_photo && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      bottom: S.ms(-2), 
+                      right: S.ms(-2),
+                      width: S.ms(20),
+                      height: S.ms(20),
+                      borderRadius: S.ms(10),
+                      borderWidth: 2,
+                      borderColor: dark ? '#0A0A0A' : '#FFF',
+                      overflow: 'hidden',
+                      backgroundColor: dark ? '#1A1A1A' : '#F8FAFC',
+                      elevation: 4,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 2
+                    }}>
+                      <Image
+                        key={`${user.profile_photo}-${user.updated_at}`}
+                        source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="cover"
+                      />
+                    </View>
                   )}
                 </View>
                 <View style={{ marginLeft: 12 }}>

@@ -84,18 +84,38 @@ export default function PremiumHeader({
 
               <TouchableOpacity
                 onPress={onRightPress}
-                style={[styles.roundButton, { backgroundColor: C.headerBtn, shadowColor: isDark ? '#000' : '#94A3B8', overflow: 'hidden' }]}
+                style={[styles.roundButton, { backgroundColor: C.headerBtn, shadowColor: isDark ? '#000' : '#94A3B8' }]}
               >
-                {user?.profile_photo ? (
-                  <Image
-                    key={`${user.profile_photo}-${user.updated_at}`}
-                    source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
-                    style={{ width: '100%', height: '100%', borderRadius: 14 }}
-                    resizeMode="cover"
-                  />
-                ) : (
+                <View style={{ width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center' }}>
                   <MaterialCommunityIcons name="account-circle-outline" size={S.ms(24)} color={brandColor} />
-                )}
+                  
+                  {user?.profile_photo && (
+                    <View style={{ 
+                      position: 'absolute', 
+                      bottom: S.ms(4), 
+                      right: S.ms(4),
+                      width: S.ms(16),
+                      height: S.ms(16),
+                      borderRadius: S.ms(8),
+                      borderWidth: 2,
+                      borderColor: C.surface,
+                      overflow: 'hidden',
+                      backgroundColor: C.card,
+                      elevation: 2,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 1
+                    }}>
+                      <Image
+                        key={`${user.profile_photo}-${user.updated_at}`}
+                        source={{ uri: withCacheBust(user.profile_photo, user.updated_at), cache: 'reload' }}
+                        style={{ width: '100%', height: '100%' }}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  )}
+                </View>
               </TouchableOpacity>
             </View>
         </View>
