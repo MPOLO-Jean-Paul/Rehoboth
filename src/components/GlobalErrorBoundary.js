@@ -52,7 +52,7 @@ class GlobalErrorBoundary extends React.Component {
 
             <View style={styles.errorCard}>
               <View style={styles.errorHeader}>
-                <MaterialCommunityIcons name="help-circle" size={16} color="#EF4444" />
+                <MaterialCommunityIcons name="alert-circle" size={16} color="#EF4444" />
                 <Text style={styles.errorLabel}>DÉTAILS TECHNIQUES</Text>
               </View>
               <ScrollView style={styles.errorScroll} showsVerticalScrollIndicator={false}>
@@ -78,7 +78,7 @@ class GlobalErrorBoundary extends React.Component {
                 end={{ x: 1, y: 0 }}
                 style={styles.btnGradient}
               >
-                <MaterialCommunityIcons name="help-circle" size={24} color="#FFF" />
+                <MaterialCommunityIcons name="alert-circle" size={24} color="#FFF" />
                 <Text style={styles.btnText}>REDÉMARRER L'APPLICATION</Text>
               </LinearGradient>
             </TouchableOpacity>

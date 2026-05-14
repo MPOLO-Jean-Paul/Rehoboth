@@ -554,7 +554,7 @@ export default function CashierScreen({ navigation, route }) {
                         <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 6 }}>PAYÉ</Text>
                      </View>
                      <TouchableOpacity onPress={() => printReceipt(item)} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                        <MaterialCommunityIcons name="cash-register" size={20} color={brandColor} />
                      </TouchableOpacity>
                   </View>
                )}
@@ -699,7 +699,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <Text style={{ fontSize: 42, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{history.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 18 }}>FC</Text></Text>
                                  </View>
                                  <View style={{ width: 60, height: 60, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                                    <MaterialCommunityIcons name="help-circle" size={32} color="#FFF" />
+                                    <MaterialCommunityIcons name="cash-register" size={32} color="#FFF" />
                                  </View>
                               </View>
                               <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 24 }} />
@@ -725,7 +725,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <View key={i} style={{ padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                                          <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                                          <MaterialCommunityIcons name="cash-register" size={20} color={brandColor} />
                                        </View>
                                        <View>
                                           <Text style={{ fontWeight: '800', color: isDark ? '#E2E8F0' : '#1A1A1A', fontSize: 14 }}>{service.toUpperCase()}</Text>
@@ -750,7 +750,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ fontSize: 11, color: brandColor, fontWeight: '900', marginTop: 4 }}>GESTION DES COMPTES SOCIÉTÉS</Text>
                               </View>
                               <TouchableOpacity onPress={() => fetchInsurances()} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center' }}>
-                                 <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                                 <MaterialCommunityIcons name="cash-register" size={20} color={brandColor} />
                               </TouchableOpacity>
                            </View>
 
@@ -812,7 +812,7 @@ export default function CashierScreen({ navigation, route }) {
                            <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 28, borderRadius: 35, marginBottom: 32, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                                  <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: 1 }}>RÉPARTITION DES FLUX</Text>
-                                 <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                                 <MaterialCommunityIcons name="cash-register" size={20} color={brandColor} />
                               </View>
 
                               <View style={{ gap: 20 }}>
@@ -851,7 +851,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ color: '#FFF', fontSize: 8, fontWeight: '900', marginTop: 5 }}>NOUVEAU</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={() => setShowAutoModal(true)} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: autoJournalEnabled ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
-                                 <MaterialCommunityIcons name="help-circle" size={22} color={autoJournalEnabled ? brandColor : (isDark ? "#F1F5F9" : '#0A0A0A')} />
+                                 <MaterialCommunityIcons name="cash-register" size={22} color={autoJournalEnabled ? brandColor : (isDark ? "#F1F5F9" : '#0A0A0A')} />
                                  <Text style={{ color: autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A'), fontSize: 8, fontWeight: '900', marginTop: 5 }}>AUTO : {autoJournalEnabled ? autoJournalFreq.toUpperCase() : 'OFF'}</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={handleCloseSession} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
@@ -1048,7 +1048,7 @@ export default function CashierScreen({ navigation, route }) {
                      <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#555555' : '#94A3B8' }}>Performance et flux de trésorerie</Text>
                   </View>
                   <TouchableOpacity onPress={() => toggleBottomTab('summary')} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                     <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
+                     <MaterialCommunityIcons name="cash-register" size={24} color={brandColor} />
                   </TouchableOpacity>
                </View>
                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 24, paddingBottom: 60 + insets.bottom }}>
@@ -1376,7 +1376,7 @@ export default function CashierScreen({ navigation, route }) {
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedJournal?.reference || 'CHARGEMENT...'}</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowJournalDetails(false)} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
+                        <MaterialCommunityIcons name="cash-register" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 
@@ -1445,7 +1445,7 @@ export default function CashierScreen({ navigation, route }) {
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedInsurance?.name}</Text>
                      </View>
                      <TouchableOpacity onPress={() => { setSelectedInsurance(null); setInsuranceReport(null); }} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
+                        <MaterialCommunityIcons name="cash-register" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 

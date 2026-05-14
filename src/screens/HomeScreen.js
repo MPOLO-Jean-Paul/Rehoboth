@@ -329,7 +329,7 @@ export default function HomeScreen({ navigation }) {
                 style={[tw`flex-row items-center px-3 border ml-2`, { height: S.vs(38), borderRadius: S.ms(19), backgroundColor: C.headerBtn, borderColor: C.border, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 }]}
                 onPress={toggleLang}
               >
-                <MaterialCommunityIcons name="help-circle" size={S.ms(18)} color={isDark ? "#FFF" : brandColor} />
+                <MaterialCommunityIcons name="view-dashboard" size={S.ms(18)} color={isDark ? "#FFF" : brandColor} />
                 <Text style={[tw`font-bold ml-1.5`, { fontSize: S.fs(12), color: C.text }]}>{lang.toUpperCase()}</Text>
               </PressableScale>
 

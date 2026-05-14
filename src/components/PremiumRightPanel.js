@@ -201,7 +201,7 @@ export default function PremiumRightPanel({
             <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>COMPTE</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
-                icon={<MaterialCommunityIcons name="help-circle" size={18} color="#FFF" />}
+                icon={<MaterialCommunityIcons name="information" size={18} color="#FFF" />}
                 iconBg={brandColor}
                 label="Mon Compte"
                 subtitle="Gérer mes informations"

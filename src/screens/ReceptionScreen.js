@@ -802,7 +802,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     onPress={() => setSelectedYearFolder(null)}
                                     style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, padding: 10, backgroundColor: brandColor + '10', borderRadius: 12, alignSelf: 'flex-start' }}
                                  >
-                                    <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                                    <MaterialCommunityIcons name="clipboard-account" size={18} color={brandColor} />
                                     <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX ARCHIVES</Text>
                                  </TouchableOpacity>
 
@@ -900,7 +900,7 @@ export default function ReceptionScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
                               <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>BILAN D'ACTIVITÉ</Text>
-                              <TouchableOpacity onPress={() => fetchServiceRevenues(false, bilanPeriod)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                              <TouchableOpacity onPress={() => fetchServiceRevenues(false, bilanPeriod)}><MaterialCommunityIcons name="clipboard-account" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
 
                            <View style={{ flexDirection: 'row', backgroundColor: C.surface, borderRadius: 20, padding: 5, marginBottom: 20, borderWidth: 1, borderColor: C.divider, elevation: 2 }}>

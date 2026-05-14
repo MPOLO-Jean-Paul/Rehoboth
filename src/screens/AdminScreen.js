@@ -99,6 +99,9 @@ export default function AdminScreen({ navigation }) {
   const [bulkCatalogItems, setBulkCatalogItems] = useState([{ label: '', price: '', dosage: '' }]);
   const [bulkCategory, setBulkCategory] = useState('Produit');
   const [customCategoryName, setCustomCategoryName] = useState('');
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetService, setResetService] = useState('pharmacie');
+  const [resetPassword, setResetPassword] = useState('');
   const bottomPanelAnim = useRef(new Animated.Value(0)).current;
 
   const leftAnim = useRef(new Animated.Value(-width)).current;
@@ -302,6 +305,48 @@ export default function AdminScreen({ navigation }) {
     if (Date.now() - lastRun < intervalMs) return;
     await downloadHospitalData(false);
     await Storage.save('admin_auto_export_state', { lastRun: Date.now(), frequency: autoExportFrequency });
+  };
+
+  const handleResetAll = async () => {
+    if (resetPassword !== 'REHOBOTH_ADMIN_RESET') {
+       return showToast("Code de sécurité incorrect", "error");
+    }
+    
+    Alert.alert("ATTENTION", "Voulez-vous vraiment TOUT EFFACER ? Cette action est irréversible et supprimera tous les dossiers, visites, factures et comptes (sauf admin).", [
+       { text: "ANNULER", style: "cancel" },
+       { text: "OUI, TOUT RÉINITIALISER", style: "destructive", onPress: async () => {
+          setIsSubmitting(true);
+          try {
+             const res = await api.post('/admin/data/reset-all');
+             showToast(res.data.message, "success");
+             setShowResetModal(false);
+             setResetPassword('');
+             fetchGlobalData();
+          } catch (e) { showToast(parseError(e), "error"); }
+          finally { setIsSubmitting(false); }
+       }}
+    ]);
+  };
+
+  const handleResetService = async () => {
+    if (resetPassword !== 'REHOBOTH_ADMIN_RESET') {
+       return showToast("Code de sécurité incorrect", "error");
+    }
+
+    Alert.alert("Confirmation", `Réinitialiser les données du service ${resetService.toUpperCase()} ? Les comptes ne seront pas supprimés.`, [
+       { text: "ANNULER", style: "cancel" },
+       { text: "CONFIRMER", style: "destructive", onPress: async () => {
+          setIsSubmitting(true);
+          try {
+             const res = await api.post('/admin/data/reset-service', { service: resetService });
+             showToast(res.data.message, "success");
+             setShowResetModal(false);
+             setResetPassword('');
+             fetchGlobalData();
+          } catch (e) { showToast(parseError(e), "error"); }
+          finally { setIsSubmitting(false); }
+       }}
+    ]);
   };
 
   const handleRenewInsurance = async (ins) => {
@@ -984,90 +1029,126 @@ export default function AdminScreen({ navigation }) {
            )}
 
            {activeView === 'data' && (
-              <FadeInView>
-                 <View style={styles.rowBetween}>
+               <FadeInView>
+                  <View style={styles.rowBetween}>
+                     <View>
+                        <Text style={[styles.vTitle, { color: C.text }]}>DONNÉES HÔPITAL</Text>
+                        <Text style={{ color: C.sub, fontSize: 10, fontWeight: '800' }}>Archives classées par année de naissance</Text>
+                     </View>
+                     <View style={{ flexDirection: 'row', gap: 8 }}>
+                        <TouchableOpacity
+                           onPress={() => setShowResetModal(true)}
+                           style={{ backgroundColor: '#EF444415', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EF444430' }}
+                        >
+                           <MaterialCommunityIcons name="database-remove" size={18} color="#EF4444" />
+                           <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>RESET</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => downloadHospitalData(true)}
+                          disabled={isSubmitting}
+                          style={{ backgroundColor: brandColor, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', opacity: isSubmitting ? 0.6 : 1 }}
+                        >
+                           <MaterialCommunityIcons name="download" size={18} color="#FFF" />
+                           <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>EXPORTER</Text>
+                        </TouchableOpacity>
+                     </View>
+                  </View>
+
+                  {!selectedYearFolder ? (
                     <View>
-                       <Text style={[styles.vTitle, { color: C.text }]}>DONNÉES HÔPITAL</Text>
-                       <Text style={{ color: C.sub, fontSize: 10, fontWeight: '800' }}>Dossiers patients classés par année de naissance</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => downloadHospitalData(true)}
-                      disabled={isSubmitting}
-                      style={{ backgroundColor: brandColor, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', opacity: isSubmitting ? 0.6 : 1 }}
-                    >
-                       <MaterialCommunityIcons name="download" size={18} color="#FFF" />
-                       <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>EXPORTER</Text>
-                    </TouchableOpacity>
-                 </View>
-
-                 <View style={{ marginTop: 16, padding: 16, backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.border }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                       <View>
-                          <Text style={{ color: C.text, fontWeight: '900', fontSize: 13 }}>Téléchargement automatique</Text>
-                          <Text style={{ color: C.sub, fontWeight: '700', fontSize: 10 }}>{lastExportUri ? 'Dernier fichier généré sur cet appareil' : 'Crée un fichier local quand l’admin ouvre cette vue'}</Text>
+                       <View style={{ flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 20 }}>
+                          <View style={[styles.searchBox, { flex: 1, backgroundColor: C.surface, borderColor: C.border, marginBottom: 0 }]}>
+                             <MaterialIcons name="search" size={20} color={brandColor} />
+                             <TextInput placeholder="Nom, code, téléphone..." placeholderTextColor={C.sub} style={[styles.searchInput, { color: C.text }]} value={dataSearch} onChangeText={setDataSearch} />
+                          </View>
                        </View>
-                       <Switch value={autoExportEnabled} onValueChange={setAutoExportEnabled} trackColor={{ true: brandColor }} />
-                    </View>
-                    <View style={{ flexDirection: 'row', gap: 8 }}>
-                       {[
-                         { id: 'daily', label: 'JOUR' },
-                         { id: 'weekly', label: 'SEMAINE' },
-                         { id: 'monthly', label: 'MOIS' },
-                       ].map(freq => (
-                         <TouchableOpacity
-                           key={freq.id}
-                           onPress={() => setAutoExportFrequency(freq.id)}
-                           style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center', backgroundColor: autoExportFrequency === freq.id ? brandColor : C.bg, borderWidth: 1, borderColor: autoExportFrequency === freq.id ? brandColor : C.border }}
-                         >
-                           <Text style={{ color: autoExportFrequency === freq.id ? '#FFF' : C.sub, fontSize: 9, fontWeight: '900' }}>{freq.label}</Text>
-                         </TouchableOpacity>
-                       ))}
-                    </View>
-                 </View>
 
-                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 14 }}>
-                    <View style={[styles.searchBox, { flex: 1, backgroundColor: C.surface, borderColor: C.border, marginBottom: 0 }]}>
-                       <MaterialIcons name="search" size={20} color={brandColor} />
-                       <TextInput placeholder="Nom, code, téléphone..." placeholderTextColor={C.sub} style={[styles.searchInput, { color: C.text }]} value={dataSearch} onChangeText={setDataSearch} />
+                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15 }}>
+                          {Object.entries(
+                            asArray(dataRecords).reduce((acc, p) => {
+                              const year = p.birth_year || 'Sans année';
+                              if (!acc[year]) acc[year] = [];
+                              acc[year].push(p);
+                              return acc;
+                            }, {})
+                          ).sort((a, b) => {
+                             if (a[0] === 'Sans année') return 1;
+                             if (b[0] === 'Sans année') return -1;
+                             return Number(b[0]) - Number(a[0]);
+                          }).map(([year, records]) => (
+                             <TouchableOpacity 
+                                key={year}
+                                onPress={() => setSelectedYearFolder({ year, records })}
+                                style={styles.folderContainer}
+                             >
+                                <MaterialCommunityIcons name="folder-account" size={48} color={brandColor} style={{ opacity: 0.8 }} />
+                                <Text style={{ color: C.text, fontWeight: '900', fontSize: 13, marginTop: 12, textAlign: 'center' }}>ANNÉE {year}</Text>
+                                <View style={{ backgroundColor: C.brandLight, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
+                                   <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{records.length} DOSSIERS</Text>
+                                </View>
+                             </TouchableOpacity>
+                          ))}
+                       </View>
                     </View>
-                    <TextInput
-                      placeholder="Année"
-                      placeholderTextColor={C.sub}
-                      keyboardType="numeric"
-                      value={dataBirthYear}
-                      onChangeText={setDataBirthYear}
-                      style={[styles.input, { width: 92, height: 52, color: C.text, borderColor: C.border, backgroundColor: C.surface, marginBottom: 0 }]}
-                    />
-                 </View>
+                  ) : (
+                    <View>
+                        <TouchableOpacity 
+                           onPress={() => setSelectedYearFolder(null)}
+                           style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20, backgroundColor: C.divider, padding: 12, borderRadius: 15, alignSelf: 'flex-start', marginTop: 10 }}
+                        >
+                           <MaterialIcons name="arrow-back" size={20} color={C.text} />
+                           <Text style={{ marginLeft: 8, fontWeight: '900', color: C.text, fontSize: 11 }}>RETOUR AUX ANNÉES</Text>
+                        </TouchableOpacity>
 
-                 {Object.entries(
-                   asArray(dataRecords).reduce((acc, p) => {
-                     const year = p.birth_year || 'Non renseignée';
-                     if (!acc[year]) acc[year] = [];
-                     acc[year].push(p);
-                     return acc;
-                   }, {})
-                 ).sort((a, b) => Number(b[0]) - Number(a[0])).map(([year, records]) => (
-                   <View key={year} style={{ marginBottom: 18 }}>
-                      <Text style={{ color: brandColor, fontSize: 11, fontWeight: '900', marginBottom: 10 }}>NAISSANCE {year} • {records.length} DOSSIER(S)</Text>
-                      {records.map(p => (
-                        <View key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
-                           <View style={{ flex: 1 }}>
-                              <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name} {p.post_name || ''}</Text>
-                              <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 3 }}>ID {safePadId(p.id)} • {p.pathology || 'Pas de pathologie'} • {p.is_insured ? (p.insurance?.name || 'Assuré') : 'Privé'}</Text>
-                           </View>
-                           <TouchableOpacity onPress={() => setEditingPatient({ ...p })} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brandColor + '12', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
-                              <MaterialIcons name="edit" size={20} color={brandColor} />
-                           </TouchableOpacity>
-                           <TouchableOpacity onPress={() => handleDeletePatient(p)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: '#EF444412', alignItems: 'center', justifyContent: 'center' }}>
-                              <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
-                           </TouchableOpacity>
+                        <View style={{ backgroundColor: brandColor, padding: 24, borderRadius: 28, marginBottom: 20, elevation: 6 }}>
+                           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>DOSSIER ANNUEL</Text>
+                           <Text style={{ color: '#FFF', fontSize: 24, fontWeight: '900', marginTop: 4 }}>NAISSANCE {selectedYearFolder.year}</Text>
                         </View>
-                      ))}
-                   </View>
-                 ))}
-              </FadeInView>
-           )}
+
+                        {selectedYearFolder.records.map(p => (
+                          <View key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
+                             <View style={{ flex: 1 }}>
+                                <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name} {p.post_name || ''}</Text>
+                                <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 3 }}>ID {safePadId(p.id)} • {p.pathology || 'Pas de pathologie'} • {p.is_insured ? (p.insurance?.name || 'Assuré') : 'Privé'}</Text>
+                             </View>
+                             <TouchableOpacity onPress={() => setEditingPatient({ ...p })} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brandColor + '12', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+                                <MaterialIcons name="edit" size={20} color={brandColor} />
+                             </TouchableOpacity>
+                             <TouchableOpacity onPress={() => handleDeletePatient(p)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: '#EF444412', alignItems: 'center', justifyContent: 'center' }}>
+                                <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
+                             </TouchableOpacity>
+                          </View>
+                        ))}
+                    </View>
+                  )}
+                  
+                  <View style={{ marginTop: 30, padding: 20, backgroundColor: C.surface, borderRadius: 28, borderWidth: 1, borderColor: C.border }}>
+                     <Text style={{ color: C.text, fontWeight: '900', fontSize: 14, marginBottom: 15 }}>PARAMÈTRES D'EXPORTATION</Text>
+                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                        <View>
+                           <Text style={{ color: C.text, fontWeight: '800', fontSize: 12 }}>Téléchargement automatique</Text>
+                           <Text style={{ color: C.sub, fontWeight: '700', fontSize: 10 }}>Génère un backup local périodiquement</Text>
+                        </View>
+                        <Switch value={autoExportEnabled} onValueChange={setAutoExportEnabled} trackColor={{ true: brandColor }} />
+                     </View>
+                     <View style={{ flexDirection: 'row', gap: 8 }}>
+                        {[
+                          { id: 'daily', label: 'JOUR' },
+                          { id: 'weekly', label: 'SEMAINE' },
+                          { id: 'monthly', label: 'MOIS' },
+                        ].map(freq => (
+                          <TouchableOpacity
+                            key={freq.id}
+                            onPress={() => setAutoExportFrequency(freq.id)}
+                            style={{ flex: 1, paddingVertical: 12, borderRadius: 12, alignItems: 'center', backgroundColor: autoExportFrequency === freq.id ? brandColor : C.bg, borderWidth: 1, borderColor: autoExportFrequency === freq.id ? brandColor : C.border }}
+                          >
+                            <Text style={{ color: autoExportFrequency === freq.id ? '#FFF' : C.sub, fontSize: 9, fontWeight: '900' }}>{freq.label}</Text>
+                          </TouchableOpacity>
+                        ))}
+                     </View>
+                  </View>
+               </FadeInView>
+            )}
 
            {/* MESSAGING VIEW */}
             {activeView === 'comm' && (
@@ -1523,7 +1604,7 @@ export default function AdminScreen({ navigation }) {
 
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15, justifyContent: 'space-between' }}>
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                 <MaterialCommunityIcons name="help-circle" size={14} color={C.sub} />
+                                 <MaterialCommunityIcons name="bell-ring-outline" size={14} color={C.sub} />
                                  <Text style={{ fontSize: 10, color: C.sub, marginLeft: 5, fontWeight: '600' }} numberOfLines={1}>
                                     {ins.contact_info || "Aucune information de contact"}
                                  </Text>
@@ -1648,7 +1729,7 @@ export default function AdminScreen({ navigation }) {
                                               onPress={() => handleDeleteCatalogItem(globalIndex)}
                                               style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.danger + '15', alignItems: 'center', justifyContent: 'center', marginLeft: 8 }}
                                            >
-                                              <MaterialCommunityIcons name="help-circle" size={18} color={C.danger} />
+                                              <MaterialCommunityIcons name="trash-can-outline" size={18} color={C.danger} />
                                            </TouchableOpacity>
                                         )}
                                      </View>
@@ -1843,7 +1924,7 @@ export default function AdminScreen({ navigation }) {
                   <Text style={styles.label}>TÉLÉPHONE</Text>
                   <View style={{ marginBottom: 20 }}>
                      <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                        <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                        <MaterialCommunityIcons name="phone" size={20} color={brandColor} />
                         <TextInput 
                            style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
                            placeholder="08X XXX XXXX" placeholderTextColor={C.placeholder} 
@@ -1871,7 +1952,7 @@ export default function AdminScreen({ navigation }) {
                         <Text style={styles.label}>MOT DE PASSE</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                              <MaterialCommunityIcons name="lock-outline" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
                                  placeholder="••••••••" placeholderTextColor={C.placeholder} 
@@ -1888,7 +1969,7 @@ export default function AdminScreen({ navigation }) {
                         <Text style={styles.label}>CONFIRMER LE MOT DE PASSE</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                              <MaterialCommunityIcons name="lock-check-outline" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
                                  placeholder="••••••••" placeholderTextColor={C.placeholder} 
@@ -1938,7 +2019,7 @@ export default function AdminScreen({ navigation }) {
                           onPress={() => setShowResetSection(!showResetSection)}
                           style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}
                         >
-                           <MaterialIcons name="lock-reset" size={20} color={brandColor} />
+                           <MaterialCommunityIcons name="lock-reset" size={20} color={brandColor} />
                            <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 10 }}>RÉINITIALISER LE MOT DE PASSE</Text>
                         </TouchableOpacity>
 
@@ -2004,7 +2085,7 @@ export default function AdminScreen({ navigation }) {
                      </View>
                   </View>
                   <TouchableOpacity onPress={() => setShowBilanModal(false)} style={styles.closeBtn}>
-                     <MaterialCommunityIcons name="help-circle" size={24} color={C.text} />
+                     <MaterialCommunityIcons name="close" size={24} color={C.text} />
                   </TouchableOpacity>
                </View>
 
@@ -2016,7 +2097,7 @@ export default function AdminScreen({ navigation }) {
                            <Text style={{ fontSize: 34, fontWeight: '900', color: C.text }}>{(stats?.revenue_period || 0).toLocaleString()} <Text style={{ fontSize: 14 }}>FC</Text></Text>
                            <Text style={{ fontSize: 11, fontWeight: '800', color: '#22C55E', marginTop: 5 }}>Rendement Optimal (+12.5%)</Text>
                         </View>
-                        <MaterialCommunityIcons name="help-circle" size={44} color="#22C55E15" />
+                        <MaterialCommunityIcons name="trending-up" size={44} color="#22C55E15" />
                      </View>
                   </View>
 
@@ -2267,7 +2348,7 @@ export default function AdminScreen({ navigation }) {
                   renderItem={({ item }) => (
                      <View style={{ paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: C.divider, flexDirection: 'row', alignItems: 'center' }}>
                         <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#3B82F615', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                           <MaterialCommunityIcons name="help-circle" size={20} color="#3B82F6" />
+                           <MaterialCommunityIcons name="account-circle-outline" size={20} color="#3B82F6" />
                         </View>
                         <View style={{ flex: 1 }}>
                            <Text style={{ color: C.text, fontWeight: '800', fontSize: 14 }}>{item.member_name}</Text>
@@ -2417,7 +2498,7 @@ export default function AdminScreen({ navigation }) {
                </ScrollView>
 
                <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: C.divider }}>
-                  <TouchableOpacity onPress={handleSaveBulkCatalog} disabled={isSubmitting}>
+               <TouchableOpacity onPress={handleSaveBulkCatalog} disabled={isSubmitting}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
                         {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                            <>
@@ -2441,7 +2522,7 @@ export default function AdminScreen({ navigation }) {
                     <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginLeft: 10 }}>DÉTAIL DES REVENUS</Text>
                  </View>
                  <TouchableOpacity onPress={() => setShowRevenueModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                    <MaterialCommunityIcons name="help-circle" size={20} color={C.closeIc} />
+                    <MaterialCommunityIcons name="close" size={20} color={C.closeIc} />
                  </TouchableOpacity>
               </View>
               <Text style={{ fontSize: 12, fontWeight: '700', color: C.sub, marginBottom: 20 }}>
@@ -2465,6 +2546,88 @@ export default function AdminScreen({ navigation }) {
               </ScrollView>
            </View>
         </View>
+      </Modal>
+
+      <Modal visible={showResetModal} animationType="slide" transparent>
+         <View style={styles.modalOverlay}>
+            <View style={[styles.modalSheet, { backgroundColor: C.bg, height: height * 0.65 }]}>
+               <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
+                  <Text style={[styles.dimT, { color: C.text }]}>RÉINITIALISATION DES DONNÉES</Text>
+                  <TouchableOpacity onPress={() => setShowResetModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
+                     <MaterialIcons name="close" size={22} color={C.closeIc} />
+                  </TouchableOpacity>
+               </View>
+               <ScrollView style={{ padding: 25 }}>
+                  <View style={{ backgroundColor: '#EF444410', padding: 18, borderRadius: 20, marginBottom: 25, borderWidth: 1, borderColor: '#EF444430' }}>
+                     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+                        <MaterialCommunityIcons name="alert-decagram" size={24} color="#EF4444" />
+                        <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 14, marginLeft: 10 }}>ZONE DE DANGER</Text>
+                     </View>
+                     <Text style={{ color: C.sub, fontSize: 12, lineHeight: 18 }}>Cette opération supprimera définitivement les données sélectionnées. Assurez-vous d'avoir exporté les données importantes avant de continuer.</Text>
+                  </View>
+
+                  <Text style={styles.label}>OPTION DE RÉINITIALISATION</Text>
+                  <View style={{ flexDirection: 'row', gap: 10, marginBottom: 20 }}>
+                     <TouchableOpacity 
+                        onPress={() => setResetService('ALL')}
+                        style={{ flex: 1, padding: 15, borderRadius: 18, backgroundColor: resetService === 'ALL' ? '#EF4444' : C.surface, borderWidth: 1, borderColor: resetService === 'ALL' ? '#EF4444' : C.border, alignItems: 'center' }}
+                     >
+                        <MaterialCommunityIcons name="database-remove" size={24} color={resetService === 'ALL' ? '#FFF' : '#EF4444'} />
+                        <Text style={{ color: resetService === 'ALL' ? '#FFF' : C.text, fontWeight: '900', fontSize: 10, marginTop: 8 }}>TOUT EFFACER</Text>
+                     </TouchableOpacity>
+                     <TouchableOpacity 
+                        onPress={() => setResetService('pharmacie')}
+                        style={{ flex: 1, padding: 15, borderRadius: 18, backgroundColor: (resetService !== 'ALL' && resetService !== '') ? brandColor : C.surface, borderWidth: 1, borderColor: (resetService !== 'ALL' && resetService !== '') ? brandColor : C.border, alignItems: 'center' }}
+                     >
+                        <MaterialCommunityIcons name="layers-remove" size={24} color={(resetService !== 'ALL' && resetService !== '') ? '#FFF' : brandColor} />
+                        <Text style={{ color: (resetService !== 'ALL' && resetService !== '') ? '#FFF' : C.text, fontWeight: '900', fontSize: 10, marginTop: 8 }}>PAR SERVICE</Text>
+                     </TouchableOpacity>
+                  </View>
+
+                  {resetService !== 'ALL' && (
+                     <FadeInView style={{ marginBottom: 20 }}>
+                        <Text style={styles.label}>SÉLECTIONNER LE SERVICE</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 5 }}>
+                           {['pharmacie', 'labo', 'soins', 'maternite', 'reception', 'caisse'].map(s => (
+                              <TouchableOpacity
+                                 key={s}
+                                 onPress={() => setResetService(s)}
+                                 style={{ paddingHorizontal: 15, paddingVertical: 10, borderRadius: 12, backgroundColor: resetService === s ? brandColor : C.input, marginRight: 8, borderWidth: 1, borderColor: resetService === s ? brandColor : C.border }}
+                              >
+                                 <Text style={{ color: resetService === s ? '#FFF' : C.sub, fontSize: 10, fontWeight: '900' }}>{s.toUpperCase()}</Text>
+                              </TouchableOpacity>
+                           ))}
+                        </ScrollView>
+                     </FadeInView>
+                  )}
+
+                  <Text style={styles.label}>CODE DE SÉCURITÉ ADMIN</Text>
+                  <TextInput 
+                     style={[styles.input, { color: C.text, borderColor: '#EF4444', backgroundColor: C.input }]} 
+                     placeholder="Entrez REHOBOTH_ADMIN_RESET" 
+                     placeholderTextColor={C.placeholder}
+                     secureTextEntry={true}
+                     value={resetPassword}
+                     onChangeText={setResetPassword}
+                  />
+
+                  <TouchableOpacity 
+                     onPress={resetService === 'ALL' ? handleResetAll : handleResetService} 
+                     disabled={isSubmitting || !resetPassword}
+                     style={{ marginTop: 10, marginBottom: 40 }}
+                  >
+                     <LinearGradient colors={resetService === 'ALL' ? ['#EF4444', '#B91C1C'] : Theme.colors.brandGradient} style={{ height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', opacity: (!resetPassword || isSubmitting) ? 0.6 : 1 }}>
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
+                           <>
+                              <MaterialCommunityIcons name="trash-can-outline" size={22} color="#FFF" />
+                              <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 15, marginLeft: 10 }}>CONFIRMER LA SUPPRESSION</Text>
+                           </>
+                        )}
+                     </LinearGradient>
+                  </TouchableOpacity>
+               </ScrollView>
+            </View>
+         </View>
       </Modal>
 
     </View>

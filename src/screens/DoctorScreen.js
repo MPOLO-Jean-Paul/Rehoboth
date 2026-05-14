@@ -548,7 +548,7 @@ export default function DoctorScreen({ navigation, route }) {
               ) : (
                 currentList.length > 0 ? currentList.map(renderVisitCard) : (
                   <View style={styles.emptyContainer}>
-                    <MaterialCommunityIcons name="help-circle" size={64} color={brandColor} style={{ opacity: 0.3 }} />
+                    <MaterialCommunityIcons name="stethoscope" size={64} color={brandColor} style={{ opacity: 0.3 }} />
                     <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>Aucun patient dans cette file</Text>
                   </View>
                 )
@@ -557,7 +557,7 @@ export default function DoctorScreen({ navigation, route }) {
           ) : (
             <FadeInView style={{ paddingTop: 10 }}>
               <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedVisit(null)}>
-                <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                <MaterialCommunityIcons name="stethoscope" size={20} color={brandColor} />
                 <Text style={[styles.backBtnText, { color: brandColor }]}>RETOUR À LA LISTE</Text>
               </TouchableOpacity>
 
@@ -592,7 +592,7 @@ export default function DoctorScreen({ navigation, route }) {
               {/* PATIENT HISTORY */}
               <TouchableOpacity style={[styles.sectionHeader, { marginTop: 0 }]} activeOpacity={0.7}>
                 <Text style={styles.fieldHeading}>HISTORIQUE MÉDICAL</Text>
-                <MaterialCommunityIcons name="help-circle" size={16} color="#64748B" />
+                <MaterialCommunityIcons name="stethoscope" size={16} color="#64748B" />
               </TouchableOpacity>
               <View style={[styles.historyContainer, { backgroundColor: isDark ? '#111827' : '#F1F5F9' }]}>
                 {histLoading ? <ActivityIndicator color={brandColor} /> :
@@ -613,12 +613,12 @@ export default function DoctorScreen({ navigation, route }) {
               <Text style={styles.fieldHeading}>{t.vitals?.toUpperCase() || 'CONSTANTES'}</Text>
               <View style={styles.vitalsRow}>
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
-                  <MaterialCommunityIcons name="help-circle" size={18} color="#EF4444" />
+                  <MaterialCommunityIcons name="stethoscope" size={18} color="#EF4444" />
                   <TextInput editable={false} style={[styles.vitalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} value={vitals.temp} />
                   <Text style={styles.vitalUnit}>°C</Text>
                 </View>
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
-                  <MaterialCommunityIcons name="help-circle" size={18} color="#3B82F6" />
+                  <MaterialCommunityIcons name="stethoscope" size={18} color="#3B82F6" />
                   <TextInput editable={false} style={[styles.vitalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} value={vitals.bp} />
                 </View>
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
@@ -641,7 +641,7 @@ export default function DoctorScreen({ navigation, route }) {
               {selectedVisit.lab_results && (
                 <FadeInView style={[styles.resultsBox, { backgroundColor: brandColor + '10', borderColor: brandColor + '30' }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                    <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                    <MaterialCommunityIcons name="stethoscope" size={18} color={brandColor} />
                     <Text style={[styles.resultsTitle, { color: brandColor }]}>RÉSULTATS DU LABORATOIRE</Text>
                   </View>
                   <View style={[styles.resultsContent, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
@@ -686,7 +686,7 @@ export default function DoctorScreen({ navigation, route }) {
               {nextService === 'labo' && (
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={[brandColor + '15', brandColor + '05']} style={styles.ordonnanceHeader}>
-                    <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                    <MaterialCommunityIcons name="stethoscope" size={20} color={brandColor} />
                     <Text style={[styles.ordonnanceTitle, { color: brandColor }]}>BON DE LABORATOIRE</Text>
                   </LinearGradient>
                   
@@ -732,7 +732,7 @@ export default function DoctorScreen({ navigation, route }) {
               {nextService === 'pharmacie' && (
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={['#10B98115', '#10B98105']} style={styles.ordonnanceHeader}>
-                    <MaterialCommunityIcons name="help-circle" size={20} color="#10B981" />
+                    <MaterialCommunityIcons name="stethoscope" size={20} color="#10B981" />
                     <Text style={[styles.ordonnanceTitle, { color: '#10B981' }]}>ORDONNANCE MÉDICALE</Text>
                   </LinearGradient>
 

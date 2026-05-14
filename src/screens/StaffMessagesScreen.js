@@ -167,7 +167,7 @@ export default function StaffMessagesScreen({ navigation }) {
         </View>
 
         <View style={[styles.cardFooter, { borderTopColor: C.divider }]}>
-           <MaterialCommunityIcons name="help-circle" size={16} color={C.sub} style={{ marginRight: 6 }} />
+           <MaterialCommunityIcons name="message-text" size={16} color={C.sub} style={{ marginRight: 6 }} />
            <Text style={[styles.footerText, { color: C.sub }]}>
              {isUnread ? 'Touchez pour marquer comme lu' : 'Message lu'}
            </Text>
@@ -217,7 +217,7 @@ export default function StaffMessagesScreen({ navigation }) {
               <FadeInView style={styles.summaryWrap}>
                 <LinearGradient colors={Theme.colors.brandGradient} style={styles.summaryCard}>
                   <View style={styles.summaryIcon}>
-                    <MaterialCommunityIcons name="help-circle" size={28} color="#FFF" />
+                    <MaterialCommunityIcons name="message-text" size={28} color="#FFF" />
                   </View>
                   <View style={styles.summaryTextWrap}>
                     <Text style={styles.summaryLabel}>BOÎTE DE RÉCEPTION</Text>
@@ -226,7 +226,7 @@ export default function StaffMessagesScreen({ navigation }) {
                     </Text>
                   </View>
                   <TouchableOpacity onPress={markAllAsRead} disabled={unreadCount === 0} style={styles.summaryAction}>
-                    <MaterialCommunityIcons name="help-circle" size={22} color="#FFF" />
+                    <MaterialCommunityIcons name="message-text" size={22} color="#FFF" />
                   </TouchableOpacity>
                 </LinearGradient>
                 <View style={[styles.filterBar, { backgroundColor: C.surface, borderColor: C.border }]}>

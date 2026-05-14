@@ -370,7 +370,7 @@ export default function LoginScreen({ navigation }) {
                     ? { borderColor: brandColor, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : '#FFF' } 
                     : { borderColor: isDark ? 'rgba(148, 163, 184, 0.16)' : C.border, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF' }
                 ]}>
-                  <Feather name="help-circle" size={20} color={emailFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
+                  <Feather name="account" size={20} color={emailFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
                     placeholder="agent@mdcd.com" placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
@@ -487,7 +487,7 @@ export default function LoginScreen({ navigation }) {
                       <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black mr-2`, { letterSpacing: 0 }]}>
                         {t.login || 'Se Connecter'}
                       </Text>
-                      <Feather name="help-circle" size={20} color="#FFF" />
+                      <Feather name="account" size={20} color="#FFF" />
                     </>
                   )}
                 </PressableScale>

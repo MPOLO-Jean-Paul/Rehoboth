@@ -79,7 +79,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
 
           {/* Quick Notes */}
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, marginTop: 32 }}>
-             <MaterialCommunityIcons name="help-circle" size={16} color={brandColor} />
+             <MaterialCommunityIcons name="stethoscope" size={16} color={brandColor} />
              <Text style={[styles.sectionTitle, { color: C.sub, marginBottom: 0, marginLeft: 8 }]}>NOTES & CONDUITES À TENIR</Text>
           </View>
           <View style={{ gap: 10 }}>
@@ -90,7 +90,7 @@ export default function DoctorActionPanel({ isOpen, anim, onClose, isDark: _igno
                 onPress={() => { onAppendNotes(note); onClose(); }}
               >
                 <View style={styles.noteIcon}>
-                   <MaterialCommunityIcons name="help-circle" size={16} color={brandColor} />
+                   <MaterialCommunityIcons name="stethoscope" size={16} color={brandColor} />
                 </View>
                 <Text style={{ flex: 1, fontSize: 13, color: C.sub, lineHeight: 20, fontWeight: '600' }}>{note}</Text>
               </TouchableOpacity>

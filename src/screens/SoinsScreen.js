@@ -1101,7 +1101,7 @@ export default function SoinsScreen({ navigation, route }) {
                       >
                         {(v.complaints_notes?.toLowerCase().includes('urgent') || activeView === 'urgencies') && (
                           <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start', marginBottom: 12 }}>
-                            <MaterialCommunityIcons name="help-circle" size={12} color="#EF4444" />
+                            <MaterialCommunityIcons name="medical-bag" size={12} color="#EF4444" />
                             <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>URGENT</Text>
                           </View>
                         )}
@@ -1238,7 +1238,7 @@ export default function SoinsScreen({ navigation, route }) {
                   onPress={() => setTransferDestination('pharmacie')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'pharmacie' ? '#10B981' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'pharmacie' ? '#10B981' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === "pharmacie" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <MaterialCommunityIcons name="medical-bag" size={20} color={transferDestination === "pharmacie" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
                   <Text style={{ color: transferDestination === 'pharmacie' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>PHARMACIE</Text>
                 </TouchableOpacity>
                 <TouchableOpacity

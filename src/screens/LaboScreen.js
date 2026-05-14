@@ -327,7 +327,7 @@ export default function LaboScreen({ navigation, route }) {
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ANALYSES EN ATTENTE</Text>
-                <TouchableOpacity onPress={fetchVisits}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                <TouchableOpacity onPress={fetchVisits}><MaterialCommunityIcons name="flask" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
                 <View>{[1, 2, 3].map(i => <SkeletonItem key={i} height={120} style={{ marginBottom: 16, borderRadius: 28 }} />)}</View>
@@ -340,7 +340,7 @@ export default function LaboScreen({ navigation, route }) {
                         <Text style={{ color: '#FFF', fontSize: 36, fontWeight: '900' }}>{visits.length}</Text>
                       </View>
                       <View style={{ width: 56, height: 56, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name="help-circle" size={30} color="#FFF" />
+                        <MaterialCommunityIcons name="flask" size={30} color="#FFF" />
                       </View>
                     </View>
                     <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
@@ -358,13 +358,13 @@ export default function LaboScreen({ navigation, route }) {
                         >
                           {isUrgent && (
                             <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start', marginBottom: 12 }}>
-                              <MaterialCommunityIcons name="help-circle" size={12} color="#EF4444" />
+                              <MaterialCommunityIcons name="flask" size={12} color="#EF4444" />
                               <Text style={{ color: '#EF4444', fontSize: 9, fontWeight: '900', marginLeft: 5 }}>URGENT</Text>
                             </View>
                           )}
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <LinearGradient colors={isUrgent ? ['#EF444420', '#EF444405'] : ['#805AD520', '#805AD505']} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                              <MaterialCommunityIcons name="help-circle" size={28} color={isUrgent ? "#EF4444" : '#805AD5'} />
+                              <MaterialCommunityIcons name="flask" size={28} color={isUrgent ? "#EF4444" : '#805AD5'} />
                             </LinearGradient>
                             <View style={{ flex: 1 }}>
                               <Text style={{ fontSize: 17, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{v.patient?.first_name} {v.patient?.last_name}</Text>
@@ -411,7 +411,7 @@ export default function LaboScreen({ navigation, route }) {
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>RÉSULTATS ENVOYÉS AUJOURD'HUI</Text>
-                <TouchableOpacity onPress={fetchHistory}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                <TouchableOpacity onPress={fetchHistory}><MaterialCommunityIcons name="flask" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
                 <View>{[1, 2, 3].map(i => <SkeletonItem key={i} height={90} style={{ marginBottom: 12, borderRadius: 24 }} />)}</View>
@@ -445,7 +445,7 @@ export default function LaboScreen({ navigation, route }) {
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>TABLEAU DE BORD</Text>
-                <TouchableOpacity onPress={() => { fetchHistory(); fetchVisits(); }}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                <TouchableOpacity onPress={() => { fetchHistory(); fetchVisits(); }}><MaterialCommunityIcons name="flask" size={24} color={brandColor} /></TouchableOpacity>
               </View>
 
               <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ borderRadius: 32, padding: 28, marginBottom: 16, elevation: 8, shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 15, shadowOffset: { width: 0, height: 8 } }}>
@@ -455,7 +455,7 @@ export default function LaboScreen({ navigation, route }) {
                     <Text style={{ color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 4 }}>{sentTodayList.length}</Text>
                   </View>
                   <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
-                    <MaterialCommunityIcons name="help-circle" size={28} color="#FFF" />
+                    <MaterialCommunityIcons name="flask" size={28} color="#FFF" />
                   </View>
                 </View>
                 <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 16 }} />
@@ -476,7 +476,7 @@ export default function LaboScreen({ navigation, route }) {
 
                 <View style={{ flex: 1, padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2, shadowColor: '#000', shadowOpacity: 0.05 }}>
                   <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: '#F59E0B15', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                    <MaterialCommunityIcons name="help-circle" size={22} color="#F59E0B" />
+                    <MaterialCommunityIcons name="flask" size={22} color="#F59E0B" />
                   </View>
                   <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{sentTodayList.filter(v => v.complaints_notes?.toLowerCase().includes('urgent')).length}</Text>
                   <Text style={{ fontSize: 10, fontWeight: '900', color: '#F59E0B', marginTop: 2, letterSpacing: 0.5 }}>URGENCES TRAITÉES</Text>
@@ -486,7 +486,7 @@ export default function LaboScreen({ navigation, route }) {
               {/* Bloc Archive Global */}
               <View style={{ flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
                 <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: '#22C55E15', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                  <MaterialCommunityIcons name="help-circle" size={28} color="#22C55E" />
+                  <MaterialCommunityIcons name="flask" size={28} color="#22C55E" />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ fontSize: 10, fontWeight: '900', color: '#22C55E', letterSpacing: 1, marginBottom: 4 }}>ARCHIVES GLOBALES</Text>
@@ -501,7 +501,7 @@ export default function LaboScreen({ navigation, route }) {
             <FadeInView>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ARCHIVES DES ANALYSES</Text>
-                <TouchableOpacity onPress={fetchHistory}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                <TouchableOpacity onPress={fetchHistory}><MaterialCommunityIcons name="flask" size={24} color={brandColor} /></TouchableOpacity>
               </View>
               {loading ? (
                 <View>{[1, 2, 3, 4].map(i => <SkeletonItem key={i} height={85} style={{ marginBottom: 10, borderRadius: 20 }} />)}</View>
@@ -576,7 +576,7 @@ export default function LaboScreen({ navigation, route }) {
                       <Text style={{ fontSize: 26, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
                     </View>
                     <View style={{ width: 50, height: 50, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                      <MaterialCommunityIcons name="help-circle" size={26} color="#FFF" />
+                      <MaterialCommunityIcons name="flask" size={26} color="#FFF" />
                     </View>
                   </View>
                   <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 18 }} />
@@ -596,7 +596,7 @@ export default function LaboScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                     <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888' : '#64748B', letterSpacing: 1 }}>SAISIE DES RÉSULTATS</Text>
                     <TouchableOpacity onPress={prefillTemplate} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12 }}>
-                      <MaterialCommunityIcons name="help-circle" size={14} color={brandColor} />
+                      <MaterialCommunityIcons name="flask" size={14} color={brandColor} />
                       <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', marginLeft: 6 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["RÉPONDRE \"NÉGATIF\""] || "RÉPONDRE \"NÉGATIF\""}</Text>
                     </TouchableOpacity>
                   </View>
@@ -690,7 +690,7 @@ export default function LaboScreen({ navigation, route }) {
           <View style={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 16, borderBottomWidth: 1, borderBottomColor: isDark ? '#1A1A1A' : '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <LinearGradient colors={[brandColor, '#805AD5']} style={{ width: 44, height: 44, borderRadius: 16, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                <MaterialCommunityIcons name="help-circle" size={24} color="#FFF" />
+                <MaterialCommunityIcons name="flask" size={24} color="#FFF" />
               </LinearGradient>
               <View>
                 <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.5 }}>STATISTIQUES LABO</Text>
@@ -718,7 +718,7 @@ export default function LaboScreen({ navigation, route }) {
 
               <View style={{ flex: 1, padding: 20, backgroundColor: '#EF444408', borderRadius: 24, borderWidth: 1, borderColor: '#EF444425' }}>
                 <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: '#EF444415', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                  <MaterialCommunityIcons name="help-circle" size={20} color="#EF4444" />
+                  <MaterialCommunityIcons name="flask" size={20} color="#EF4444" />
                 </View>
                 <Text style={{ fontSize: 32, fontWeight: '900', color: '#EF4444' }}>{stats?.urgent ?? visits.filter(v => v.complaints_notes?.toLowerCase().includes('urgent')).length}</Text>
                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1, marginTop: 4 }}>URGENCES</Text>
@@ -733,7 +733,7 @@ export default function LaboScreen({ navigation, route }) {
                   <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: '700' }}>Aujourd'hui</Text>
                   <Text style={{ color: '#FFF', fontSize: 48, fontWeight: '900', marginTop: 4 }}>{stats?.completed ?? sentTodayList.length}</Text>
                 </View>
-                <MaterialCommunityIcons name="help-circle" size={64} color="rgba(255,255,255,0.2)" />
+                <MaterialCommunityIcons name="flask" size={64} color="rgba(255,255,255,0.2)" />
               </View>
               <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -757,7 +757,7 @@ export default function LaboScreen({ navigation, route }) {
             {/* Archive global */}
             <View style={{ flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
               <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: '#22C55E15', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                <MaterialCommunityIcons name="help-circle" size={26} color="#22C55E" />
+                <MaterialCommunityIcons name="flask" size={26} color="#22C55E" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', letterSpacing: 1.5, marginBottom: 4 }}>ARCHIVES GLOBALES</Text>
