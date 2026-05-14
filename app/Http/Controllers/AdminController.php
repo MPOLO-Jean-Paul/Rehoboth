@@ -898,4 +898,73 @@ class AdminController extends Controller
             return $this->buildDashboardStats($request);
         });
     }
+
+    public function resetAll(Request $request)
+    {
+        // 1. Transactional Data
+        \DB::table('invoices')->delete();
+        \DB::table('visits')->delete();
+        \DB::table('maternity_cases')->delete();
+        \DB::table('maternity_follow_ups')->delete();
+        \DB::table('hospitalizations')->delete();
+        \DB::table('nursing_reports')->delete();
+        \DB::table('notifications')->delete();
+        
+        // 2. Messaging
+        \DB::table('staff_message_reads')->delete();
+        \DB::table('staff_messages')->delete();
+
+        // 3. Master Data (Optional but usually part of full reset)
+        \DB::table('patients')->delete();
+        \DB::table('medicines')->delete(); // Pharmacy stock
+        \DB::table('insured_members')->delete();
+        \DB::table('insurances')->delete();
+
+        // 4. Accounts (Keep Admin)
+        User::where('role', '!=', 'admin')->delete();
+
+        // Clear cache
+        \Cache::flush();
+
+        return response()->json(['message' => 'Toutes les données ont été réinitialisées avec succès. Seul le compte administrateur a été conservé.']);
+    }
+
+    public function resetService(Request $request)
+    {
+        $service = strtolower($request->input('service'));
+        
+        switch($service) {
+            case 'pharmacie':
+                \DB::table('medicines')->delete();
+                \DB::table('invoices')->where('service', 'pharmacie')->delete();
+                \DB::table('visits')->where('current_service', 'pharmacie')->update(['status' => 'completed']);
+                break;
+            case 'labo':
+                \DB::table('invoices')->where('service', 'labo')->delete();
+                \DB::table('visits')->where('current_service', 'labo')->update(['status' => 'completed']);
+                break;
+            case 'soins':
+                \DB::table('nursing_reports')->delete();
+                \DB::table('hospitalizations')->delete();
+                \DB::table('invoices')->where('service', 'soins')->delete();
+                break;
+            case 'maternite':
+                \DB::table('maternity_cases')->delete();
+                \DB::table('maternity_follow_ups')->delete();
+                \DB::table('invoices')->where('service', 'maternite')->delete();
+                break;
+            case 'reception':
+                \DB::table('patients')->delete();
+                \DB::table('invoices')->where('service', 'reception')->delete();
+                break;
+            case 'caisse':
+                \DB::table('invoices')->delete();
+                break;
+            default:
+                return response()->json(['message' => 'Service non reconnu'], 422);
+        }
+
+        \Cache::flush();
+        return response()->json(['message' => "Les données du service " . ucfirst($service) . " ont été réinitialisées."]);
+    }
 }

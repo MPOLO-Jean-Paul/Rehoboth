@@ -184,6 +184,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::put('/admin/patient-records/{id}', [AdminController::class, 'updatePatientRecord']);
     Route::delete('/admin/patient-records/{id}', [AdminController::class, 'deletePatientRecord']);
     Route::get('/admin/data/export', [AdminController::class, 'exportHospitalData']);
+    Route::post('/admin/data/reset-all', [AdminController::class, 'resetAll']);
+    Route::post('/admin/data/reset-service', [AdminController::class, 'resetService']);
     
     // Settings
     Route::get('/admin/settings', [AdminController::class, 'getSettings']);
