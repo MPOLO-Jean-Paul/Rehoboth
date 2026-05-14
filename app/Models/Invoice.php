@@ -21,6 +21,7 @@ class Invoice extends Model
         'payment_currency',
         'payment_status',
         'insurance_id',
+        'paid_amount',
     ];
 
     protected $casts = [

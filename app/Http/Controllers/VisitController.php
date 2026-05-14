@@ -584,4 +584,39 @@ class VisitController extends Controller
         $prefix = $visit->complaints_notes ? "\n" : '';
         $visit->complaints_notes = ($visit->complaints_notes ?? '') . $prefix . '[' . strtoupper($role) . '] ' . $notes;
     }
+
+    public function discharge(Request $request, $id): JsonResponse
+    {
+        $visit = Visit::findOrFail($id);
+        
+        $data = $request->validate([
+            'discharge_type' => 'required|string|in:guerison,refere,evasion,deces',
+            'discharge_summary' => 'nullable|string',
+            'follow_up_date' => 'nullable|date',
+        ]);
+
+        $visit->update([
+            'status' => 'completed',
+            'current_service' => 'completed',
+            'discharge_date' => now(),
+            'discharge_type' => $data['discharge_type'],
+            'discharge_summary' => $data['discharge_summary'] ?? null,
+            'follow_up_date' => $data['follow_up_date'] ?? null
+        ]);
+
+        // Update Patient status
+        $patient = $visit->patient;
+        $patientStatus = ($data['discharge_type'] === 'deces') ? 'deceased' : 'discharged';
+        
+        $patient->update([
+            'status' => $patientStatus,
+            'discharge_type' => $data['discharge_type'],
+            'death_date' => ($data['discharge_type'] === 'deces') ? now() : null,
+        ]);
+
+        return response()->json([
+            'message' => 'Sortie du patient enregistrée avec succès.',
+            'visit' => $visit
+        ]);
+    }
 }

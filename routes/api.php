@@ -46,6 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:admin,reception,soins'])->group(function () {
     Route::get('/patients', [PatientController::class, 'index']);
+    Route::get('/patients/{id}', [PatientController::class, 'show']);
     Route::post('/patients', [PatientController::class, 'store']);
     Route::get('/reception/stats-today', [PatientController::class, 'statsToday']);
     Route::get('/reception/cash-today', [AdminController::class, 'getCashToday']);
@@ -70,6 +71,7 @@ Route::middleware(['auth:sanctum', 'role:admin,caisse,medecin,labo,pharmacie,soi
 
 Route::middleware(['auth:sanctum', 'role:admin,medecin,labo,soins,maternite'])->group(function () {
     Route::post('/visits/{id}/forward', [VisitController::class, 'forward']); // Move to next service
+    Route::post('/visits/{id}/discharge', [VisitController::class, 'discharge']); // Discharge patient
 });
 
 // Maternité
@@ -112,6 +114,7 @@ Route::middleware(['auth:sanctum', 'role:admin,caisse'])->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index']);
     Route::get('/invoices/{id}/check-insurance-status', [InvoiceController::class, 'checkInsuranceStatus']);
     Route::post('/invoices/{id}/pay', [InvoiceController::class, 'pay']);
+    Route::post('/invoices/{id}/pay-advance', [InvoiceController::class, 'payAdvance']);
     Route::get('/cashier/daily-summary', [InvoiceController::class, 'getDailySummary']);
     Route::get('/cashier/history', [InvoiceController::class, 'getHistory']);
     Route::get('/cashier/accounting/stats', [InvoiceController::class, 'getAccountingStats']);
@@ -122,6 +125,12 @@ Route::middleware(['auth:sanctum', 'role:admin,caisse'])->group(function () {
     Route::get('/cashier/accounting/auto-settings', [InvoiceController::class, 'getAutoJournalSettings']);
     Route::post('/cashier/accounting/auto-settings', [InvoiceController::class, 'updateAutoJournalSettings']);
     Route::get('/cashier/accounting/journals/{id}', [InvoiceController::class, 'getJournalDetails']);
+    
+    // Expenses
+    Route::get('/expenses', [\App\Http\Controllers\ExpenseController::class, 'index']);
+    Route::get('/expenses/summary', [\App\Http\Controllers\ExpenseController::class, 'summary']);
+    Route::post('/expenses', [\App\Http\Controllers\ExpenseController::class, 'store']);
+    Route::delete('/expenses/{id}', [\App\Http\Controllers\ExpenseController::class, 'destroy']);
 
     // Insurances & Reports
     // Route::get('/insurances', [InsuranceController::class, 'index']); // Moved to shared block
@@ -158,6 +167,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Admin
     Route::get('/admin/bootstrap', [AdminController::class, 'getBootstrap']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+    Route::post('/admin/notify-daily', [AdminController::class, 'sendDailyReportNotification']);
     Route::post('/admin/users', [AdminController::class, 'createUser']);
     Route::get('/admin/users', [AdminController::class, 'getUsers']);
     Route::put('/admin/users/{id}', [AdminController::class, 'updateUser']);
@@ -186,6 +196,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/admin/data/export', [AdminController::class, 'exportHospitalData']);
     Route::post('/admin/data/reset-all', [AdminController::class, 'resetAll']);
     Route::post('/admin/data/reset-service', [AdminController::class, 'resetService']);
+    Route::post('/admin/backup', [AdminController::class, 'runBackup']);
+    Route::get('/admin/backup/download', [AdminController::class, 'downloadBackup']);
     
     // Settings
     Route::get('/admin/settings', [AdminController::class, 'getSettings']);

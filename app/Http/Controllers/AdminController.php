@@ -26,6 +26,14 @@ class AdminController extends Controller
         return response()->json($this->buildDashboardStats($request));
     }
 
+    public function sendDailyReportNotification(Request $request)
+    {
+        $command = new \App\Console\Commands\SendDailyPerformanceReport();
+        $command->handle();
+        
+        return response()->json(['message' => 'Rapport journalier envoyé aux administrateurs.']);
+    }
+
     private function buildDashboardStats(Request $request): array
     {
         $period = $request->get('period', 'day'); // day, week, month
@@ -72,11 +80,17 @@ class AdminController extends Controller
         $labCount = Visit::where('current_service', 'labo')
             ->where('created_at', '>=', $startDate)
             ->count();
+            
+        $totalExpenses = \App\Models\Expense::where('expense_date', '>=', $startDate->toDateString())
+            ->where('expense_date', '<=', Carbon::now()->toDateString())
+            ->sum('amount');
 
         return [
             'total_patients_period' => $patientsCount,
             'total_visits_period' => $visitsCount,
             'revenue_period' => $totalRevenue,
+            'expenses_period' => $totalExpenses,
+            'net_period' => $totalRevenue - $totalExpenses,
             'revenue_by_service' => $revenueByService,
             'lab_period_count' => $labCount,
             'period' => $period,
@@ -847,15 +861,38 @@ class AdminController extends Controller
 
         $payload = [
             'generated_at' => now()->toIso8601String(),
-            'patients' => \App\Models\Patient::with('insurance:id,name,status,contract_end_date')->latest()->get(),
+            'hospital_name' => WorkflowSettings::get('hospital_name', 'Polyclique Rehoboth'),
+            'patients' => \App\Models\Patient::with('insurance:id,name,status,contract_end_date')->latest()->limit(2000)->get(),
             'insurances' => \App\Models\Insurance::withCount(['patients', 'insuredMembers'])->orderBy('name')->get(),
-            'invoices_summary' => \App\Models\Invoice::selectRaw('service, status, COUNT(*) as count, COALESCE(SUM(amount), 0) as total')
-                ->groupBy('service', 'status')
-                ->get(),
+            'financials' => [
+                'invoices_summary' => \App\Models\Invoice::selectRaw('service, status, COUNT(*) as count, COALESCE(SUM(amount), 0) as total')
+                    ->where('created_at', '>=', now()->subMonths(3))
+                    ->groupBy('service', 'status')
+                    ->get(),
+                'recent_expenses' => \App\Models\Expense::latest()->limit(500)->get(),
+            ],
+            'clinical' => [
+                'recent_visits' => \App\Models\Visit::with('patient:id,first_name,last_name')->latest()->limit(1000)->get(),
+                'maternity_active' => \App\Models\MaternityCase::with('patient:id,first_name,last_name')->where('status', '!=', 'discharged')->get(),
+                'hospitalized' => \App\Models\Hospitalization::with('patient:id,first_name,last_name')->where('status', 'active')->get(),
+                'nursing_stats' => \App\Models\NursingReport::latest()->limit(50)->get(),
+            ],
+            'pharmacy' => [
+                'stock_status' => \App\Models\Medicine::select('id', 'name', 'stock_quantity', 'low_stock_threshold', 'unit_price')->get(),
+            ]
         ];
 
+        $payload['backups'] = collect(\Illuminate\Support\Facades\Storage::disk('local')->files('backups'))
+            ->map(function($file) {
+                return [
+                    'filename' => basename($file),
+                    'size' => round(\Illuminate\Support\Facades\Storage::disk('local')->size($file) / 1024 / 1024, 2) . ' MB',
+                    'date' => date('d/m/Y H:i', \Illuminate\Support\Facades\Storage::disk('local')->lastModified($file)),
+                ];
+            })->sortByDesc('filename')->values();
+
         if ($request->query('download') === '1') {
-            $filename = 'rehoboth-data-' . now()->format('Ymd-His') . '.json';
+            $filename = 'rehoboth-export-' . now()->format('Ymd-His') . '.json';
             return Response::make(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), 200, [
                 'Content-Type' => 'application/json',
                 'Content-Disposition' => "attachment; filename={$filename}",
@@ -863,6 +900,22 @@ class AdminController extends Controller
         }
 
         return response()->json($payload);
+    }
+
+    public function downloadBackup(Request $request)
+    {
+        $filename = $request->input('filename');
+        if (!$filename || !\Illuminate\Support\Facades\Storage::disk('local')->exists('backups/' . $filename)) {
+            return response()->json(['message' => 'Fichier de sauvegarde introuvable.'], 404);
+        }
+
+        return \Illuminate\Support\Facades\Storage::disk('local')->download('backups/' . $filename);
+    }
+
+    public function runBackup(Request $request)
+    {
+        \Illuminate\Support\Facades\Artisan::call('app:backup-database');
+        return response()->json(['message' => 'Sauvegarde manuelle déclenchée avec succès.']);
     }
 
     private function normalizeInsuranceDates(array &$data)

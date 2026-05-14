@@ -152,7 +152,8 @@ class PharmacyController extends Controller
             'items.*.price' => 'nullable|numeric|min:0',
             'items.*.dosage' => 'nullable|string',
             'items.*.instructions' => 'nullable|string',
-            'payment_mode' => 'nullable|string|in:cash,insurance',
+            'payment_mode' => 'nullable|string|in:cash,insurance,orange,airtel,mpesa',
+            'payment_phone' => 'nullable|string',
         ]);
 
         DB::transaction(function () use ($data, $visitId, $request) {
@@ -225,6 +226,8 @@ class PharmacyController extends Controller
                     'service' => 'pharmacie',
                     'item_count' => count($dispensedItems),
                     'metadata' => ['items' => $dispensedItems],
+                    'payment_method' => $data['payment_mode'] ?? 'cash',
+                    'payment_phone' => $data['payment_phone'] ?? null,
                 ]);
             } else {
                 // Optionally update metadata if items changed significantly, 
@@ -234,6 +237,8 @@ class PharmacyController extends Controller
                     $existingInvoice->amount = $totalAmount;
                     $existingInvoice->metadata = ['items' => $dispensedItems];
                     $existingInvoice->item_count = count($dispensedItems);
+                    $existingInvoice->payment_method = $data['payment_mode'] ?? $existingInvoice->payment_method;
+                    $existingInvoice->payment_phone = $data['payment_phone'] ?? $existingInvoice->payment_phone;
                     $existingInvoice->save();
                 }
             }

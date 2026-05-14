@@ -215,11 +215,11 @@ class MaternityController extends Controller
 
             if ($fee > 0) {
                 $invoice = $this->createMaternityInvoice($case, $fee, 'Accouchement maternité', 'delivery');
-                $this->notifyRole('caisse', 'Facture maternité',
-                    "Accouchement enregistré pour {$case->patient->first_name} {$case->patient->last_name}. Montant: " . number_format($fee, 0) . " FC.",
-                    ['type' => 'billing', 'invoice_id' => $invoice->id, 'maternity_case_id' => $case->id]
-                );
-            }
+                    $this->notifyRole('caisse', 'Facture maternité',
+                        "Accouchement enregistré pour {$case->patient->first_name} {$case->patient->last_name}. Montant: " . number_format($fee, 0) . " FC.",
+                        ['type' => 'billing', 'invoice_id' => $invoice->id, 'maternity_case_id' => $case->id]
+                    );
+                }
 
             return response()->json([
                 'message' => 'Accouchement enregistré.',

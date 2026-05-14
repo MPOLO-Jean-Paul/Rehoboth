@@ -27,8 +27,15 @@ class PatientController extends Controller
             });
         }
 
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        } elseif ($request->boolean('active_only')) {
+            $query->where('status', 'active');
+        }
+
         // On ne récupère que les colonnes nécessaires pour la liste
-        $query->select(['id', 'first_name', 'last_name', 'post_name', 'is_insured', 'insurance_id', 'birth_year', 'created_at', 'pathology']);
+        $query->select(['id', 'first_name', 'last_name', 'post_name', 'is_insured', 'insurance_id', 'birth_year', 'created_at', 'pathology', 'status', 'death_date']);
 
         // Limite de sécurité pour éviter de saturer la mémoire en cas de gros volume
         $perPage = min(max($request->integer('per_page', 50), 10), 100);
@@ -54,6 +61,7 @@ class PatientController extends Controller
             'insurance_code' => 'nullable|string',
             'contact_info' => 'nullable|string',
             'complaints' => 'nullable|string',
+            'orientation' => 'nullable|string',
             'consultation_fee' => 'nullable|numeric|min:0',
             'gender' => 'nullable|string|max:10'
         ]);
@@ -124,6 +132,7 @@ class PatientController extends Controller
             $visit = Visit::create([
                 'patient_id' => $patient->id,
                 'current_service' => ($isInsured || $request->input('is_emergency')) ? 'soins' : 'caisse',
+                'orientation' => $request->input('orientation') ?? 'medecin',
                 'status' => 'pending',
                 'complaints_notes' => ($request->input('is_emergency') ? '[URGENCE] ' : '') . ($data['complaints'] ?? ''),
                 'lab_order_status' => 'none',
@@ -171,6 +180,48 @@ class PatientController extends Controller
     {
         \App\Models\Insurance::syncExpiredContracts();
         return response()->json(\App\Models\Insurance::select('id', 'name', 'status', 'contract_end_date', 'monthly_flat_fee')->orderBy('name')->get());
+    }
+
+    public function show($id)
+    {
+        $patient = Patient::with([
+            'insurance',
+            'visits' => function ($q) {
+                $q->with(['doctor:id,name', 'labOrders.items', 'prescriptions.items', 'invoices'])
+                  ->orderBy('created_at', 'desc');
+            },
+            'maternityCases.followUps'
+        ])->findOrFail($id);
+
+        // Build a consolidated timeline of care
+        $timeline = $patient->visits->map(function ($visit) {
+            return [
+                'id' => $visit->id,
+                'date' => $visit->created_at->toIso8601String(),
+                'type' => 'consultation',
+                'service' => $visit->orientation ?? 'Général',
+                'doctor' => $visit->doctor?->name,
+                'summary' => $visit->complaints_notes,
+                'diagnosis' => $visit->diagnosis,
+                'vitals' => $visit->vitals,
+                'lab_orders' => $visit->labOrders,
+                'prescriptions' => $visit->prescriptions,
+                'invoices' => $visit->invoices,
+                'discharge' => [
+                    'date' => $visit->discharge_date,
+                    'type' => $visit->discharge_type,
+                    'summary' => $visit->discharge_summary,
+                ]
+            ];
+        });
+
+        return response()->json([
+            'patient' => $patient,
+            'timeline' => $timeline,
+            'visit_count' => $patient->visits->count(),
+            'last_visit' => $patient->visits->first(),
+            'total_spent' => $patient->invoices->where('status', 'paid')->sum('amount'),
+        ]);
     }
 
     public function verifyInsurance(Request $request)

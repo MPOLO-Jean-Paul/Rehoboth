@@ -140,6 +140,7 @@ class InvoiceController extends Controller
             }
 
             $invoice->status = 'paid';
+            $invoice->paid_amount = $invoice->amount;
 
             $session = \App\Models\CashierSession::where('status', 'open')->first();
             if ($session) {
@@ -186,6 +187,40 @@ class InvoiceController extends Controller
             return response()->json([
                 'message' => 'Facture validée et payée. Le dossier a été transféré vers le service suivant.',
                 'payment_status' => 'succeeded',
+                'invoice' => $invoice
+            ]);
+        });
+    }
+
+    public function payAdvance(Request $request, $id)
+    {
+        $request->validate([
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|in:cash,insurance,orange,airtel,mpesa',
+        ]);
+
+        return DB::transaction(function () use ($request, $id) {
+            $invoice = Invoice::lockForUpdate()->findOrFail($id);
+
+            if ($invoice->status === 'paid' && $invoice->paid_amount >= $invoice->amount) {
+                return response()->json(['message' => 'Cette facture est déjà soldée.', 'invoice' => $invoice], 409);
+            }
+
+            $newPaid = $invoice->paid_amount + $request->amount;
+            
+            if ($newPaid >= $invoice->amount) {
+                $invoice->paid_amount = $invoice->amount;
+                $invoice->status = 'paid';
+            } else {
+                $invoice->paid_amount = $newPaid;
+                // keep status unpaid, or partial
+            }
+
+            $invoice->payment_method = $request->payment_method;
+            $invoice->save();
+
+            return response()->json([
+                'message' => 'Acompte enregistré avec succès. ' . ($invoice->status === 'paid' ? 'Facture soldée.' : 'Reste à payer : ' . ($invoice->amount - $invoice->paid_amount)),
                 'invoice' => $invoice
             ]);
         });

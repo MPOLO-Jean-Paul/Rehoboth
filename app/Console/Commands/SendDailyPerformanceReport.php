@@ -18,14 +18,26 @@ class SendDailyPerformanceReport extends Command
         $today = \Carbon\Carbon::today();
         $tomorrow = $today->copy()->addDay();
         
+        // 💰 Revenue
         $revenue = \App\Models\Invoice::where('status', 'paid')
             ->where('created_at', '>=', $today)
             ->where('created_at', '<', $tomorrow)
             ->sum('amount');
 
+        // 💸 Expenses
+        $expenses = \App\Models\Expense::where('expense_date', $today->toDateString())
+            ->sum('amount');
+
+        // 📈 Stats
         $patientsCount = \App\Models\Visit::where('created_at', '>=', $today)
             ->where('created_at', '<', $tomorrow)
             ->count();
+
+        $births = \App\Models\MaternityCase::where('delivery_date', '>=', $today)
+            ->where('delivery_date', '<', $tomorrow)
+            ->count();
+
+        $net = $revenue - $expenses;
 
         $admins = \App\Models\User::where('role', 'admin')
             ->whereNotNull('expo_push_token')
@@ -37,12 +49,19 @@ class SendDailyPerformanceReport extends Command
         }
 
         $tokens = $admins->pluck('expo_push_token')->toArray();
-        $title = "📊 Rendement du Jour Disponible";
-        $body = "Aujourd'hui : " . number_format($revenue, 0, ',', ' ') . " FC pour " . $patientsCount . " visites. Cliquez pour voir les détails.";
+        $title = "📊 RÉSUMÉ DU JOUR : " . $today->format('d/m/Y');
+        
+        $body = "💰 Recettes : " . number_format($revenue, 0, ',', ' ') . " FC\n" .
+                "💸 Dépenses : " . number_format($expenses, 0, ',', ' ') . " FC\n" .
+                "⚖️ Solde : " . number_format($net, 0, ',', ' ') . " FC\n" .
+                "👥 Visites : " . $patientsCount . ($births > 0 ? " | 👶 Naissances : " . $births : "");
 
         $success = \App\Services\ExpoNotificationService::send($tokens, $title, $body, [
             'type' => 'daily_report',
-            'date' => $today->toDateString()
+            'date' => $today->toDateString(),
+            'revenue' => $revenue,
+            'expenses' => $expenses,
+            'net' => $net
         ]);
 
         if ($success) {

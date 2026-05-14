@@ -22,6 +22,11 @@ class Visit extends Model
         'lab_order_status',
         'pharmacy_order_status',
         'doctor_id',
+        'orientation',
+        'discharge_date',
+        'discharge_type',
+        'discharge_summary',
+        'follow_up_date',
     ];
 
     protected $casts = [
