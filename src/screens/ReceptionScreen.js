@@ -509,7 +509,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <View style={{ flex: 1, marginLeft: 16 }}>
                                              <Text style={{ fontSize: 16, fontWeight: '800', color: C.text }}>{p.first_name} {p.last_name}</Text>
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                                                <MaterialCommunityIcons name="help-circle" size={12} color={brandColor} />
+                                                 <MaterialCommunityIcons name="clock-outline" size={12} color={brandColor} />
                                                 <Text style={{ color: C.sub, fontSize: 11, marginLeft: 4 }}>{new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                                              </View>
                                           </View>
@@ -633,14 +633,14 @@ export default function ReceptionScreen({ navigation, route }) {
                               {form.id && (
                                  <FadeInView style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#22C55E15', padding: 16, borderRadius: 24, marginBottom: 25, borderWidth: 1, borderColor: '#22C55E30' }}>
                                     <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#22C55E', alignItems: 'center', justifyContent: 'center' }}>
-                                       <MaterialCommunityIcons name="help-circle" size={24} color="#FFF" />
+                                       <MaterialCommunityIcons name="check-circle-outline" size={24} color="#FFF" />
                                     </View>
                                     <View style={{ flex: 1, marginLeft: 16 }}>
                                        <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>DOSSIER CHARGÉ</Text>
                                        <Text style={{ color: C.text, fontSize: 15, fontWeight: '800' }}>{form.first_name} {form.last_name}</Text>
                                     </View>
                                     <TouchableOpacity onPress={() => setForm({ ...form, id: null, complaints: '' })} style={{ padding: 8 }}>
-                                       <MaterialCommunityIcons name="help-circle" size={20} color="#EF4444" />
+                                       <MaterialCommunityIcons name="close-circle-outline" size={20} color="#EF4444" />
                                     </TouchableOpacity>
                                  </FadeInView>
                               )}
@@ -814,7 +814,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <View style={{ flex: 1 }}>
                                              <Text style={{ fontSize: 17, fontWeight: '900', color: C.text }}>{p.first_name} {p.last_name}</Text>
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                                                <MaterialCommunityIcons name="help-circle" size={12} color={C.sub} />
+                                                <MaterialCommunityIcons name="alert-circle-outline" size={14} color={C.sub} />
                                                 <Text style={{ fontSize: 12, color: C.sub, marginLeft: 4 }}>{p.age} ANS ({p.birth_year || 'N/A'})</Text>
                                                 {p.pathology && (
                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
@@ -868,7 +868,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>{ins.name}</Text>
                                           <Text style={{ fontSize: 11, color: brandColor, fontWeight: '800' }}>{patientCount} PATIENTS ENREGISTRÉS</Text>
                                        </View>
-                                       <MaterialCommunityIcons name="help-circle" size={32} color={brandColor} style={{ opacity: 0.3 }} />
+                                       <MaterialCommunityIcons name="information-outline" size={32} color={brandColor} style={{ opacity: 0.3 }} />
                                     </View>
 
                                     <View style={{ height: 1, backgroundColor: C.divider, marginVertical: 15 }} />
@@ -964,7 +964,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                  );
                               }) : (
                                  <View style={{ alignItems: 'center', padding: 20 }}>
-                                    <MaterialCommunityIcons name="help-circle" size={40} color={C.divider} />
+                            <MaterialCommunityIcons name="folder-search-outline" size={40} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
                                     <Text style={{ color: C.sub, fontSize: 12, marginTop: 10, fontWeight: '700' }}>Aucune recette aujourd'hui</Text>
                                  </View>
                               )}
@@ -1079,7 +1079,7 @@ export default function ReceptionScreen({ navigation, route }) {
                <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: C.divider, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ fontSize: 16, fontWeight: '900', color: C.text }}>{bt.receptionStatsTitle}</Text>
                   <TouchableOpacity onPress={() => toggleBottomTab('stats')} style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: C.closeBg, alignItems: 'center', justifyContent: 'center' }}>
-                     <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                     <MaterialCommunityIcons name="information-outline" size={18} color={brandColor} />
                   </TouchableOpacity>
                </View>
                <ScrollView style={{ padding: 16 }}>

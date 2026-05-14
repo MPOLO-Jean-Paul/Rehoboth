@@ -566,7 +566,7 @@ export default function SoinsScreen({ navigation, route }) {
           selectedVisit && { key: 'back-list', icon: 'arrow-back', onPress: () => setSelectedVisit(null), active: true },
           activeView !== 'care' && !selectedVisit && { key: 'back-care', icon: 'arrow-back', onPress: () => { setActiveView('care'); setActiveTab('queue'); if (activeBottomTab) toggleBottomTab('stats'); } },
           activeView === 'hospitalisation' && { key: 'admit', icon: 'hotel', onPress: () => setShowAdmitForm(true), active: true },
-          activeView === 'rapport' && { key: 'report', icon: 'assignment-add', onPress: () => setShowReportForm(true), active: true },
+          activeView === 'rapport' && { key: 'report', icon: 'assignment-turned-in', onPress: () => setShowReportForm(true), active: true },
           { key: 'refresh', icon: 'refresh', onPress: () => { if (activeView === 'hospitalisation') fetchHospitalizations(); else { fetchVisits(); fetchHistory(); } } },
         ]}
       />
@@ -670,7 +670,7 @@ export default function SoinsScreen({ navigation, route }) {
                       style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 18, backgroundColor: brandColor, elevation: 4 }}
                       onPress={() => setShowAdmitForm(true)}
                     >
-                      <MaterialCommunityIcons name="help-circle" size={20} color="#FFF" />
+                      <MaterialCommunityIcons name="check-circle-outline" size={20} color="#FFF" />
                       <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12, marginLeft: 8 }}>ADMETTRE UN PATIENT</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -782,7 +782,7 @@ export default function SoinsScreen({ navigation, route }) {
                         {/* Card Header */}
                         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 18 }}>
                           <LinearGradient colors={['#3B82F615', '#3B82F605']} style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-                            <MaterialCommunityIcons name="help-circle" size={28} color="#3B82F6" />
+                            <MaterialCommunityIcons name="information-outline" size={28} color="#3B82F6" />
                           </LinearGradient>
                           <View style={{ flex: 1, marginLeft: 14 }}>
                             <Text style={{ fontSize: 17, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{h.patient?.first_name} {h.patient?.last_name}</Text>
@@ -839,7 +839,7 @@ export default function SoinsScreen({ navigation, route }) {
                     <View>
                       {alerts.critical > 0 && (
                         <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: '#EF444430' }}>
-                          <MaterialCommunityIcons name="help-circle" size={16} color="#EF4444" />
+                          <MaterialCommunityIcons name="alert-circle-outline" size={16} color="#EF4444" />
                           <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>{alerts.critical} ALERTE(S) CRITIQUE(S)</Text>
                         </View>
                       )}
@@ -908,7 +908,7 @@ export default function SoinsScreen({ navigation, route }) {
                                 style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 14, backgroundColor: '#EF444415', borderWidth: 1, borderColor: '#EF444430' }}
                                 onPress={() => handleTriggerAlert(alertItem.hospitalization_id, true, 'Surveillance renforcée requise')}
                               >
-                                <MaterialCommunityIcons name="help-circle" size={18} color="#EF4444" />
+                                <MaterialCommunityIcons name="alert-circle-outline" size={18} color="#EF4444" />
                                 <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 12, marginLeft: 6 }}>ESCALADER</Text>
                               </TouchableOpacity>
                             </View>
@@ -962,7 +962,7 @@ export default function SoinsScreen({ navigation, route }) {
                             <Text style={{ color: isDark ? '#CBD5E1' : '#475569', fontSize: 12, marginTop: 2 }}>Consultez la section Alertes pour y répondre.</Text>
                           </View>
                           <TouchableOpacity onPress={() => setActiveView('alertes')}>
-                            <MaterialCommunityIcons name="help-circle" size={28} color="#EF4444" />
+                            <MaterialCommunityIcons name="alert-outline" size={28} color="#EF4444" />
                           </TouchableOpacity>
                         </View>
                       )}
@@ -1162,7 +1162,7 @@ export default function SoinsScreen({ navigation, route }) {
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                 <Text style={styles.fieldHeading}>SIGNES VITAUX (CONSTANTES)</Text>
                 <TouchableOpacity onPress={() => toggleActionPanel(true)} style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
-                  <MaterialCommunityIcons name="help-circle" size={14} color={brandColor} />
+                  <MaterialCommunityIcons name="information-outline" size={14} color={brandColor} />
                   <Text style={{ marginLeft: 6, fontSize: 10, fontWeight: '900', color: brandColor }}>ACTES & SOINS</Text>
                 </TouchableOpacity>
               </View>
@@ -1245,15 +1245,15 @@ export default function SoinsScreen({ navigation, route }) {
                   onPress={() => setTransferDestination('maternite')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'maternite' ? '#EC4899' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === "maternite" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <MaterialCommunityIcons name="baby-face-outline" size={20} color={transferDestination === "maternite" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
                   <Text style={{ color: transferDestination === 'maternite' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>MATERNITÉ</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setTransferDestination('completed')}
                   style={{ flex: 1, padding: 14, borderRadius: 16, backgroundColor: transferDestination === 'completed' ? '#22C55E' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: transferDestination === 'completed' ? '#22C55E' : (isDark ? '#2E2E2E' : '#E2E8F0'), alignItems: 'center' }}
                 >
-                  <MaterialCommunityIcons name="help-circle" size={20} color={transferDestination === "completed" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
-                  <Text style={{ color: transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>TERMINER ICI</Text>
+                  <MaterialIcons name="assignment-turned-in" size={20} color={transferDestination === "completed" ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B')} />
+                  <Text style={{ color: transferDestination === 'completed' ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '900', fontSize: 11, marginTop: 4 }}>TERMINER</Text>
                 </TouchableOpacity>
               </View>
 
@@ -1334,7 +1334,7 @@ export default function SoinsScreen({ navigation, route }) {
                      onPress={() => setPrescriptionItems(prev => [...prev, { name: 'Autre produit...', quantity: 1, instructions: '' }])}
                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 14, borderStyle: 'dashed', borderWidth: 1, borderColor: '#10B981' }}
                   >
-                     <MaterialCommunityIcons name="help-circle" size={18} color="#10B981" />
+                     <MaterialCommunityIcons name="check-circle-outline" size={18} color="#10B981" />
                      <Text style={{ color: '#10B981', fontWeight: '900', fontSize: 11, marginLeft: 8 }}>AJOUTER MANUELLEMENT</Text>
                   </TouchableOpacity>
                 </FadeInView>
@@ -1394,7 +1394,7 @@ export default function SoinsScreen({ navigation, route }) {
               </View>
             </View>
             <TouchableOpacity onPress={() => toggleBottomTab('stats')} style={{ width: 42, height: 42, borderRadius: 21, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-              <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
+              <MaterialCommunityIcons name="clipboard-text-outline" size={24} color={brandColor} />
             </TouchableOpacity>
           </View>
 
@@ -1414,7 +1414,7 @@ export default function SoinsScreen({ navigation, route }) {
 
               <View style={{ flex: 1, padding: 20, backgroundColor: '#EF444408', borderRadius: 28, borderWidth: 1, borderColor: '#EF444425' }}>
                 <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: '#EF444415', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
-                  <MaterialCommunityIcons name="help-circle" size={22} color="#EF4444" />
+                  <MaterialCommunityIcons name="alert-circle-outline" size={22} color="#EF4444" />
                 </View>
                 <Text style={{ fontSize: 34, fontWeight: '950', color: '#EF4444' }}>{stats?.urgencies ?? urgenciesList.length}</Text>
                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#EF4444', letterSpacing: 1.2, marginTop: 4 }}>URGENCES</Text>

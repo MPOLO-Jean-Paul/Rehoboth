@@ -651,7 +651,7 @@ export default function PharmacyScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                               <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ÉTAT DES PRODUITS</Text>
-                              <TouchableOpacity onPress={fetchData}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                              <TouchableOpacity onPress={fetchData}><MaterialCommunityIcons name="refresh" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
                            {medicines.map((m, i) => (
                               <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
@@ -774,7 +774,7 @@ export default function PharmacyScreen({ navigation, route }) {
             <Animated.View style={[{ position: 'absolute', bottom: 85, left: 16, right: 16, maxHeight: height * 0.5, backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF', borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#1A1A1A' : '#F1F5F9', elevation: 20 }, { transform: [{ translateY: bottomPanelAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }) }] }]}>
                <View style={{ padding: 24, borderBottomWidth: 1, borderBottomColor: isDark ? '#1A1A1A' : '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>PÉREMPTION</Text>
-                  <TouchableOpacity onPress={() => toggleBottomTab('expiry')}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                  <TouchableOpacity onPress={() => toggleBottomTab('expiry')}><MaterialCommunityIcons name="alert-circle-outline" size={24} color={brandColor} /></TouchableOpacity>
                </View>
                <ScrollView style={{ padding: 24 }}>
                   {expiring.expired.length > 0 && <Text style={{ color: '#EF4444', fontWeight: '900', marginBottom: 12 }}>DÉJÀ EXPIRÉS</Text>}
@@ -893,7 +893,7 @@ export default function PharmacyScreen({ navigation, route }) {
                <View style={[styles.modalSheet, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', paddingBottom: 20 + insets.bottom }]}>
                   <View style={styles.sheetHeader}>
                      <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>NOUVEAU PRODUIT</Text>
-                     <TouchableOpacity onPress={() => setShowNewModal(false)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                     <TouchableOpacity onPress={() => setShowNewModal(false)}><MaterialCommunityIcons name="close" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
                   <View style={{ padding: 24 }}>
                      <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Nom" value={newMed.name} onChangeText={v => setNewMed({ ...newMed, name: v })} />
@@ -915,7 +915,7 @@ export default function PharmacyScreen({ navigation, route }) {
                <View style={[styles.modalSheet, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', maxHeight: '90%', paddingBottom: 20 + insets.bottom }]}>
                   <View style={styles.sheetHeader}>
                      <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DÉLIVRANCE</Text>
-                     <TouchableOpacity onPress={() => setShowDispenseModal(false)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                     <TouchableOpacity onPress={() => setShowDispenseModal(false)}><MaterialCommunityIcons name="close" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
                   <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 60 + insets.bottom }} showsVerticalScrollIndicator={false}>
                       <View style={{ marginBottom: 24, padding: 12, borderLeftWidth: 4, borderLeftColor: brandColor, backgroundColor: isDark ? '#111827' : '#F8FAFC' }}>
@@ -936,7 +936,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                selectedVisitForDispense.prescription_items.map((pItem, i) => (
                                   <View key={i} style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 12, borderBottomWidth: i < selectedVisitForDispense.prescription_items.length - 1 ? 1 : 0, borderBottomColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
                                      <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', alignItems: 'center', justifyContent: 'center', marginRight: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                                        <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                                        <MaterialCommunityIcons name="pill" size={20} color={brandColor} />
                                      </View>
                                      <View style={{ flex: 1 }}>
                                         <Text style={{ color: isDark ? '#F1F5F9' : '#1A1A1A', fontWeight: '900', fontSize: 15 }}>{pItem.name || '—'}</Text>
@@ -968,7 +968,7 @@ export default function PharmacyScreen({ navigation, route }) {
 
                       {dispenseItems.length === 0 ? (
                          <View style={{ padding: 40, alignItems: 'center', borderRadius: 24, borderWidth: 2, borderStyle: 'dashed', borderColor: isDark ? '#2E2E2E' : '#CBD5E1', marginBottom: 20 }}>
-                            <MaterialCommunityIcons name="help-circle" size={40} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
+                            <MaterialCommunityIcons name="cart-variant" size={40} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
                             <Text style={{ color: isDark ? '#555' : '#94A3B8', fontWeight: '800', marginTop: 12, fontSize: 13 }}>Le panier est vide</Text>
                          </View>
                       ) : (
@@ -987,7 +987,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                       </View>
                                       <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                          <TouchableOpacity onPress={() => { if (item.quantity > 1) setDispenseItems(prev => prev.map(i => i.medicine_id === item.medicine_id ? { ...i, quantity: i.quantity - 1 } : i)); }} style={{ padding: 8 }}>
-                                            <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                                            <MaterialCommunityIcons name="minus" size={18} color={brandColor} />
                                          </TouchableOpacity>
                                          <Text style={{ color: isDark ? '#FFF' : '#1A1A1A', fontWeight: '900', minWidth: 30, textAlign: 'center', fontSize: 15 }}>{item.quantity}</Text>
                                          <TouchableOpacity onPress={() => setDispenseItems(prev => prev.map(i => i.medicine_id === item.medicine_id ? { ...i, quantity: i.quantity + 1 } : i))} style={{ padding: 8 }}>
@@ -1050,7 +1050,7 @@ export default function PharmacyScreen({ navigation, route }) {
                       </LinearGradient>
                      <TouchableOpacity style={styles.modalSubmit} onPress={handleDispense} disabled={isSubmitting}>
                         <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 30 }}>
-                           <Text style={{ color: '#FFF', fontWeight: '900' }}>"DÉLIVRER"</Text>
+                           <Text style={{ color: '#FFF', fontWeight: '900' }}>DÉLIVRER</Text>
                         </LinearGradient>
                      </TouchableOpacity>
                   </ScrollView>

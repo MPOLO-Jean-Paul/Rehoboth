@@ -915,7 +915,7 @@ export default function AdminScreen({ navigation }) {
                     patients.filter(p => `${p.first_name} ${p.last_name} ${p.id}`.toLowerCase().includes(patientSearch.toLowerCase())).map((p, i) => (
                        <TouchableOpacity key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
                           <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.divider, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                             <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
+                             <MaterialCommunityIcons name="information-outline" size={24} color={brandColor} />
                           </View>
                           <View style={{ flex: 1 }}>
                              <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name}</Text>
@@ -1148,7 +1148,7 @@ export default function AdminScreen({ navigation }) {
                       <View style={styles.rowBetween}>
                          <Text style={[styles.vTitle, { color: C.text, fontSize: 18 }]}>MESSAGES REÇUS</Text>
                          <TouchableOpacity onPress={fetchGlobalData}>
-                            <MaterialCommunityIcons name="help-circle" size={22} color={brandColor} />
+                            <MaterialCommunityIcons name="information-outline" size={22} color={brandColor} />
                          </TouchableOpacity>
                       </View>
 
@@ -1267,7 +1267,7 @@ export default function AdminScreen({ navigation }) {
                         <Text style={{ fontSize: 11, fontWeight: '900', color: C.danger, marginBottom: 15 }}>ALERTES CRITIQUES</Text>
                         {(stats?.low_stock_medicines?.length || 0) > 0 ? (
                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <MaterialCommunityIcons name="help-circle" size={20} color={C.danger} />
+                              <MaterialCommunityIcons name="alert-circle-outline" size={20} color={C.danger} />
                               <View style={{ marginLeft: 10 }}>
                                  <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>{stats.low_stock_medicines.length}</Text>
                                  <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>STOCK FAIBLE</Text>
@@ -1275,13 +1275,13 @@ export default function AdminScreen({ navigation }) {
                            </View>
                         ) : (
                            <View style={{ flexDirection: 'row', alignItems: 'center', opacity: 0.5 }}>
-                              <MaterialCommunityIcons name="help-circle" size={20} color="#22C55E" />
+                              <MaterialCommunityIcons name="check-circle-outline" size={20} color="#22C55E" />
                               <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>STOCK STABLE</Text>
                            </View>
                         )}
                         <View style={{ height: 1, backgroundColor: C.border, marginVertical: 12 }} />
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                           <MaterialCommunityIcons name="help-circle" size={20} color="#F59E0B" />
+                           <MaterialCommunityIcons name="information-outline" size={20} color="#F59E0B" />
                            <View style={{ marginLeft: 10 }}>
                               <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>0</Text>
                               <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>URGENCES ATTENTE</Text>
@@ -1394,7 +1394,7 @@ export default function AdminScreen({ navigation }) {
                         style={[styles.addBtn, { backgroundColor: brandColor, paddingHorizontal: 12, height: 40, borderRadius: 14 }]} 
                         onPress={() => { setEditingInsurance(null); setNewInsurance({ name: '', email: '', contract_date: '', contract_end_date: '', contract_type: 'annuel', monthly_flat_fee: '', contact_info: '', status: 'active' }); setShowInsuranceModal(true); }}
                      >
-                        <MaterialCommunityIcons name="help-circle" size={18} color="#FFF" />
+                        <MaterialCommunityIcons name="email-check-outline" size={18} color="#FFF" />
                         <Text style={[styles.addBtnT, { fontSize: 11, marginLeft: 4 }]}>NOUVEAU</Text>
                      </TouchableOpacity>
                   </View>
@@ -1475,7 +1475,7 @@ export default function AdminScreen({ navigation }) {
                            
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
                               <LinearGradient colors={[brandColor, '#4F46E5']} style={{ width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
-                                 <MaterialCommunityIcons name="help-circle" size={26} color="#FFF" />
+                                 <MaterialCommunityIcons name="account-search-outline" size={26} color="#FFF" />
                               </LinearGradient>
                               <View style={{ flex: 1, marginLeft: 16 }}>
                                  <Text style={{ fontSize: 19, fontWeight: '900', color: C.text }}>{ins.name}</Text>
@@ -1972,7 +1972,7 @@ export default function AdminScreen({ navigation }) {
                           onPress={() => handleDeleteUser(editingUser.id)}
                           style={{ flexDirection: 'row', alignItems: 'center' }}
                         >
-                           <MaterialCommunityIcons name="help-circle" size={20} color="#EF4444" />
+                           <MaterialCommunityIcons name="alert-outline" size={20} color="#EF4444" />
                            <Text style={{ color: '#EF4444', fontWeight: '800', marginLeft: 10 }}>SUPPRIMER LE COMPTE DÉFINITIVEMENT</Text>
                         </TouchableOpacity>
                      </View>
@@ -2223,7 +2223,7 @@ export default function AdminScreen({ navigation }) {
                   <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900' }}>GESTION DES ADHÉRENTS</Text>
                </View>
                <TouchableOpacity onPress={() => setShowMemberModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                  <MaterialCommunityIcons name="help-circle" size={22} color={C.closeIc} />
+                  <MaterialCommunityIcons name="information-outline" size={22} color={C.closeIc} />
                </TouchableOpacity>
             </View>
             
@@ -2301,7 +2301,7 @@ export default function AdminScreen({ navigation }) {
                 <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
                   <Text style={[styles.dimT, { color: C.text }]}>AJOUTER SERVICES</Text>
                   <TouchableOpacity onPress={() => setShowCatalogModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                     <MaterialCommunityIcons name="help-circle" size={22} color={C.closeIc} />
+                     <MaterialCommunityIcons name="information-outline" size={22} color={C.closeIc} />
                   </TouchableOpacity>
                </View>
                
