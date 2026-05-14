@@ -83,7 +83,7 @@ export default function FloatingActionDock({
                 style={[styles.actionBtn, searchOpen && styles.activeBtn]}
                 onPress={() => setSearchOpen((current) => !current)}
               >
-                <MaterialIcons name="search" size={S.ms(22)} color={searchOpen ? '#FFF' : brandColor} />
+                <MaterialIcons name="search" size={S.ms(22)} color={searchOpen ? "#FFF" : brandColor} />
               </PressableScale>
             )}
 

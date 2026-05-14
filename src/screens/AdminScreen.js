@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import tw from 'twrnc';
 import api from '../services/api';
 import { AppContext } from '../../App';
@@ -22,6 +24,11 @@ import { isValidPhone, detectOperator, operatorColor } from '../utils/phoneValid
 
 const { width, height } = Theme.layout;
 const ADMIN_REFRESH_INTERVAL_MS = 60000;
+const asArray = (value) => Array.isArray(value) ? value : [];
+const asText = (value) => value === undefined || value === null ? '' : String(value);
+const formatMoney = (value) => Number(value || 0).toLocaleString();
+const safePadId = (value) => String(value ?? '').padStart(5, '0');
+const isInsuranceExpired = (ins) => ins?.status === 'expired' || ins?.is_expired || (ins?.contract_end_date && new Date(ins.contract_end_date) < new Date());
 
 export default function AdminScreen({ navigation }) {
   const { themeMode, toggleTheme, lang, toggleLang, isOnline, brandColor, C, S, isDark } = useTheme();
@@ -81,6 +88,13 @@ export default function AdminScreen({ navigation }) {
   const [selectedDateFolder, setSelectedDateFolder] = useState(null);
   const [selectedYearFolder, setSelectedYearFolder] = useState(null);
   const [insuranceSearch, setInsuranceSearch] = useState('');
+  const [dataRecords, setDataRecords] = useState([]);
+  const [dataSearch, setDataSearch] = useState('');
+  const [dataBirthYear, setDataBirthYear] = useState('');
+  const [editingPatient, setEditingPatient] = useState(null);
+  const [autoExportEnabled, setAutoExportEnabled] = useState(false);
+  const [autoExportFrequency, setAutoExportFrequency] = useState('daily');
+  const [lastExportUri, setLastExportUri] = useState(null);
   const [memberSearch, setMemberSearch] = useState('');
   const [bulkCatalogItems, setBulkCatalogItems] = useState([{ label: '', price: '', dosage: '' }]);
   const [bulkCategory, setBulkCategory] = useState('Produit');
@@ -94,6 +108,12 @@ export default function AdminScreen({ navigation }) {
 
   useEffect(() => {
     loadCachedData();
+    Storage.get('admin_auto_export_config').then(config => {
+      if (config) {
+        setAutoExportEnabled(!!config.enabled);
+        setAutoExportFrequency(config.frequency || 'daily');
+      }
+    });
     fetchGlobalData();
     fetchSettings();
     const interval = setInterval(() => {
@@ -114,14 +134,28 @@ export default function AdminScreen({ navigation }) {
     };
   }, [revenuePeriod]);
 
+  useEffect(() => {
+    if (activeView === 'data') {
+      fetchDataRecords(true);
+      maybeAutoExportData();
+    }
+  }, [activeView, dataSearch, dataBirthYear, autoExportEnabled, autoExportFrequency]);
+
+  useEffect(() => {
+    Storage.save('admin_auto_export_config', {
+      enabled: autoExportEnabled,
+      frequency: autoExportFrequency,
+    });
+  }, [autoExportEnabled, autoExportFrequency]);
+
   const loadCachedData = async () => {
     const cached = await Storage.get('admin_bootstrap');
     if (cached) {
-      setStats(cached.stats);
-      setUsers(cached.users);
-      setPatients(cached.patients);
-      setMessages(Array.isArray(cached.messages) ? cached.messages : cached.messages.data || []);
-      setInsurances(cached.insurances);
+      setStats(cached.stats || null);
+      setUsers(asArray(cached.users));
+      setPatients(asArray(cached.patients));
+      setMessages(Array.isArray(cached.messages) ? cached.messages : asArray(cached.messages?.data));
+      setInsurances(asArray(cached.insurances));
       setLoading(false);
     }
   };
@@ -132,11 +166,12 @@ export default function AdminScreen({ navigation }) {
       const resp = await api.get(`/admin/bootstrap?period=${period}`);
       const data = resp.data;
 
-      setStats(data.stats);
-      setUsers(data.users);
-      setPatients(data.patients);
-      setMessages(Array.isArray(data.messages) ? data.messages : data.messages.data || []);
-      setInsurances(data.insurances);
+      setStats(data.stats || null);
+      setUsers(asArray(data.users));
+      setPatients(asArray(data.patients));
+      setMessages(Array.isArray(data.messages) ? data.messages : asArray(data.messages?.data));
+      setInsurances(asArray(data.insurances));
+      setDataRecords(asArray(data.patients));
       
       // Save for next time
       Storage.save('admin_bootstrap', data);
@@ -163,6 +198,134 @@ export default function AdminScreen({ navigation }) {
     setShowInsuranceModal(true);
   };
 
+  const fetchDataRecords = async (isBg = false) => {
+    try {
+      const res = await api.get('/admin/patient-records', {
+        params: {
+          q: dataSearch || undefined,
+          birth_year: dataBirthYear || undefined,
+          limit: 800,
+        },
+      });
+      setDataRecords(asArray(res.data));
+    } catch (e) {
+      if (!isBg) showToast(parseError(e), 'error');
+    }
+  };
+
+  const handleUpdatePatient = async () => {
+    if (!editingPatient?.first_name || !editingPatient?.last_name) {
+      return showToast('Nom et prénom requis', 'error');
+    }
+
+    setIsSubmitting(true);
+    try {
+      await api.put(`/admin/patient-records/${editingPatient.id}`, editingPatient);
+      showToast('Dossier patient mis à jour', 'success');
+      setEditingPatient(null);
+      fetchDataRecords(true);
+      fetchGlobalData(revenuePeriod, true);
+    } catch (e) {
+      showToast(parseError(e), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeletePatient = (patient) => {
+    Alert.alert('Confirmation', `Supprimer le dossier de ${patient.first_name} ${patient.last_name} ?`, [
+      { text: t.cancel || 'Annuler', style: 'cancel' },
+      {
+        text: 'SUPPRIMER',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.delete(`/admin/patient-records/${patient.id}`);
+            showToast('Dossier patient supprimé', 'success');
+            setDataRecords(current => current.filter(item => item.id !== patient.id));
+            setPatients(current => current.filter(item => item.id !== patient.id));
+          } catch (e) {
+            showToast(parseError(e), 'error');
+          }
+        },
+      },
+    ]);
+  };
+
+  const buildExportHtml = (payload) => {
+    const patientsList = asArray(payload?.patients);
+    const insuranceList = asArray(payload?.insurances);
+    const rows = patientsList.slice(0, 2000).map(p => `
+      <tr>
+        <td>${p.id}</td><td>${p.first_name || ''} ${p.last_name || ''}</td>
+        <td>${p.birth_year || ''}</td><td>${p.pathology || ''}</td>
+        <td>${p.is_insured ? (p.insurance?.name || 'Assuré') : 'Privé'}</td>
+      </tr>`).join('');
+
+    return `
+      <html><body style="font-family: Arial; padding: 24px;">
+        <h1>Export général Rehoboth</h1>
+        <p>Généré le ${new Date(payload?.generated_at || Date.now()).toLocaleString()}</p>
+        <h2>Résumé</h2>
+        <p>${patientsList.length} dossiers patients • ${insuranceList.length} assurances</p>
+        <h2>Dossiers patients</h2>
+        <table style="width:100%; border-collapse: collapse;" border="1" cellpadding="6">
+          <thead><tr><th>ID</th><th>Patient</th><th>Naissance</th><th>Pathologie</th><th>Couverture</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </body></html>`;
+  };
+
+  const downloadHospitalData = async (share = true) => {
+    setIsSubmitting(true);
+    try {
+      const res = await api.get('/admin/data/export');
+      const file = await Print.printToFileAsync({ html: buildExportHtml(res.data) });
+      setLastExportUri(file.uri);
+      await Storage.save('admin_last_data_export', { uri: file.uri, at: Date.now() });
+      if (share && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(file.uri);
+      }
+      showToast('Export des données généré sur cet appareil', 'success');
+    } catch (e) {
+      showToast(parseError(e), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const maybeAutoExportData = async () => {
+    if (!autoExportEnabled) return;
+    const saved = await Storage.get('admin_auto_export_state');
+    const lastRun = Number(saved?.lastRun || 0);
+    const intervalMs = autoExportFrequency === 'weekly' ? 7 * 86400000 : autoExportFrequency === 'monthly' ? 30 * 86400000 : 86400000;
+    if (Date.now() - lastRun < intervalMs) return;
+    await downloadHospitalData(false);
+    await Storage.save('admin_auto_export_state', { lastRun: Date.now(), frequency: autoExportFrequency });
+  };
+
+  const handleRenewInsurance = async (ins) => {
+    const start = new Date();
+    const end = new Date();
+    end.setFullYear(end.getFullYear() + 1);
+
+    setIsSubmitting(true);
+    try {
+      await api.post(`/admin/insurances/${ins.id}/renew`, {
+        contract_date: start.toLocaleDateString('fr-FR'),
+        contract_end_date: end.toLocaleDateString('fr-FR'),
+        monthly_flat_fee: ins.monthly_flat_fee,
+        contract_type: ins.contract_type || 'annuel',
+      });
+      showToast('Contrat renouvelé pour 12 mois', 'success');
+      fetchGlobalData(revenuePeriod, true);
+    } catch (e) {
+      showToast(parseError(e), 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const parseError = (e) => {
     if (e.response?.data?.errors) {
       const errors = e.response.data.errors;
@@ -173,7 +336,7 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleSaveInsurance = async () => {
-    if (!newInsurance.name || !newInsurance.monthly_flat_fee) return showToast("Champs requis", 'error');
+    if (!newInsurance.name || !newInsurance.monthly_flat_fee) return showToast("Champs requis", "error");
     setIsSubmitting(true);
 
     // Nettoyage des données pour éviter d'envoyer des chaînes vides pour des champs optionnels
@@ -188,10 +351,10 @@ export default function AdminScreen({ navigation }) {
     try {
       if (editingInsurance) {
         await api.put(`/admin/insurances/${editingInsurance.id}`, payload);
-        showToast("Assurance mise à jour avec succès", 'success');
+        showToast("Assurance mise à jour avec succès", "success");
       } else {
         await api.post('/admin/insurances', payload);
-        showToast("Assurance créée avec succès", 'success');
+        showToast("Assurance créée avec succès", "success");
       }
       setShowInsuranceModal(false);
       setEditingInsurance(null);
@@ -209,7 +372,7 @@ export default function AdminScreen({ navigation }) {
 
   const handleSaveBulkCatalog = async () => {
     const validItems = bulkCatalogItems.filter(it => it.label && it.price);
-    if (validItems.length === 0) return showToast("Aucun service valide à ajouter", 'error');
+    if (validItems.length === 0) return showToast("Aucun service valide à ajouter", "error");
     
     setIsSubmitting(true);
     try {
@@ -243,39 +406,39 @@ export default function AdminScreen({ navigation }) {
         }
       });
       
-      showToast("Catalogue mis à jour", 'success');
+      showToast("Catalogue mis à jour", "success");
       setShowCatalogModal(false);
       setBulkCatalogItems([{ label: '', price: '', dosage: '' }]);
     } catch (e) {
-      showToast("Erreur lors de la mise à jour", 'error');
+      showToast("Erreur lors de la mise à jour", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteCatalogItem = (globalIndex) => {
-    Alert.alert("Confirmation", "Supprimer ce service du catalogue ?", [
-      { text: t.cancel, style: 'cancel' },
-      { text: "SUPPRIMER", style: 'destructive', onPress: () => {
+    Alert.alert("Confirmation", "Supprimer ce service du catalogue ? ", [
+      { text: t.cancel, style: "cancel" },
+      { text: "SUPPRIMER", style: "destructive", onPress: () => {
           const next = [...priceCatalog];
           next.splice(globalIndex, 1);
           setPriceCatalog(next);
-          showToast("Élément supprimé", 'info');
+          showToast("Élément supprimé", "info");
         }
       }
     ]);
   };
 
   const handleAddMember = async () => {
-    if (!newMember.member_name || !newMember.membership_code) return showToast("Champs requis", 'error');
+    if (!newMember.member_name || !newMember.membership_code) return showToast("Champs requis", "error");
     setIsSubmitting(true);
     try {
       if (editingMember) {
         await api.put(`/admin/insurances/members/${editingMember.id}`, newMember);
-        showToast("Membre mis à jour", 'success');
+        showToast("Membre mis à jour", "success");
       } else {
         await api.post('/admin/insurances/members', { ...newMember, insurance_id: activeInsurance.id });
-        showToast("Membre ajouté", 'success');
+        showToast("Membre ajouté", "success");
       }
       setNewMember({ insurance_id: null, member_name: '', membership_code: '' });
       setEditingMember(null);
@@ -294,12 +457,12 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleDeleteMember = (memberId) => {
-    Alert.alert("Confirmation", "Supprimer cet adhérent de la liste ?", [
-      { text: t.cancel, style: 'cancel' },
-      { text: "SUPPRIMER", style: 'destructive', onPress: async () => {
+    Alert.alert("Confirmation", "Supprimer cet adhérent de la liste ? ", [
+      { text: t.cancel, style: "cancel" },
+      { text: "SUPPRIMER", style: "destructive", onPress: async () => {
           try {
             await api.delete(`/admin/insurances/members/${memberId}`);
-            showToast("Adhérent supprimé", 'success');
+            showToast("Adhérent supprimé", "success");
             fetchMembers(activeInsurance.id);
           } catch (e) { showToast(parseError(e), 'error'); }
         }
@@ -422,18 +585,18 @@ export default function AdminScreen({ navigation }) {
         },
       });
 
-      showToast("Catalogue mis à jour", 'success');
+      showToast("Catalogue mis à jour", "success");
       fetchSettings();
     } catch (e) { showToast(parseError(e), 'error'); }
     finally { setIsSubmitting(false); }
   };
 
   const handleCreateUser = async () => {
-    if (!newUser.name || !newUser.email || !newUser.password) return showToast("Champs requis", 'error');
-    if (newUser.password !== newUser.confirmPassword) return showToast("Les mots de passe ne correspondent pas", 'error');
+    if (!newUser.name || !newUser.email || !newUser.password) return showToast("Champs requis", "error");
+    if (newUser.password !== newUser.confirmPassword) return showToast("Les mots de passe ne correspondent pas", "error");
     
     if (newUser.phone && !isValidPhone(newUser.phone)) {
-      return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom, Africell requis)", 'error');
+      return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom, Africell requis)", "error");
     }
     
     setIsSubmitting(true);
@@ -458,14 +621,14 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleUpdateUser = async () => {
-    if (!editingUser.name || !editingUser.email) return showToast("Champs requis", 'error');
+    if (!editingUser.name || !editingUser.email) return showToast("Champs requis", "error");
     if (editingUser.phone && !isValidPhone(editingUser.phone)) {
-      return showToast("Numéro de téléphone invalide", 'error');
+      return showToast("Numéro de téléphone invalide", "error");
     }
     setIsSubmitting(true);
     try {
       await api.put(`/admin/users/${editingUser.id}`, editingUser);
-      showToast("Mis à jour", 'success');
+      showToast("Mis à jour", "success");
       setShowEditModal(false);
       fetchGlobalData();
     } catch (e) { showToast(parseError(e), 'error'); }
@@ -473,11 +636,11 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleResetPassword = async () => {
-    if (!resetPasswordVal || resetPasswordVal.length < 6) return showToast("Mot de passe trop court", 'error');
+    if (!resetPasswordVal || resetPasswordVal.length < 6) return showToast("Mot de passe trop court", "error");
     setIsResetting(true);
     try {
       await api.post(`/admin/users/${editingUser.id}/reset-password`, { password: resetPasswordVal });
-      showToast("Mot de passe réinitialisé", 'success');
+      showToast("Mot de passe réinitialisé", "success");
       setShowResetSection(false);
       setResetPasswordVal('');
     } catch (e) { showToast(parseError(e), 'error'); }
@@ -485,12 +648,12 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleDeleteUser = (userId) => {
-    Alert.alert("Confirmation", "Supprimer cet utilisateur ?", [
-      { text: t.cancel, style: 'cancel' },
-      { text: "SUPPRIMER", style: 'destructive', onPress: async () => {
+    Alert.alert("Confirmation", "Supprimer cet utilisateur ? ", [
+      { text: t.cancel, style: "cancel" },
+      { text: "SUPPRIMER", style: "destructive", onPress: async () => {
           try {
             await api.delete(`/admin/users/${userId}`);
-            showToast("Supprimé", 'success');
+            showToast("Supprimé", "success");
             setShowEditModal(false);
             fetchGlobalData();
           } catch (e) { showToast(parseError(e), 'error'); }
@@ -500,12 +663,12 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleDeleteInsurance = (id) => {
-    Alert.alert("Confirmation", "Supprimer ce contrat d'assurance ?", [
-      { text: t.cancel, style: 'cancel' },
-      { text: "SUPPRIMER", style: 'destructive', onPress: async () => {
+    Alert.alert("Confirmation", "Supprimer ce contrat d'assurance ? ", [
+      { text: t.cancel, style: "cancel" },
+      { text: "SUPPRIMER", style: "destructive", onPress: async () => {
           try {
             await api.delete(`/admin/insurances/${id}`);
-            showToast("Contrat supprimé", 'success');
+            showToast("Contrat supprimé", "success");
             fetchGlobalData();
           } catch (e) { showToast(t.error, 'error'); }
         }
@@ -514,7 +677,7 @@ export default function AdminScreen({ navigation }) {
   };
 
   const handleBroadcast = async () => {
-    if (!broadcast.subject || !broadcast.message) return showToast("Objet et message requis", 'error');
+    if (!broadcast.subject || !broadcast.message) return showToast("Objet et message requis", "error");
     setIsSubmitting(true);
     try {
       if (broadcast.id) {
@@ -522,13 +685,13 @@ export default function AdminScreen({ navigation }) {
             ...broadcast,
             target_role: broadcast.target_role || null,
          });
-         showToast("Message modifié", 'success');
+         showToast("Message modifié", "success");
       } else {
          await api.post('/admin/broadcast', {
             ...broadcast,
             target_role: broadcast.target_role || null,
          });
-         showToast("Message envoyé", 'success');
+         showToast("Message envoyé", "success");
       }
       setBroadcast({ subject: '', message: '', target_role: '', priority: 'normal' });
       fetchGlobalData(revenuePeriod, true);
@@ -580,6 +743,7 @@ export default function AdminScreen({ navigation }) {
     { id: 'dashboard', icon: 'view-dashboard', label: t.navDashboard, sub: t.navDashboardSub }, 
     { id: 'users', icon: 'account-group', label: t.adminPersonnel, sub: t.navPersonnelSub }, 
     { id: 'patients', icon: 'folder', label: t.navPatients, sub: t.navPatientsSub }, 
+    { id: 'data', icon: 'database-cog', label: 'Données', sub: 'Archives patients' },
     { id: 'insurances', icon: 'shield-account', label: t.adminInsurances, sub: 'Contrats actifs' }, 
     { id: 'comm', icon: 'email-fast', label: t.navMessaging, sub: t.navMessagingSub }, 
     { id: 'stats', icon: 'chart-bar', label: t.adminAnalytics, sub: t.navStatsSub }, 
@@ -643,7 +807,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ flex: 1 }}>
                            <View style={{ marginBottom: 5 }}>
                               <Text style={styles.heroLabel}>
-                                 {revenuePeriod === 'day' ? "CHIFFRE D'AFFAIRES JOUR" : revenuePeriod === 'week' ? "CHIFFRE D'AFFAIRES SEMAINE" : "CHIFFRE D'AFFAIRES MOIS"}
+                                 {revenuePeriod === 'day' ? "CHIFFRE D'AFFAIRES JOUR" : revenuePeriod === "week" ? "CHIFFRE D'AFFAIRES SEMAINE" : "CHIFFRE D'AFFAIRES MOIS"}
                               </Text>
                            </View>
                            <TouchableOpacity onPress={() => setShowRevenueModal(true)}>
@@ -666,10 +830,10 @@ export default function AdminScreen({ navigation }) {
                   <View style={{ marginTop: 25 }}>
                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15, paddingHorizontal: 5 }}>
                         <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>RÉPARTITION DES REVENUS</Text>
-                        <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                        <MaterialCommunityIcons name="chart-pie" size={18} color={brandColor} />
                      </View>
                      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
-                        {stats?.revenue_by_service?.map((rev, i) => (
+                     {asArray(stats?.revenue_by_service).map((rev, i) => (
                            <FadeInView key={i} delay={i * 100}>
                               <View style={{ width: 140, padding: 16, borderRadius: 24, backgroundColor: C.surface, borderWidth: 1, borderColor: C.border, marginRight: 15, elevation: 3, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 8 }}>
                                  <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
@@ -755,7 +919,7 @@ export default function AdminScreen({ navigation }) {
                           </View>
                           <View style={{ flex: 1 }}>
                              <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name}</Text>
-                             <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 2 }}>ID: {p.id.toString().padStart(5, '0')} • {p.pathology || "Pas de pathologie"}</Text>
+                           <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 2 }}>ID: {safePadId(p.id)} • {p.pathology || "Pas de pathologie"}</Text>
                           </View>
                           <MaterialIcons name="chevron-right" size={24} color={C.sub} />
                        </TouchableOpacity>
@@ -816,6 +980,92 @@ export default function AdminScreen({ navigation }) {
                        ))}
                     </View>
                  )}
+              </FadeInView>
+           )}
+
+           {activeView === 'data' && (
+              <FadeInView>
+                 <View style={styles.rowBetween}>
+                    <View>
+                       <Text style={[styles.vTitle, { color: C.text }]}>DONNÉES HÔPITAL</Text>
+                       <Text style={{ color: C.sub, fontSize: 10, fontWeight: '800' }}>Dossiers patients classés par année de naissance</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => downloadHospitalData(true)}
+                      disabled={isSubmitting}
+                      style={{ backgroundColor: brandColor, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', opacity: isSubmitting ? 0.6 : 1 }}
+                    >
+                       <MaterialCommunityIcons name="download" size={18} color="#FFF" />
+                       <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>EXPORTER</Text>
+                    </TouchableOpacity>
+                 </View>
+
+                 <View style={{ marginTop: 16, padding: 16, backgroundColor: C.surface, borderRadius: 22, borderWidth: 1, borderColor: C.border }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                       <View>
+                          <Text style={{ color: C.text, fontWeight: '900', fontSize: 13 }}>Téléchargement automatique</Text>
+                          <Text style={{ color: C.sub, fontWeight: '700', fontSize: 10 }}>{lastExportUri ? 'Dernier fichier généré sur cet appareil' : 'Crée un fichier local quand l’admin ouvre cette vue'}</Text>
+                       </View>
+                       <Switch value={autoExportEnabled} onValueChange={setAutoExportEnabled} trackColor={{ true: brandColor }} />
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
+                       {[
+                         { id: 'daily', label: 'JOUR' },
+                         { id: 'weekly', label: 'SEMAINE' },
+                         { id: 'monthly', label: 'MOIS' },
+                       ].map(freq => (
+                         <TouchableOpacity
+                           key={freq.id}
+                           onPress={() => setAutoExportFrequency(freq.id)}
+                           style={{ flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center', backgroundColor: autoExportFrequency === freq.id ? brandColor : C.bg, borderWidth: 1, borderColor: autoExportFrequency === freq.id ? brandColor : C.border }}
+                         >
+                           <Text style={{ color: autoExportFrequency === freq.id ? '#FFF' : C.sub, fontSize: 9, fontWeight: '900' }}>{freq.label}</Text>
+                         </TouchableOpacity>
+                       ))}
+                    </View>
+                 </View>
+
+                 <View style={{ flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 14 }}>
+                    <View style={[styles.searchBox, { flex: 1, backgroundColor: C.surface, borderColor: C.border, marginBottom: 0 }]}>
+                       <MaterialIcons name="search" size={20} color={brandColor} />
+                       <TextInput placeholder="Nom, code, téléphone..." placeholderTextColor={C.sub} style={[styles.searchInput, { color: C.text }]} value={dataSearch} onChangeText={setDataSearch} />
+                    </View>
+                    <TextInput
+                      placeholder="Année"
+                      placeholderTextColor={C.sub}
+                      keyboardType="numeric"
+                      value={dataBirthYear}
+                      onChangeText={setDataBirthYear}
+                      style={[styles.input, { width: 92, height: 52, color: C.text, borderColor: C.border, backgroundColor: C.surface, marginBottom: 0 }]}
+                    />
+                 </View>
+
+                 {Object.entries(
+                   asArray(dataRecords).reduce((acc, p) => {
+                     const year = p.birth_year || 'Non renseignée';
+                     if (!acc[year]) acc[year] = [];
+                     acc[year].push(p);
+                     return acc;
+                   }, {})
+                 ).sort((a, b) => Number(b[0]) - Number(a[0])).map(([year, records]) => (
+                   <View key={year} style={{ marginBottom: 18 }}>
+                      <Text style={{ color: brandColor, fontSize: 11, fontWeight: '900', marginBottom: 10 }}>NAISSANCE {year} • {records.length} DOSSIER(S)</Text>
+                      {records.map(p => (
+                        <View key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
+                           <View style={{ flex: 1 }}>
+                              <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name} {p.post_name || ''}</Text>
+                              <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 3 }}>ID {safePadId(p.id)} • {p.pathology || 'Pas de pathologie'} • {p.is_insured ? (p.insurance?.name || 'Assuré') : 'Privé'}</Text>
+                           </View>
+                           <TouchableOpacity onPress={() => setEditingPatient({ ...p })} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brandColor + '12', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+                              <MaterialIcons name="edit" size={20} color={brandColor} />
+                           </TouchableOpacity>
+                           <TouchableOpacity onPress={() => handleDeletePatient(p)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: '#EF444412', alignItems: 'center', justifyContent: 'center' }}>
+                              <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
+                           </TouchableOpacity>
+                        </View>
+                      ))}
+                   </View>
+                 ))}
               </FadeInView>
            )}
 
@@ -898,7 +1148,7 @@ export default function AdminScreen({ navigation }) {
                       <View style={styles.rowBetween}>
                          <Text style={[styles.vTitle, { color: C.text, fontSize: 18 }]}>MESSAGES REÇUS</Text>
                          <TouchableOpacity onPress={fetchGlobalData}>
-                            <MaterialIcons name="help-circle" size={22} color={brandColor} />
+                            <MaterialCommunityIcons name="help-circle" size={22} color={brandColor} />
                          </TouchableOpacity>
                       </View>
 
@@ -1003,7 +1253,7 @@ export default function AdminScreen({ navigation }) {
                      {/* TOP INSURANCES */}
                      <View style={{ flex: 1, backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border }}>
                         <Text style={{ fontSize: 11, fontWeight: '900', color: C.text, marginBottom: 15 }}>TOP ASSURANCES</Text>
-                        {stats?.top_insurances?.map((ins, i) => (
+                        {asArray(stats?.top_insurances).map((ins, i) => (
                            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ['#3B82F6', '#8B5CF6', '#EC4899'][i] || brandColor, marginRight: 10 }} />
                               <Text style={{ color: C.sub, fontSize: 12, fontWeight: '700', flex: 1 }} numberOfLines={1}>{ins.insurance_company}</Text>
@@ -1017,7 +1267,7 @@ export default function AdminScreen({ navigation }) {
                         <Text style={{ fontSize: 11, fontWeight: '900', color: C.danger, marginBottom: 15 }}>ALERTES CRITIQUES</Text>
                         {(stats?.low_stock_medicines?.length || 0) > 0 ? (
                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                              <MaterialIcons name="help-circle" size={20} color={C.danger} />
+                              <MaterialCommunityIcons name="help-circle" size={20} color={C.danger} />
                               <View style={{ marginLeft: 10 }}>
                                  <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>{stats.low_stock_medicines.length}</Text>
                                  <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>STOCK FAIBLE</Text>
@@ -1025,13 +1275,13 @@ export default function AdminScreen({ navigation }) {
                            </View>
                         ) : (
                            <View style={{ flexDirection: 'row', alignItems: 'center', opacity: 0.5 }}>
-                              <MaterialIcons name="help-circle" size={20} color="#22C55E" />
+                              <MaterialCommunityIcons name="help-circle" size={20} color="#22C55E" />
                               <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>STOCK STABLE</Text>
                            </View>
                         )}
                         <View style={{ height: 1, backgroundColor: C.border, marginVertical: 12 }} />
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                           <MaterialIcons name="help-circle" size={20} color="#F59E0B" />
+                           <MaterialCommunityIcons name="help-circle" size={20} color="#F59E0B" />
                            <View style={{ marginLeft: 10 }}>
                               <Text style={{ color: C.text, fontWeight: '900', fontSize: 14 }}>0</Text>
                               <Text style={{ color: C.sub, fontSize: 9, fontWeight: '700' }}>URGENCES ATTENTE</Text>
@@ -1142,16 +1392,16 @@ export default function AdminScreen({ navigation }) {
                      </View>
                      <TouchableOpacity 
                         style={[styles.addBtn, { backgroundColor: brandColor, paddingHorizontal: 12, height: 40, borderRadius: 14 }]} 
-                        onPress={() => { setEditingInsurance(null); setNewInsurance({ name: '', contract_date: '', monthly_flat_fee: '', contact_info: '' }); setShowInsuranceModal(true); }}
+                        onPress={() => { setEditingInsurance(null); setNewInsurance({ name: '', email: '', contract_date: '', contract_end_date: '', contract_type: 'annuel', monthly_flat_fee: '', contact_info: '', status: 'active' }); setShowInsuranceModal(true); }}
                      >
-                        <MaterialIcons name="help-circle" size={18} color="#FFF" />
+                        <MaterialCommunityIcons name="help-circle" size={18} color="#FFF" />
                         <Text style={[styles.addBtnT, { fontSize: 11, marginLeft: 4 }]}>NOUVEAU</Text>
                      </TouchableOpacity>
                   </View>
 
                   {/* PREMIUM ANALYTICS CARDS */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 20, paddingBottom: 10 }}>
-                     {insurances.map(ins => {
+                     {asArray(insurances).map(ins => {
                         const consumption = ins.real_consumption || 0;
                         const flatFee = Number(ins.monthly_flat_fee || 0);
                         const isProfit = flatFee > consumption;
@@ -1184,12 +1434,12 @@ export default function AdminScreen({ navigation }) {
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                  <View>
                                     <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub }}>FORFAIT</Text>
-                                    <Text style={{ fontSize: 13, fontWeight: '900', color: C.text }}>{flatFee.toLocaleString()} FC</Text>
+                                    <Text style={{ fontSize: 13, fontWeight: '900', color: C.text }}>{formatMoney(flatFee)} FC</Text>
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub }}>{isProfit ? 'PROFIT' : 'PERTE'}</Text>
                                     <Text style={{ fontSize: 13, fontWeight: '900', color: isProfit ? "#22C55E" : "#EF4444" }}>
-                                       {isProfit ? "+" : "-"} {diff.toLocaleString()} FC
+                                       {isProfit ? "+" : "-"} {formatMoney(diff)} FC
                                     </Text>
                                  </View>
                               </View>
@@ -1209,14 +1459,19 @@ export default function AdminScreen({ navigation }) {
                      />
                    </View>
 
-                  {insurances.filter(ins => ins.name.toLowerCase().includes(insuranceSearch.toLowerCase())).map((ins, i) => (
+                  {asArray(insurances).filter(ins => asText(ins.name).toLowerCase().includes(asText(insuranceSearch).toLowerCase())).map((ins, i) => (
                      <FadeInView key={ins.id} delay={i * 50}>
+                        {(() => {
+                           const expired = isInsuranceExpired(ins);
+                           const statusColor = expired ? '#EF4444' : (ins.status === 'suspended' ? '#F59E0B' : (ins.status === 'terminated' ? '#EF4444' : '#22C55E'));
+                           const statusLabel = expired ? 'EXPIRÉ' : (ins.status ? ins.status.toUpperCase() : 'ACTIF');
+                           return (
                         <TouchableOpacity 
                            onPress={() => { setActiveInsurance(ins); fetchMembers(ins.id); setShowMemberModal(true); }}
                            activeOpacity={0.9}
                            style={{ backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border, elevation: 4, marginBottom: 16, overflow: 'hidden' }}
                         >
-                           <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 6, backgroundColor: (ins.real_consumption > ins.monthly_flat_fee) ? '#EF4444' : brandColor }} />
+                           <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 6, backgroundColor: expired ? '#EF4444' : ((ins.real_consumption > ins.monthly_flat_fee) ? '#EF4444' : brandColor) }} />
                            
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
                               <LinearGradient colors={[brandColor, '#4F46E5']} style={{ width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
@@ -1225,18 +1480,23 @@ export default function AdminScreen({ navigation }) {
                               <View style={{ flex: 1, marginLeft: 16 }}>
                                  <Text style={{ fontSize: 19, fontWeight: '900', color: C.text }}>{ins.name}</Text>
                                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
-                                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, backgroundColor: ins.status === 'terminated' ? '#EF444420' : (ins.status === 'suspended' ? '#F59E0B20' : '#22C55E20'), marginRight: 10 }}>
-                                       <Text style={{ fontSize: 8, fontWeight: '900', color: ins.status === 'terminated' ? '#EF4444' : (ins.status === 'suspended' ? '#F59E0B' : '#22C55E') }}>
-                                          {ins.status ? ins.status.toUpperCase() : 'ACTIF'}
+                                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, backgroundColor: statusColor + '20', marginRight: 10 }}>
+                                       <Text style={{ fontSize: 8, fontWeight: '900', color: statusColor }}>
+                                          {statusLabel}
                                        </Text>
                                     </View>
                                     <MaterialIcons name="event-available" size={12} color={C.sub} />
                                     <Text style={{ fontSize: 10, color: C.sub, fontWeight: '700', marginLeft: 4 }}>
-                                       CONTRAT DU {ins.contract_date ? new Date(ins.contract_date).toLocaleDateString() : 'NON SPÉCIFIÉ'}
+                                       CONTRAT DU {ins.contract_date ? new Date(ins.contract_date).toLocaleDateString() : 'NON SPÉCIFIÉ'} AU {ins.contract_end_date ? new Date(ins.contract_end_date).toLocaleDateString() : 'NON SPÉCIFIÉ'}
                                     </Text>
                                  </View>
                               </View>
                               <View style={{ flexDirection: 'row' }}>
+                                 {expired && (
+                                   <TouchableOpacity onPress={() => handleRenewInsurance(ins)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: '#22C55E12', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
+                                      <MaterialCommunityIcons name="autorenew" size={20} color="#22C55E" />
+                                   </TouchableOpacity>
+                                 )}
                                  <TouchableOpacity onPress={() => setupEditInsurance(ins)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', marginRight: 8 }}>
                                     <MaterialIcons name="edit" size={20} color={brandColor} />
                                  </TouchableOpacity>
@@ -1257,13 +1517,13 @@ export default function AdminScreen({ navigation }) {
                               <View style={{ width: 1, backgroundColor: C.border, marginHorizontal: 15 }} />
                               <View style={{ flex: 1, alignItems: 'flex-end' }}>
                                  <Text style={{ fontSize: 8, fontWeight: '900', color: C.sub, letterSpacing: 1 }}>VALEUR MENSUELLE</Text>
-                                 <Text style={{ fontSize: 18, fontWeight: '900', color: brandColor, marginTop: 4 }}>{ins.monthly_flat_fee?.toLocaleString()} FC</Text>
+                                 <Text style={{ fontSize: 18, fontWeight: '900', color: brandColor, marginTop: 4 }}>{formatMoney(ins.monthly_flat_fee)} FC</Text>
                               </View>
                            </View>
 
                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15, justifyContent: 'space-between' }}>
                               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                 <MaterialIcons name="help-circle" size={14} color={C.sub} />
+                                 <MaterialCommunityIcons name="help-circle" size={14} color={C.sub} />
                                  <Text style={{ fontSize: 10, color: C.sub, marginLeft: 5, fontWeight: '600' }} numberOfLines={1}>
                                     {ins.contact_info || "Aucune information de contact"}
                                  </Text>
@@ -1271,6 +1531,8 @@ export default function AdminScreen({ navigation }) {
                               <MaterialIcons name="chevron-right" size={20} color={C.sub} />
                            </View>
                         </TouchableOpacity>
+                           );
+                        })()}
                      </FadeInView>
                   ))}
                </FadeInView>
@@ -1386,7 +1648,7 @@ export default function AdminScreen({ navigation }) {
                                               onPress={() => handleDeleteCatalogItem(globalIndex)}
                                               style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: C.danger + '15', alignItems: 'center', justifyContent: 'center', marginLeft: 8 }}
                                            >
-                                              <MaterialIcons name="help-circle" size={18} color={C.danger} />
+                                              <MaterialCommunityIcons name="help-circle" size={18} color={C.danger} />
                                            </TouchableOpacity>
                                         )}
                                      </View>
@@ -1435,20 +1697,20 @@ export default function AdminScreen({ navigation }) {
                           </View>
                        </View>
                     ))}
-                    {diseases.length === 0 && <Text style={{ color: C.sub, textAlign: 'center' }}>{"Aucune donnée de diagnostic."</Text>}
+                    {diseases.length === 0 && <Text style={{ color: C.sub, textAlign: 'center' }}>Aucune donnée de diagnostic.</Text>}
                  </View>
               ) : activeBottomTab === 'stock' ? (
                  <View>
                     <View style={{ backgroundColor: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF444420' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B20' : '#10B98120'), padding: 15, borderRadius: 20, marginBottom: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF444440' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B40' : '#10B98140') }}>
                        <MaterialCommunityIcons 
-                         name={expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "alert" : "check-decagram")} 
+                         name={expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === "warning" ? "alert" : "check-decagram")} 
                          size={24} 
                          color={expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981')} 
                        />
                        <View style={{ marginLeft: 12 }}>
-                          <Text style={{ fontWeight: '900', color: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981'), fontSize: 11 }}>{"SANTÉ DE LA PHARMACIE"</Text>
+                          <Text style={{ fontWeight: '900', color: expiryData.pharmacy_health?.alert_level === 'critical' ? '#EF4444' : (expiryData.pharmacy_health?.alert_level === 'warning' ? '#F59E0B' : '#10B981'), fontSize: 11 }}>SANTÉ DE LA PHARMACIE</Text>
                           <Text style={{ color: C.text, fontWeight: '700', fontSize: 13 }}>
-                             {expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === 'warning' ? "Attention requise" : "État du stock stable")}
+                             {expiryData.pharmacy_health?.alert_level === 'critical' ? "" : (expiryData.pharmacy_health?.alert_level === "warning" ? "Attention requise" : "État du stock stable")}
                           </Text>
                        </View>
                     </View>
@@ -1488,7 +1750,7 @@ export default function AdminScreen({ navigation }) {
                  </View>
               ) : activeBottomTab === 'caisse' ? (
                  <View>
-                    <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 15, letterSpacing: 1.5 }}>{"BILAN DES ENTRÉES PAR SERVICE"</Text>
+                    <Text style={{ fontSize: 10, fontWeight: '900', color: C.sub, marginBottom: 15, letterSpacing: 1.5 }}>BILAN DES ENTRÉES PAR SERVICE</Text>
                     {cashData.items?.map((c, i) => (
                        <View key={i} style={{ padding: 18, backgroundColor: C.surface, borderRadius: 24, marginBottom: 14, borderWidth: 1, borderColor: C.border, elevation: 2 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
@@ -1507,7 +1769,7 @@ export default function AdminScreen({ navigation }) {
                     {(!cashData.items || cashData.items.length === 0) && (
                        <View style={{ alignItems: 'center', paddingVertical: 40 }}>
                           <MaterialCommunityIcons name="cash-remove" size={48} color={C.sub} style={{ opacity: 0.3 }} />
-                          <Text style={{ color: C.sub, marginTop: 10 }}>{"Aucune recette enregistrée pour cette période."</Text>
+                          <Text style={{ color: C.sub, marginTop: 10 }}>Aucune recette enregistrée pour cette période.</Text>
                        </View>
                     )}
                  </View>
@@ -1575,16 +1837,16 @@ export default function AdminScreen({ navigation }) {
                </View>
                <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false}>
                   <Text style={styles.label}>{t.users.fullName}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Ex: Jean Mpolo" placeholderTextColor="" value={showEditModal ? editingUser?.name : newUser.name} onChangeText={v => showEditModal ? setEditingUser({...editingUser, name: v}) : setNewUser({...newUser, name: v})} />
-                  <Text style={styles.label}>{"POSTNOM"</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: Jean Mpolo" placeholderTextColor={C.placeholder} value={showEditModal ? editingUser?.name : newUser.name} onChangeText={v => showEditModal ? setEditingUser({...editingUser, name: v}) : setNewUser({...newUser, name: v})} />
+                  <Text style={styles.label}>POSTNOM</Text>
                   <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: Bakole" placeholderTextColor="#64748B" value={showEditModal ? editingUser?.postname : newUser.postname} onChangeText={v => showEditModal ? setEditingUser({...editingUser, postname: v}) : setNewUser({...newUser, postname: v})} />
-                  <Text style={styles.label}>{"TÉLÉPHONE"</Text>
+                  <Text style={styles.label}>TÉLÉPHONE</Text>
                   <View style={{ marginBottom: 20 }}>
                      <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                        <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                        <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                         <TextInput 
                            style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                           placeholder={"08X XXX XXXX" placeholderTextColor="" 
+                           placeholder="08X XXX XXXX" placeholderTextColor={C.placeholder} 
                            keyboardType="phone-pad" 
                            value={showEditModal ? editingUser?.phone : newUser.phone} 
                            onChangeText={v => {
@@ -1602,17 +1864,17 @@ export default function AdminScreen({ navigation }) {
                      </View>
                   </View>
                   <Text style={styles.label}>{t.users.emailAddress}</Text>
-                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"agent@test.com" placeholderTextColor="" autoCapitalize="none" keyboardType="email-address" value={showEditModal ? editingUser?.email : newUser.email} onChangeText={v => showEditModal ? setEditingUser({...editingUser, email: v}) : setNewUser({...newUser, email: v})} />
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="agent@test.com" placeholderTextColor={C.placeholder} autoCapitalize="none" keyboardType="email-address" value={showEditModal ? editingUser?.email : newUser.email} onChangeText={v => showEditModal ? setEditingUser({...editingUser, email: v}) : setNewUser({...newUser, email: v})} />
                   
                   {!showEditModal && (
                      <>
-                        <Text style={styles.label}>{"MOT DE PASSE"</Text>
+                        <Text style={styles.label}>MOT DE PASSE</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                              <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                 placeholder={"••••••••" placeholderTextColor="" 
+                                 placeholder="••••••••" placeholderTextColor={C.placeholder} 
                                  secureTextEntry={!showPassword} 
                                  value={newUser.password} 
                                  onChangeText={v => setNewUser({...newUser, password: v})} 
@@ -1623,13 +1885,13 @@ export default function AdminScreen({ navigation }) {
                            </View>
                         </View>
 
-                        <Text style={styles.label}>{"CONFIRMER LE MOT DE PASSE"</Text>
+                        <Text style={styles.label}>CONFIRMER LE MOT DE PASSE</Text>
                         <View style={{ marginBottom: 20 }}>
                            <View style={{ borderColor: C.border, backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56 }}>
-                              <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                              <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                               <TextInput 
                                  style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                 placeholder={"••••••••" placeholderTextColor="" 
+                                 placeholder="••••••••" placeholderTextColor={C.placeholder} 
                                  secureTextEntry={!showConfirmPassword} 
                                  value={newUser.confirmPassword} 
                                  onChangeText={v => setNewUser({...newUser, confirmPassword: v})} 
@@ -1660,7 +1922,7 @@ export default function AdminScreen({ navigation }) {
 
                   {(showEditModal ? editingUser?.role : newUser.role) === 'medecin' && (
                      <FadeInView>
-                        <Text style={styles.label}>{"SPÉCIALITÉ MÉDICALE"</Text>
+                        <Text style={styles.label}>SPÉCIALITÉ MÉDICALE</Text>
                         <TextInput 
                            style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
                            placeholder="Ex: Cardiologie, Pédiatrie..." 
@@ -1677,7 +1939,7 @@ export default function AdminScreen({ navigation }) {
                           style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15 }}
                         >
                            <MaterialIcons name="lock-reset" size={20} color={brandColor} />
-                           <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 10 }}>{"RÉINITIALISER LE MOT DE PASSE"</Text>
+                           <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 10 }}>RÉINITIALISER LE MOT DE PASSE</Text>
                         </TouchableOpacity>
 
                         {showResetSection && (
@@ -1688,7 +1950,7 @@ export default function AdminScreen({ navigation }) {
                                     <MaterialIcons name="vpn-key" size={20} color={brandColor} />
                                     <TextInput 
                                        style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
-                                       placeholder={"••••••••" placeholderTextColor="" 
+                                       placeholder="••••••••" placeholderTextColor={C.placeholder} 
                                        secureTextEntry={!showResetPassword} 
                                        value={resetPasswordVal} 
                                        onChangeText={setResetPasswordVal} 
@@ -1700,7 +1962,7 @@ export default function AdminScreen({ navigation }) {
                               </View>
                               <TouchableOpacity onPress={handleResetPassword} disabled={isResetting}>
                                  <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
-                                    {isResetting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{"VALIDER LE NOUVEAU PASS"</Text>}
+                                    {isResetting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: "#FFF", fontWeight: '900', fontSize: 12 }}>VALIDER LE NOUVEAU PASS</Text>}
                                  </LinearGradient>
                               </TouchableOpacity>
                            </FadeInView>
@@ -1710,15 +1972,15 @@ export default function AdminScreen({ navigation }) {
                           onPress={() => handleDeleteUser(editingUser.id)}
                           style={{ flexDirection: 'row', alignItems: 'center' }}
                         >
-                           <MaterialIcons name="help-circle" size={20} color="#EF4444" />
-                           <Text style={{ color: '#EF4444', fontWeight: '800', marginLeft: 10 }}>{"SUPPRIMER LE COMPTE DÉFINITIVEMENT"</Text>
+                           <MaterialCommunityIcons name="help-circle" size={20} color="#EF4444" />
+                           <Text style={{ color: '#EF4444', fontWeight: '800', marginLeft: 10 }}>SUPPRIMER LE COMPTE DÉFINITIVEMENT</Text>
                         </TouchableOpacity>
                      </View>
                   )}
 
                   <TouchableOpacity onPress={showEditModal ? handleUpdateUser : handleCreateUser} disabled={isSubmitting} style={{ marginTop: 30 }}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
-                        {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{showEditModal ? t.save.toUpperCase() : t.users.generate.toUpperCase()}</Text>}
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: "#FFF", fontWeight: '900', letterSpacing: 1 }}>{showEditModal ? t.save.toUpperCase() : t.users.generate.toUpperCase()}</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                   <View style={{ height: 40 }} />
@@ -1737,28 +1999,28 @@ export default function AdminScreen({ navigation }) {
                         <MaterialCommunityIcons name="trophy-variant" size={24} color="#FFF" />
                      </LinearGradient>
                      <View>
-                        <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>{"BILAN GÉNÉRAL MDCD"</Text>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>BILAN GÉNÉRAL MDCD</Text>
                         <Text style={{ fontSize: 11, color: C.sub, fontWeight: '700' }}>Période : {reportFrequency === 'daily' ? 'Journalière' : reportFrequency === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}</Text>
                      </View>
                   </View>
                   <TouchableOpacity onPress={() => setShowBilanModal(false)} style={styles.closeBtn}>
-                     <MaterialIcons name="help-circle" size={24} color={C.text} />
+                     <MaterialCommunityIcons name="help-circle" size={24} color={C.text} />
                   </TouchableOpacity>
                </View>
 
                <ScrollView contentContainerStyle={{ padding: 25 }}>
                   <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderRadius: 28, padding: 25, borderWidth: 1, borderColor: C.divider, marginBottom: 25 }}>
-                     <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 2, marginBottom: 15 }}>{"RÉSUMÉ FINANCIER"</Text>
+                     <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 2, marginBottom: 15 }}>RÉSUMÉ FINANCIER</Text>
                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                         <View>
                            <Text style={{ fontSize: 34, fontWeight: '900', color: C.text }}>{(stats?.revenue_period || 0).toLocaleString()} <Text style={{ fontSize: 14 }}>FC</Text></Text>
-                           <Text style={{ fontSize: 11, fontWeight: '800', color: '#22C55E', marginTop: 5 }}>{"Rendement Optimal (+12.5%)"</Text>
+                           <Text style={{ fontSize: 11, fontWeight: '800', color: '#22C55E', marginTop: 5 }}>Rendement Optimal (+12.5%)</Text>
                         </View>
                         <MaterialCommunityIcons name="help-circle" size={44} color="#22C55E15" />
                      </View>
                   </View>
 
-                  <Text style={{ fontSize: 14, fontWeight: '900', color: C.text, marginBottom: 18, marginLeft: 5 }}>{"DÉTAILS PAR SERVICE"</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '900', color: C.text, marginBottom: 18, marginLeft: 5 }}>DÉTAILS PAR SERVICE</Text>
                   
                   {[
                      { name: 'RÉCEPTION / ACCUEIL', val: stats?.total_visits_period || 0, unit: 'Visites', yield: '100%', col: '#3182CE', icon: 'account-multiple-check' },
@@ -1787,7 +2049,7 @@ export default function AdminScreen({ navigation }) {
                   <View style={{ marginTop: 20, padding: 20, backgroundColor: brandColor + '08', borderRadius: 24, borderWidth: 1, borderColor: brandColor + '20' }}>
                      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
                         <MaterialIcons name="info-outline" size={18} color={brandColor} />
-                        <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, marginLeft: 8 }}>{"RECOMMANDATION SYSTÈME"</Text>
+                        <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, marginLeft: 8 }}>RECOMMANDATION SYSTÈME</Text>
                      </View>
                      <Text style={{ fontSize: 12, color: C.text, lineHeight: 18, fontWeight: '600' }}>Le service des soins est en sur-capacité. Envisagez de renforcer l'équipe de nuit pour maintenir la qualité MDCD.</Text>
                   </View>
@@ -1797,7 +2059,7 @@ export default function AdminScreen({ navigation }) {
                     onPress={() => { setShowBilanModal(false); showToast("Rapport envoyé à l'administration", "success"); }}
                   >
                      <MaterialCommunityIcons name="send-check" size={20} color={C.bg} style={{ marginRight: 10 }} />
-                     <Text style={{ color: C.bg, fontWeight: '900', fontSize: 13 }}>{"ARCHIVER & PARTAGER"</Text>
+                     <Text style={{ color: C.bg, fontWeight: '900', fontSize: 13 }}>ARCHIVER & PARTAGER</Text>
                   </TouchableOpacity>
                   <View style={{ height: 40 }} />
                </ScrollView>
@@ -1805,7 +2067,70 @@ export default function AdminScreen({ navigation }) {
          </View>
       </Modal>
 
-      <Modal visible={showInsuranceModal} animationType="" transparent>
+      <Modal visible={!!editingPatient} animationType="fade" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { backgroundColor: C.bg, height: height * 0.88 }]}>
+            <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
+              <Text style={[styles.dimT, { color: C.text }]}>MODIFIER DOSSIER PATIENT</Text>
+              <TouchableOpacity onPress={() => setEditingPatient(null)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
+                <MaterialIcons name="close" size={22} color={C.closeIc} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ padding: 20 }} keyboardShouldPersistTaps="handled">
+              <Text style={styles.label}>PRÉNOM</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.first_name || ''} onChangeText={v => setEditingPatient(p => ({ ...p, first_name: v }))} />
+              <Text style={styles.label}>NOM</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.last_name || ''} onChangeText={v => setEditingPatient(p => ({ ...p, last_name: v }))} />
+              <Text style={styles.label}>POSTNOM</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.post_name || ''} onChangeText={v => setEditingPatient(p => ({ ...p, post_name: v }))} />
+              <Text style={styles.label}>ANNÉE DE NAISSANCE</Text>
+              <TextInput keyboardType="numeric" style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={String(editingPatient?.birth_year || '')} onChangeText={v => setEditingPatient(p => ({ ...p, birth_year: v }))} />
+              <Text style={styles.label}>PATHOLOGIE / NOTE</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.pathology || ''} onChangeText={v => setEditingPatient(p => ({ ...p, pathology: v }))} />
+              <Text style={styles.label}>CONTACT</Text>
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.contact_info || ''} onChangeText={v => setEditingPatient(p => ({ ...p, contact_info: v }))} />
+
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Text style={styles.label}>PATIENT ASSURÉ</Text>
+                <Switch value={!!editingPatient?.is_insured} onValueChange={v => setEditingPatient(p => ({ ...p, is_insured: v }))} trackColor={{ true: brandColor }} />
+              </View>
+
+              {editingPatient?.is_insured && (
+                <>
+                  <Text style={styles.label}>ASSURANCE</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 14 }}>
+                    {asArray(insurances).map(ins => {
+                      const expired = isInsuranceExpired(ins);
+                      const selected = editingPatient?.insurance_id === ins.id;
+                      return (
+                        <TouchableOpacity
+                          key={ins.id}
+                          disabled={expired}
+                          onPress={() => setEditingPatient(p => ({ ...p, insurance_id: ins.id }))}
+                          style={{ paddingHorizontal: 14, paddingVertical: 10, borderRadius: 14, marginRight: 8, backgroundColor: selected ? brandColor : C.surface, borderWidth: 1, borderColor: expired ? '#EF4444' : (selected ? brandColor : C.border), opacity: expired ? 0.45 : 1 }}
+                        >
+                          <Text style={{ color: selected ? '#FFF' : C.text, fontSize: 10, fontWeight: '900' }}>{ins.name}</Text>
+                          {expired ? <Text style={{ color: '#EF4444', fontSize: 8, fontWeight: '900' }}>EXPIRÉ</Text> : null}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                  <Text style={styles.label}>CODE ASSURÉ</Text>
+                  <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} value={editingPatient?.insurance_code || ''} onChangeText={v => setEditingPatient(p => ({ ...p, insurance_code: v }))} />
+                </>
+              )}
+
+              <TouchableOpacity onPress={handleUpdatePatient} disabled={isSubmitting} style={{ height: 58, borderRadius: 18, overflow: 'hidden', marginTop: 8, marginBottom: 40, opacity: isSubmitting ? 0.6 : 1 }}>
+                <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                  <Text style={{ color: '#FFF', fontWeight: '900' }}>{isSubmitting ? 'ENREGISTREMENT...' : 'ENREGISTRER LE DOSSIER'}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showInsuranceModal} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
            <View style={[styles.modalSheet, { backgroundColor: C.bg, height: height * 0.92 }]}>
             <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
@@ -1816,13 +2141,13 @@ export default function AdminScreen({ navigation }) {
             </View>
             <ScrollView style={{ padding: 20 }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
-              <Text style={styles.label}>{"NOM DE LA COMPAGNIE"</Text>
+              <Text style={styles.label}>NOM DE LA COMPAGNIE</Text>
               <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: ASCOMA, SONAS, CNSS..." placeholderTextColor="#64748B" value={newInsurance.name} onChangeText={v => setNewInsurance({...newInsurance, name: v})} />
 
-              <Text style={styles.label}>{"EMAIL DE CONTACT"</Text>
+              <Text style={styles.label}>EMAIL DE CONTACT</Text>
               <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="contact@ascoma.cd" placeholderTextColor="#64748B" keyboardType="email-address" autoCapitalize="none" value={newInsurance.email} onChangeText={v => setNewInsurance({...newInsurance, email: v})} />
 
-              <Text style={styles.label}>{"TYPE DE CONTRAT (PÉRIODICITÉ)"</Text>
+              <Text style={styles.label}>TYPE DE CONTRAT (PÉRIODICITÉ)</Text>
               <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
                 {[
                   { id: 'mensuel', label: 'MENSUEL', icon: 'calendar-month' },
@@ -1844,28 +2169,29 @@ export default function AdminScreen({ navigation }) {
               </View>
 
               <Text style={styles.label}>MONTANT DU FORFAIT (FC)</Text>
-              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Ex: 500000" placeholderTextColor="" keyboardType="numeric" value={newInsurance.monthly_flat_fee} onChangeText={v => setNewInsurance({...newInsurance, monthly_flat_fee: v})} />
+              <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Ex: 500000" placeholderTextColor={C.placeholder} keyboardType="numeric" value={newInsurance.monthly_flat_fee} onChangeText={v => setNewInsurance({...newInsurance, monthly_flat_fee: v})} />
 
               <View style={{ flexDirection: 'row', gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{"DÉBUT CONTRAT (JJ/MM/AAAA)"</Text>
+                  <Text style={styles.label}>DÉBUT CONTRAT (JJ/MM/AAAA)</Text>
                   <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="01/01/2026" placeholderTextColor="#64748B" value={newInsurance.contract_date} onChangeText={v => setNewInsurance({...newInsurance, contract_date: v})} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.label}>{"FIN CONTRAT (JJ/MM/AAAA)"</Text>
+                  <Text style={styles.label}>FIN CONTRAT (JJ/MM/AAAA)</Text>
                   <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="31/12/2026" placeholderTextColor="#64748B" value={newInsurance.contract_end_date} onChangeText={v => setNewInsurance({...newInsurance, contract_end_date: v})} />
                 </View>
               </View>
 
-              <Text style={styles.label}>{"CONTACTS / INFOS COMPLÉMENTAIRES"</Text>
+              <Text style={styles.label}>CONTACTS / INFOS COMPLÉMENTAIRES</Text>
               <TextInput style={[styles.input, { color: C.text, borderColor: C.border, backgroundColor: C.input, height: 90, textAlignVertical: 'top', paddingTop: 12 }]} multiline placeholder="Numéro de téléphone, personne de contact..." placeholderTextColor="#64748B" value={newInsurance.contact_info} onChangeText={v => setNewInsurance({...newInsurance, contact_info: v})} />
 
-              <Text style={styles.label}>{"ÉTAT DU CONTRAT"</Text>
+              <Text style={styles.label}>ÉTAT DU CONTRAT</Text>
               <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
                 {[
                   { id: 'active', label: 'ACTIF', color: '#22C55E' },
                   { id: 'suspended', label: 'SUSPENDU', color: '#F59E0B' },
-                  { id: 'terminated', label: 'ROMPU', color: '#EF4444' }
+                  { id: 'terminated', label: 'ROMPU', color: '#EF4444' },
+                  { id: 'expired', label: 'EXPIRÉ', color: '#EF4444' }
                 ].map(s => (
                   <TouchableOpacity
                     key={s.id}
@@ -1879,7 +2205,7 @@ export default function AdminScreen({ navigation }) {
 
               <TouchableOpacity onPress={handleSaveInsurance} disabled={isSubmitting} style={{ marginTop: 10 }}>
                 <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 18, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
-                   {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{editingInsurance ? "METTRE À JOUR" : "CRÉER LE CONTRAT"}</Text>}
+                   {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: "#FFF", fontWeight: '900', letterSpacing: 1 }}>{editingInsurance ? "METTRE À JOUR" : "CRÉER LE CONTRAT"}</Text>}
                 </LinearGradient>
               </TouchableOpacity>
               <View style={{ height: 50 }} />
@@ -1894,10 +2220,10 @@ export default function AdminScreen({ navigation }) {
             <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
                <View>
                   <Text style={[styles.dimT, { color: C.text }]}>{activeInsurance?.name}</Text>
-                  <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900' }}>{"GESTION DES ADHÉRENTS"</Text>
+                  <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900' }}>GESTION DES ADHÉRENTS</Text>
                </View>
                <TouchableOpacity onPress={() => setShowMemberModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                  <MaterialIcons name="help-circle" size={22} color={C.closeIc} />
+                  <MaterialCommunityIcons name="help-circle" size={22} color={C.closeIc} />
                </TouchableOpacity>
             </View>
             
@@ -1914,11 +2240,11 @@ export default function AdminScreen({ navigation }) {
                   </View>
                   <View style={{ flexDirection: 'row', gap: 10 }}>
                      <TextInput style={[styles.input, { flex: 1, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Nom Complet" placeholderTextColor="#64748B" value={newMember.member_name} onChangeText={v => setNewMember({...newMember, member_name: v})} />
-                     <TextInput style={[styles.input, { width: 100, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder={"Code ID" placeholderTextColor={C.placeholder} value={newMember.membership_code} onChangeText={v => setNewMember({...newMember, membership_code: v})} />
+                     <TextInput style={[styles.input, { width: 100, height: 48, marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} placeholder="Code ID" placeholderTextColor={C.placeholder} value={newMember.membership_code} onChangeText={v => setNewMember({...newMember, membership_code: v})} />
                   </View>
                   <TouchableOpacity onPress={handleAddMember} disabled={isSubmitting} style={{ marginTop: 12 }}>
                      <LinearGradient colors={editingMember ? ['#F59E0B', '#D97706'] : ['#3B82F6', '#2563EB']} style={{ height: 48, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSubmitting ? <ActivityIndicator color="" /> : <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12 }}>{editingMember ? "ENREGISTRER LES MODIFICATIONS" : "AJOUTER À LA LISTE"}</Text>}
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: "#FFF", fontWeight: '900', fontSize: 12 }}>{editingMember ? "ENREGISTRER LES MODIFICATIONS" : "AJOUTER À LA LISTE"}</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                </View>
@@ -1927,7 +2253,7 @@ export default function AdminScreen({ navigation }) {
                <View style={[styles.searchBox, { height: 44, borderRadius: 12, backgroundColor: C.input, marginBottom: 15 }]}>
                   <MaterialIcons name="search" size={20} color={C.sub} />
                   <TextInput 
-                    placeholder={"Chercher un adhérent..." placeholderTextColor={C.sub} 
+                    placeholder="Chercher un adhérent..." placeholderTextColor={C.sub} 
                     style={[styles.searchInput, { color: C.text, fontSize: 13 }]} 
                     value={memberSearch}
                     onChangeText={setMemberSearch}
@@ -1960,7 +2286,7 @@ export default function AdminScreen({ navigation }) {
                   ListEmptyComponent={() => (
                      <View style={{ alignItems: 'center', marginTop: 40 }}>
                         <MaterialCommunityIcons name="account-search-outline" size={48} color={C.sub} style={{ opacity: 0.3 }} />
-                        <Text style={{ color: C.sub, marginTop: 10, fontSize: 12 }}>{"Aucun adhérent trouvé."</Text>
+                        <Text style={{ color: C.sub, marginTop: 10, fontSize: 12 }}>Aucun adhérent trouvé.</Text>
                      </View>
                   )}
                />
@@ -1969,18 +2295,18 @@ export default function AdminScreen({ navigation }) {
         </View>
       </Modal>
 
-      <Modal visible={showCatalogModal} animationType="" transparent>
+      <Modal visible={showCatalogModal} animationType="fade" transparent>
          <View style={styles.modalOverlay}>
              <View style={[styles.modalSheet, { backgroundColor: C.bg, height: '85%' }]}>
                 <View style={[styles.dimH, { borderBottomColor: C.divider }]}>
-                  <Text style={[styles.dimT, { color: C.text }]}>{"AJOUTER SERVICES"</Text>
+                  <Text style={[styles.dimT, { color: C.text }]}>AJOUTER SERVICES</Text>
                   <TouchableOpacity onPress={() => setShowCatalogModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                     <MaterialIcons name="help-circle" size={22} color={C.closeIc} />
+                     <MaterialCommunityIcons name="help-circle" size={22} color={C.closeIc} />
                   </TouchableOpacity>
                </View>
                
                <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
-                  <Text style={styles.label}>{"CATÉGORIE COMMUNE"</Text>
+                  <Text style={styles.label}>CATÉGORIE COMMUNE</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
                      {['Dossier', 'Consultation', 'Examen', 'Soins', 'Produit', 'Autre'].map(cat => (
                         <TouchableOpacity 
@@ -2005,14 +2331,14 @@ export default function AdminScreen({ navigation }) {
                         <Text style={styles.label}>NOM DE LA CATÉGORIE PERSONNALISÉE</Text>
                         <TextInput 
                            style={[styles.input, { color: isDark ? '#FFF' : '#000', borderColor: brandColor, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC' }]} 
-                           placeholder={"Ex: Maintenance, Services Externes..." placeholderTextColor=""
+                           placeholder="Ex: Maintenance, Services Externes..." placeholderTextColor={C.placeholder}
                            value={customCategoryName}
                            onChangeText={setCustomCategoryName}
                         />
                      </FadeInView>
                   )}
 
-                  <Text style={[styles.label, { marginBottom: 15 }]}>{"LISTE DES ÉLÉMENTS"</Text>
+                  <Text style={[styles.label, { marginBottom: 15 }]}>LISTE DES ÉLÉMENTS</Text>
                   {bulkCatalogItems.map((item, idx) => (
                      <View key={idx} style={{ flexDirection: 'row', gap: 10, marginBottom: 15, alignItems: 'center' }}>
                         <View style={{ flex: 2 }}>
@@ -2032,7 +2358,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ width: 80 }}>
                            <TextInput 
                               style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={"Code..." placeholderTextColor=""
+                              placeholder="Code..." placeholderTextColor={C.placeholder}
                               value={item.code || ''}
                               onChangeText={v => {
                                  const next = [...bulkCatalogItems];
@@ -2046,7 +2372,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ flex: 1 }}>
                            <TextInput 
                                              style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={"Dosage..." placeholderTextColor=""
+                              placeholder="Dosage..." placeholderTextColor={C.placeholder}
                               value={item.dosage || ''}
                               onChangeText={v => {
                                  const next = [...bulkCatalogItems];
@@ -2059,7 +2385,7 @@ export default function AdminScreen({ navigation }) {
                         <View style={{ flex: 1 }}>
                            <TextInput 
                                              style={[styles.input, { marginBottom: 0, color: C.text, borderColor: C.border, backgroundColor: C.input }]} 
-                              placeholder={"Prix..." placeholderTextColor=""
+                              placeholder="Prix..." placeholderTextColor={C.placeholder}
                               keyboardType="numeric"
                               value={item.price}
                               onChangeText={v => {
@@ -2086,17 +2412,17 @@ export default function AdminScreen({ navigation }) {
                      style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: brandColor, borderStyle: 'dashed', marginTop: 10 }}
                   >
                      <MaterialIcons name="add" size={20} color={brandColor} />
-                     <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 8 }}>{"AJOUTER UNE LIGNE"</Text>
+                     <Text style={{ color: brandColor, fontWeight: '800', marginLeft: 8 }}>AJOUTER UNE LIGNE</Text>
                   </TouchableOpacity>
                </ScrollView>
 
                <View style={{ padding: 20, borderTopWidth: 1, borderTopColor: C.divider }}>
                   <TouchableOpacity onPress={handleSaveBulkCatalog} disabled={isSubmitting}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
-                        {isSubmitting ? <ActivityIndicator color="" /> : (
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                            <>
                               <MaterialIcons name="cloud-upload" size={24} color="#FFF" />
-                              <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, marginLeft: 10 }}>{"ENREGISTRER TOUT"</Text>
+                              <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, marginLeft: 10 }}>ENREGISTRER TOUT</Text>
                            </>
                         )}
                      </LinearGradient>
@@ -2106,23 +2432,23 @@ export default function AdminScreen({ navigation }) {
          </View>
       </Modal>
 
-     <Modal visible={showRevenueModal} transparent animationType="" onRequestClose={() => setShowRevenueModal(false)}>
+     <Modal visible={showRevenueModal} transparent animationType="fade" onRequestClose={() => setShowRevenueModal(false)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 20 }}>
            <View style={{ backgroundColor: C.surface, borderRadius: 32, padding: 24, elevation: 10, borderWidth: 1, borderColor: C.border, maxHeight: S.height * 0.8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <MaterialCommunityIcons name="finance" size={24} color={brandColor} />
-                    <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginLeft: 10 }}>{"DÉTAIL DES REVENUS"</Text>
+                    <Text style={{ fontSize: 16, fontWeight: '900', color: C.text, marginLeft: 10 }}>DÉTAIL DES REVENUS</Text>
                  </View>
                  <TouchableOpacity onPress={() => setShowRevenueModal(false)} style={{ padding: 8, backgroundColor: C.closeBg, borderRadius: 12 }}>
-                    <MaterialIcons name="help-circle" size={20} color={C.closeIc} />
+                    <MaterialCommunityIcons name="help-circle" size={20} color={C.closeIc} />
                  </TouchableOpacity>
               </View>
               <Text style={{ fontSize: 12, fontWeight: '700', color: C.sub, marginBottom: 20 }}>
                  Total généré pour la période ({revenuePeriod === 'day' ? 'Jour' : revenuePeriod === 'week' ? 'Semaine' : 'Mois'}): <Text style={{ color: brandColor, fontWeight: '900' }}>{(stats?.revenue_period || 0).toLocaleString()} FC</Text>
               </Text>
               <ScrollView showsVerticalScrollIndicator={false}>
-                 {stats?.revenue_by_service?.map((rev, i) => (
+                     {asArray(stats?.revenue_by_service).map((rev, i) => (
                     <View key={i} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, marginBottom: 12, borderRadius: 20, backgroundColor: C.input, borderWidth: 1, borderColor: C.border }}>
                        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                           <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
@@ -2134,7 +2460,7 @@ export default function AdminScreen({ navigation }) {
                     </View>
                  ))}
                  {(!stats?.revenue_by_service || stats.revenue_by_service.length === 0) && (
-                    <Text style={{ textAlign: 'center', color: C.sub, fontStyle: 'italic', paddingVertical: 20 }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucun revenu pour cette période."] || "Aucun revenu pour cette période."}</Text>
+                    <Text style={{ textAlign: 'center', color: C.sub, fontStyle: 'italic', paddingVertical: 20 }}>"Aucun revenu pour cette période."</Text>
                  )}
               </ScrollView>
            </View>

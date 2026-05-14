@@ -2,60 +2,33 @@ const fs = require('fs');
 const path = require('path');
 
 const dirs = ['./src/screens', './src/components'];
-let totalFixed = 0;
 
-const fixFile = (fullPath) => {
-  let content = fs.readFileSync(fullPath, 'utf8');
-  let original = content;
+const fixFile = (filePath) => {
+  let content = fs.readFileSync(filePath, 'utf8');
+  const original = content;
 
-  // Pattern 1: Fix broken placeholders like:
-  // placeholder={(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Code ou Nom de l"] || "Code ou Nom de l"}examen..."
-  // Should be:
-  // placeholder="Code ou Nom de l'examen..."
+  // 1. Fix unclosed quotes in placeholders followed by empty keyboardType
+  // Pattern: placeholder="... ' keyboardType=""
+  content = content.replace(/placeholder="([^"']{1,50})' keyboardType=""/g, 'placeholder="$1" keyboardType="numeric"');
   
-  // Match: (typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["TRUNCATED_STRING"] || "TRUNCATED_STRING"}SUFFIX"
-  // The pattern is: the string was split at an apostrophe
-  
-  content = content.replace(
-    /\(typeof t !== 'undefined' && t\.dynamic \? t\.dynamic : \{\}\)\["([^"]+)"\]\s*\|\|\s*"([^"]+)"\}([^"]*)"([^"]*)/g,
-    (match, key, fallback, suffix, rest) => {
-      // Reconstruct the original string with apostrophe
-      const originalStr = key + "'" + suffix + '"' + rest;
-      console.log(`  Fixed split-apostrophe: "${key}" + "}${suffix}"`);
-      return `"${key}'${suffix}"`;
-    }
-  );
+  // 2. Fix remaining empty keyboardType
+  // Pattern: keyboardType=""
+  // Default to numeric for safety as most were for qty/price/year.
+  content = content.replace(/keyboardType=""/g, 'keyboardType="numeric"');
 
-  // Pattern 2: More specific - the broken "}word..." pattern in placeholder attributes
-  // placeholder={(typeof t ...)[\"Motif de l\"] || \"Motif de l\"}urgence (Ex: ...)\"
-  content = content.replace(
-    /placeholder=\{\(typeof t !== 'undefined' && t\.dynamic \? t\.dynamic : \{\}\)\["([^"]+)"\]\s*\|\|\s*"([^"]+)"\}([^"<\n]*?)"/g,
-    (match, key, fallback, suffix) => {
-      const fullStr = key + "'" + suffix;
-      console.log(`  Fixed placeholder pattern: "${key}" -> "${fullStr}"`);
-      return `placeholder="${fullStr}"`;
-    }
-  );
+  // 3. Fix: placeholder="... ' (generic unclosed quote before attribute)
+  content = content.replace(/placeholder="([^"']{1,50})' ([a-zA-Z]+)=/g, 'placeholder="$1" $2=');
 
   if (content !== original) {
-    fs.writeFileSync(fullPath, content);
-    totalFixed++;
-    console.log('Fixed:', fullPath);
+    fs.writeFileSync(filePath, content, 'utf8');
+    console.log(`Fixed: ${path.basename(filePath)}`);
   }
 };
 
-const scanDir = (dir) => {
-  if (!fs.existsSync(dir)) return;
-  const files = fs.readdirSync(dir);
+for (const dir of dirs) {
+  if (!fs.existsSync(dir)) continue;
+  const files = fs.readdirSync(dir).filter(f => f.endsWith('.js'));
   for (const file of files) {
-    const fullPath = path.join(dir, file);
-    if (fs.statSync(fullPath).isDirectory()) {
-      scanDir(fullPath);
-    } else if (fullPath.endsWith('.js')) {
-      fixFile(fullPath);
-    }
+    fixFile(path.join(dir, file));
   }
-};
-
-dirs.forEach(scanDir);
-console.log(`\nTotal files fixed: ${totalFixed}`);
+}

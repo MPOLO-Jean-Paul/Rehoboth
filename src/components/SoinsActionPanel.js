@@ -174,7 +174,7 @@ export default function SoinsActionPanel({ isOpen, anim, onClose, isDark: _ignor
               style={styles.validateGrad}
             >
               <MaterialCommunityIcons name="clipboard-check-outline" size={20} color="#FFF" style={{ marginRight: 8 }} />
-              <Text style={styles.validateText}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["GÉNÉRER LES NOTES"] || "GÉNÉRER LES NOTES"}</Text>
+              <Text style={styles.validateText}>"GÉNÉRER LES NOTES"</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>

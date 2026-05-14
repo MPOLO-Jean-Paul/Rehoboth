@@ -172,7 +172,7 @@ export default function PharmacyScreen({ navigation, route }) {
          const resp = await api.get('/pharmacy/dispensed-today');
          setDeliveryHistory(resp.data.data || resp.data);
       } catch (e) {
-         if (!isBg) showToast("Erreur historique", 'error');
+         if (!isBg) showToast("Erreur historique", "error");
       } finally {
          if (!isBg) setLoading(false);
       }
@@ -184,7 +184,7 @@ export default function PharmacyScreen({ navigation, route }) {
          const resp = await api.get('/pharmacy/sales', { params: { period: salesPeriod } });
          setSalesData(resp.data);
       } catch (e) {
-         if (!isBg) showToast("Erreur ventes", 'error');
+         if (!isBg) showToast("Erreur ventes", "error");
       } finally {
          if (!isBg) setLoading(false);
       }
@@ -201,7 +201,7 @@ export default function PharmacyScreen({ navigation, route }) {
    };
 
    const handleAddStock = async () => {
-      if (!selectedMed || !formQty) return showToast("Informations manquantes", 'error');
+      if (!selectedMed || !formQty) return showToast("Informations manquantes", "error");
       setIsSubmitting(true);
       try {
          await api.post('/pharmacy/stock', {
@@ -211,7 +211,7 @@ export default function PharmacyScreen({ navigation, route }) {
             low_stock_threshold: formThreshold ? parseInt(formThreshold) : undefined,
             reason: 'Réapprovisionnement'
          });
-         showToast("Stock mis à jour", 'success');
+         showToast("Stock mis à jour", "success");
          setShowAddModal(false);
          setFormQty('');
          setFormExpiry('');
@@ -223,7 +223,7 @@ export default function PharmacyScreen({ navigation, route }) {
    };
 
    const handleCreateMed = async () => {
-      if (!newMed.name || !newMed.price) return showToast("Nom et prix requis", 'error');
+      if (!newMed.name || !newMed.price) return showToast("Nom et prix requis", "error");
       setIsSubmitting(true);
       try {
          await api.post('/pharmacy/medicines', {
@@ -231,7 +231,7 @@ export default function PharmacyScreen({ navigation, route }) {
             price: parseFloat(newMed.price),
             low_stock_threshold: parseInt(newMed.low_stock_threshold) || 10
          });
-         showToast("Produit ajouté au catalogue", 'success');
+         showToast("Produit ajouté au catalogue", "success");
          setShowNewModal(false);
          setNewMed({ name: '', dosage: '', price: '', low_stock_threshold: '10' });
          fetchData();
@@ -243,7 +243,7 @@ export default function PharmacyScreen({ navigation, route }) {
       setIsSubmitting(true);
       try {
          await api.post(`/pharmacy/cancel/${visitId}`);
-         showToast("Ordonnance annulée et stock restitué", 'success');
+         showToast("Ordonnance annulée et stock restitué", "success");
          fetchData();
       } catch (e) {
          showToast(e.response?.data?.message || t.error, 'error');
@@ -432,7 +432,7 @@ export default function PharmacyScreen({ navigation, route }) {
          <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12, textAlign: 'center' }}>{title}</Text>
          <Text style={{ fontSize: 14, color: isDark ? '#888888' : '#64748B', textAlign: 'center', lineHeight: 24, fontWeight: '600' }}>{message}</Text>
          <TouchableOpacity onPress={() => fetchData()} style={{ marginTop: 32, paddingHorizontal: 28, paddingVertical: 14, borderRadius: 20, backgroundColor: brandColor }}>
-            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13 }}>{"ACTUALISER"</Text>
+            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13 }}>ACTUALISER</Text>
          </TouchableOpacity>
       </FadeInView>
    );
@@ -474,11 +474,11 @@ export default function PharmacyScreen({ navigation, route }) {
                   <>
                      <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
                         <View style={{ flex: 1.2, backgroundColor: brandColor, padding: 18, borderRadius: 28, elevation: 6 }}>
-                           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>{"RECETTE DU JOUR"</Text>
+                           <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>RECETTE DU JOUR</Text>
                            <Text style={{ color: '#FFF', fontSize: 20, fontWeight: '900', marginTop: 6 }}>{deliveryHistory.reduce((acc, h) => acc + Number(h.total || 0), 0).toLocaleString()} <Text style={{ fontSize: 10 }}>FC</Text></Text>
                         </View>
                         <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 18, borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
-                           <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>{"EN ATTENTE"</Text>
+                           <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>EN ATTENTE</Text>
                            <Text style={{ color: isDark ? '#FFF' : '#0A0A0A', fontSize: 20, fontWeight: '900', marginTop: 6 }}>{visits.length}</Text>
                         </View>
                      </View>
@@ -495,7 +495,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                  <MaterialIcons name="search" size={22} color={brandColor} />
                                  <TextInput
                                     style={{ flex: 1, marginLeft: 10, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '600' }}
-                                    placeholder={"Rechercher une ordonnance..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                                    placeholder="Rechercher une ordonnance..." placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
                                     value={searchQuery}
                                     onChangeText={setSearchQuery}
                                  />
@@ -512,7 +512,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                        onPress={() => openDispenseModal(item)}
                                     >
                                        <View style={{ width: 64, height: 64, borderRadius: 22, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                                          <MaterialCommunityIcons name="help-circle" size={30} color={brandColor} />
+                                          <MaterialCommunityIcons name="account-circle" size={30} color={brandColor} />
                                        </View>
                                        <View style={{ flex: 1, marginLeft: 18 }}>
                                           <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{item.patient?.first_name} {item.patient?.last_name}</Text>
@@ -539,10 +539,10 @@ export default function PharmacyScreen({ navigation, route }) {
                      {activeView === 'stock' && (
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{"GESTION DU STOCK"</Text>
+                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>GESTION DU STOCK</Text>
                               <View style={{ flexDirection: 'row' }}>
                                  <TouchableOpacity onPress={() => { setSelectedMed(null); setStockAddStep(1); setShowAddModal(true); }} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: brandColor, alignItems: 'center', justifyContent: 'center' }}>
-                                    <MaterialIcons name="help-circle" size={24} color="#FFF" />
+                                    <MaterialCommunityIcons name="plus" size={24} color="#FFF" />
                                  </TouchableOpacity>
                                  <TouchableOpacity onPress={() => setShowNewModal(true)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#3498DB', alignItems: 'center', justifyContent: 'center', marginLeft: 8 }}>
                                     <MaterialIcons name="library-add" size={20} color="#FFF" />
@@ -557,7 +557,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                     {lowStockMeds.map(m => (
                                        <TouchableOpacity key={m.id} onPress={() => { setSelectedMed(m); setStockAddStep(2); setFormThreshold(String(m.low_stock_threshold || '')); setShowAddModal(true); }} style={{ width: 160, padding: 16, backgroundColor: '#EF444415', borderRadius: 24, marginRight: 12, borderWidth: 1, borderColor: '#EF444430' }}>
                                           <Text style={{ fontWeight: '800', color: isDark ? '#F1F5F9' : '#1A1A1A', fontSize: 13 }} numberOfLines={1}>{m.name}</Text>
-                                          <Text style={{ fontSize: 18, fontWeight: '900', color: '#EF4444', marginTop: 8 }}>{m.stock_quantity} <Text style={{ fontSize: 9 }}>{"RESTANTS"</Text></Text>
+                                          <Text style={{ fontSize: 18, fontWeight: '900', color: '#EF4444', marginTop: 8 }}>{m.stock_quantity} <Text style={{ fontSize: 9 }}>RESTANTS</Text></Text>
                                        </TouchableOpacity>
                                     ))}
                                  </ScrollView>
@@ -569,7 +569,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                  <MaterialIcons name="search" size={22} color={brandColor} />
                                  <TextInput
                                     style={{ flex: 1, marginLeft: 10, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '600' }}
-                                    placeholder={"Rechercher un produit..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                                    placeholder="Rechercher un produit..." placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
                                     value={stockSearch}
                                     onChangeText={setStockSearch}
                                  />
@@ -593,7 +593,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                           onPress={() => { setSelectedMed(m); setStockAddStep(2); setFormThreshold(String(m.low_stock_threshold || '')); setShowAddModal(true); }}
                                        >
                                           <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', alignItems: 'center', justifyContent: 'center', marginRight: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                                             <MaterialCommunityIcons name="help-circle" size={28} color={statusColor} />
+                                             <MaterialCommunityIcons name="pill" size={28} color={statusColor} />
                                           </View>
                                           <View style={{ flex: 1 }}>
                                              <Text style={{ fontSize: 16, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A', marginBottom: 2 }}>{m.name}</Text>
@@ -603,7 +603,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                                 </View>
                                                 {insights.all?.find(i => i.id === m.id)?.status === 'fast_moving' && (
                                                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, backgroundColor: '#3B82F615', marginRight: 8 }}>
-                                                      <Text style={{ fontSize: 9, fontWeight: '900', color: '#3B82F6' }}>{"FAST MOVING"</Text>
+                                                      <Text style={{ fontSize: 9, fontWeight: '900', color: '#3B82F6' }}>FAST MOVING</Text>
                                                    </View>
                                                 )}
                                                 {insights.all?.find(i => i.id === m.id)?.status === 'slow_moving' && (
@@ -617,7 +617,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                           </View>
                                           <View style={{ alignItems: 'flex-end' }}>
                                              <Text style={{ fontSize: 24, fontWeight: '900', color: statusColor }}>{m.stock_quantity}</Text>
-                                             <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#555555' : '#94A3B8', letterSpacing: 0.5 }}>{"UNITÉS"</Text>
+                                             <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#555555' : '#94A3B8', letterSpacing: 0.5 }}>UNITÉS</Text>
                                           </View>
                                        </PressableScale>
                                     </FadeInView>
@@ -638,7 +638,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <View style={{ flex: 1 }}>
                                        <Text style={{ fontWeight: '900', fontSize: 16, color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{item.patient?.first_name} {item.patient?.last_name}</Text>
-                                       <Text style={{ color: '#22C55E', fontSize: 11, fontWeight: '900', marginTop: 4 }}>{"DÉLIVRANCE COMPLÈTE"</Text>
+                                       <Text style={{ color: '#22C55E', fontSize: 11, fontWeight: '900', marginTop: 4 }}>DÉLIVRANCE COMPLÈTE</Text>
                                     </View>
                                     <Text style={{ fontWeight: '900', color: brandColor, fontSize: 18 }}>{Number(item.total || 0).toLocaleString()} <Text style={{ fontSize: 10 }}>FC</Text></Text>
                                  </View>
@@ -650,13 +650,13 @@ export default function PharmacyScreen({ navigation, route }) {
                      {activeView === 'prices' && (
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{"ÉTAT DES PRODUITS"</Text>
-                              <TouchableOpacity onPress={fetchData}><MaterialIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                              <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>ÉTAT DES PRODUITS</Text>
+                              <TouchableOpacity onPress={fetchData}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
                            {medicines.map((m, i) => (
                               <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
                                  <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: m.stock_quantity > 0 ? brandColor + '10' : '#EF444410', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                                    <MaterialCommunityIcons name={m.stock_quantity > 0 ? "check-circle-outline" : "close-circle-outline"} size={24} color={m.stock_quantity > 0 ? brandColor : '#EF4444'} />
+                                    <MaterialCommunityIcons name={m.stock_quantity > 0 ? "check-circle-outline" : "close-circle-outline"} size={24} color={m.stock_quantity > 0 ? brandColor : "#EF4444"} />
                                  </View>
                                  <View style={{ flex: 1 }}>
                                     <Text style={{ fontWeight: '900', fontSize: 16, color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{m.name}</Text>
@@ -664,7 +664,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={{ fontWeight: '900', fontSize: 18, color: brandColor }}>{Number(m.price || 0).toLocaleString()}</Text>
-                                    <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{"PRIX UNITÉ"</Text>
+                                    <Text style={{ fontSize: 10, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>PRIX UNITÉ</Text>
                                  </View>
                               </View>
                            ))}
@@ -685,7 +685,7 @@ export default function PharmacyScreen({ navigation, route }) {
                               ))}
                            </View>
                            <View style={{ padding: 24, borderRadius: 30, backgroundColor: brandColor, marginBottom: 24 }}>
-                              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '900' }}>{"CHIFFRE D'AFFAIRES"</Text>
+                              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, fontWeight: '900' }}>CHIFFRE D'AFFAIRES</Text>
                               <Text style={{ color: '#FFF', fontSize: 32, fontWeight: '900', marginTop: 8 }}>{Number(salesData.total_revenue || 0).toLocaleString()} FC</Text>
                            </View>
 
@@ -695,10 +695,10 @@ export default function PharmacyScreen({ navigation, route }) {
                                  disabled={isSubmitting}
                                  style={{ padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, marginBottom: 24, borderWidth: 1, borderColor: brandColor, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
                               >
-                                 {isSubmitting ? <ActivityIndicator size="" color={brandColor} /> : (
+                                 {isSubmitting ? <ActivityIndicator size="small" color={brandColor} /> : (
                                     <>
                                        <MaterialCommunityIcons name="send-check" size={24} color={brandColor} style={{ marginRight: 12 }} />
-                                       <Text style={{ color: brandColor, fontWeight: '900', fontSize: 13 }}>{"CLÔTURER & ENVOYER RAPPORT À L'ADMIN"</Text>
+                                       <Text style={{ color: brandColor, fontWeight: '900', fontSize: 13 }}>CLÔTURER & ENVOYER RAPPORT À L'ADMIN</Text>
                                     </>
                                  )}
                               </TouchableOpacity>
@@ -724,7 +724,7 @@ export default function PharmacyScreen({ navigation, route }) {
                            </View>
                            
                            <View style={{ marginBottom: 24 }}>
-                              <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1, marginBottom: 12 }}>{"À RENOUVELER PRIORITAIREMENT"</Text>
+                              <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1, marginBottom: 12 }}>À RENOUVELER PRIORITAIREMENT</Text>
                               {insights.to_renew?.length > 0 ? insights.to_renew.map((item, idx) => (
                                  <View key={idx} style={{ padding: 18, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: item.is_critical ? '#EF4444' : brandColor, borderLeftWidth: 6, borderLeftColor: item.is_critical ? '#EF4444' : brandColor }}>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -738,7 +738,7 @@ export default function PharmacyScreen({ navigation, route }) {
                                        </View>
                                     </View>
                                  </View>
-                              )) : <Text style={{ color: '#64748B', fontStyle: 'italic', fontSize: 12 }}>{"Aucun produit en seuil critique."</Text>}
+                              )) : <Text style={{ color: '#64748B', fontStyle: 'italic', fontSize: 12 }}>Aucun produit en seuil critique.</Text>}
                            </View>
 
                            <View style={{ marginBottom: 24 }}>
@@ -749,14 +749,14 @@ export default function PharmacyScreen({ navigation, route }) {
                                        <Text style={{ fontWeight: '800', fontSize: 12, color: isDark ? '#E2E8F0' : '#1A1A1A' }}>{item.name}</Text>
                                        <Text style={{ fontSize: 9, color: '#64748B', marginTop: 2 }}>{item.volume_30d} ventes / 30j</Text>
                                     </View>
-                                 )) : <Text style={{ color: '#64748B', fontStyle: 'italic', fontSize: 12 }}>{"Tous vos produits circulent bien."</Text>}
+                                 )) : <Text style={{ color: '#64748B', fontStyle: 'italic', fontSize: 12 }}>Tous vos produits circulent bien.</Text>}
                               </View>
                            </View>
 
                            <View style={{ padding: 20, backgroundColor: '#3B82F610', borderRadius: 24, borderWidth: 1, borderColor: '#3B82F630' }}>
                               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                                 <MaterialIcons name="help-circle" size={18} color="#3B82F6" />
-                                 <Text style={{ fontWeight: '900', fontSize: 13, color: '#3B82F6', marginLeft: 8 }}>{"CONSEIL DE GESTION"</Text>
+                                 <MaterialCommunityIcons name="information-outline" size={18} color="#3B82F6" />
+                                 <Text style={{ fontWeight: '900', fontSize: 13, color: '#3B82F6', marginLeft: 8 }}>CONSEIL DE GESTION</Text>
                               </View>
                               <Text style={{ fontSize: 12, color: isDark ? '#E2E8F0' : '#1E293B', lineHeight: 18 }}>
                                  Les produits "" avec un stock faible doivent être commandés immédiatement. 
@@ -773,11 +773,11 @@ export default function PharmacyScreen({ navigation, route }) {
          {activeBottomTab === 'expiry' && (
             <Animated.View style={[{ position: 'absolute', bottom: 85, left: 16, right: 16, maxHeight: height * 0.5, backgroundColor: isDark ? '#0A0A0A' : '#FFFFFF', borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#1A1A1A' : '#F1F5F9', elevation: 20 }, { transform: [{ translateY: bottomPanelAnim.interpolate({ inputRange: [0, 1], outputRange: [400, 0] }) }] }]}>
                <View style={{ padding: 24, borderBottomWidth: 1, borderBottomColor: isDark ? '#1A1A1A' : '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>{"PÉREMPTION"</Text>
-                  <TouchableOpacity onPress={() => toggleBottomTab('expiry')}><MaterialIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                  <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A' }}>PÉREMPTION</Text>
+                  <TouchableOpacity onPress={() => toggleBottomTab('expiry')}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
                </View>
                <ScrollView style={{ padding: 24 }}>
-                  {expiring.expired.length > 0 && <Text style={{ color: '#EF4444', fontWeight: '900', marginBottom: 12 }}>{"DÉJÀ EXPIRÉS"</Text>}
+                  {expiring.expired.length > 0 && <Text style={{ color: '#EF4444', fontWeight: '900', marginBottom: 12 }}>DÉJÀ EXPIRÉS</Text>}
                   {expiring.expired.map(m => (
                      <View key={m.id} style={{ padding: 18, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: '#EF444430', borderLeftWidth: 4, borderLeftColor: '#EF4444' }}>
                         <Text style={{ fontWeight: '900', fontSize: 15, color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{m.name}</Text>
@@ -851,7 +851,7 @@ export default function PharmacyScreen({ navigation, route }) {
                         <View>
                            <TextInput
                               style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 15 }]}
-                              placeholder={"Rechercher un produit..." placeholderTextColor=""
+                              placeholder="Rechercher un produit..." placeholderTextColor={C.placeholder}
                               onChangeText={(text) => setModalSearch(text)}
                               value={modalSearch}
                            />
@@ -863,21 +863,21 @@ export default function PharmacyScreen({ navigation, route }) {
                                  </TouchableOpacity>
                               ))
                            ) : (
-                              <Text style={{ textAlign: 'center', color: '#94A3B8', marginTop: 20 }}>{"Aucun produit trouvé"</Text>
+                              <Text style={{ textAlign: 'center', color: '#94A3B8', marginTop: 20 }}>Aucun produit trouvé</Text>
                            )}
                         </View>
                      ) : (
                         <View>
                            <Text style={{ fontSize: 22, fontWeight: '900', color: brandColor, marginBottom: 20 }}>{selectedMed?.name}</Text>
                            <Text style={styles.modalLabel}>QUANTITÉ À AJOUTER</Text>
-                           <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder={"Qté' keyboardType="" value={formQty} onChangeText={setFormQty} />
-                           <Text style={styles.modalLabel}>{"DATE DE PÉREMPTION"</Text>
+                           <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Qté" keyboardType="numeric" value={formQty} onChangeText={setFormQty} />
+                           <Text style={styles.modalLabel}>DATE DE PÉREMPTION</Text>
                            <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="YYYY-MM-DD" value={formExpiry} onChangeText={setFormExpiry} />
-                           <Text style={styles.modalLabel}>{"SEUIL D'ALERTE"</Text>
+                           <Text style={styles.modalLabel}>SEUIL D'ALERTE</Text>
                            <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Seuil" keyboardType="numeric" value={formThreshold} onChangeText={setFormThreshold} />
                            <TouchableOpacity style={styles.modalSubmit} onPress={handleAddStock} disabled={isSubmitting}>
                               <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 30 }}>
-                                 <Text style={{ color: '#FFF', fontWeight: '900' }}>{"VALIDER"</Text>
+                                 <Text style={{ color: '#FFF', fontWeight: '900' }}>VALIDER</Text>
                               </LinearGradient>
                            </TouchableOpacity>
                         </View>
@@ -888,20 +888,20 @@ export default function PharmacyScreen({ navigation, route }) {
          </Modal>
 
          {/* NEW MEDICINE MODAL */}
-         <Modal visible={showNewModal} transparent animationType="">
+         <Modal visible={showNewModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
                <View style={[styles.modalSheet, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', paddingBottom: 20 + insets.bottom }]}>
                   <View style={styles.sheetHeader}>
-                     <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"NOUVEAU PRODUIT"</Text>
-                     <TouchableOpacity onPress={() => setShowNewModal(false)}><MaterialIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                     <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>NOUVEAU PRODUIT</Text>
+                     <TouchableOpacity onPress={() => setShowNewModal(false)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
                   <View style={{ padding: 24 }}>
-                     <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder={"Nom" value={newMed.name} onChangeText={v => setNewMed({ ...newMed, name: v })} />
+                     <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Nom" value={newMed.name} onChangeText={v => setNewMed({ ...newMed, name: v })} />
                      <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Dosage" value={newMed.dosage} onChangeText={v => setNewMed({ ...newMed, dosage: v })} />
-                     <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder={"Prix' keyboardType="" value={newMed.price} onChangeText={v => setNewMed({ ...newMed, price: v })} />
+                     <TextInput style={[styles.modalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} placeholder="Prix" keyboardType="numeric" value={newMed.price} onChangeText={v => setNewMed({ ...newMed, price: v })} />
                      <TouchableOpacity style={styles.modalSubmit} onPress={handleCreateMed} disabled={isSubmitting}>
                         <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 30 }}>
-                           <Text style={{ color: '#FFF', fontWeight: '900' }}>{"AJOUTER AU CATALOGUE"</Text>
+                           <Text style={{ color: '#FFF', fontWeight: '900' }}>AJOUTER AU CATALOGUE</Text>
                         </LinearGradient>
                      </TouchableOpacity>
                   </View>
@@ -910,12 +910,12 @@ export default function PharmacyScreen({ navigation, route }) {
          </Modal>
 
          {/* DISPENSE MODAL */}
-         <Modal visible={showDispenseModal} transparent animationType="">
+         <Modal visible={showDispenseModal} transparent animationType="fade">
             <View style={styles.modalOverlay}>
                <View style={[styles.modalSheet, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', maxHeight: '90%', paddingBottom: 20 + insets.bottom }]}>
                   <View style={styles.sheetHeader}>
-                     <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"DÉLIVRANCE"</Text>
-                     <TouchableOpacity onPress={() => setShowDispenseModal(false)}><MaterialIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                     <Text style={{ fontSize: 14, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DÉLIVRANCE</Text>
+                     <TouchableOpacity onPress={() => setShowDispenseModal(false)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
                   <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 60 + insets.bottom }} showsVerticalScrollIndicator={false}>
                       <View style={{ marginBottom: 24, padding: 12, borderLeftWidth: 4, borderLeftColor: brandColor, backgroundColor: isDark ? '#111827' : '#F8FAFC' }}>
@@ -928,7 +928,7 @@ export default function PharmacyScreen({ navigation, route }) {
                       <View style={{ borderRadius: 24, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', overflow: 'hidden', marginBottom: 24, elevation: 3 }}>
                          <LinearGradient colors={['#3498DB15', '#3498DB05']} style={{ flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderBottomColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                             <MaterialCommunityIcons name="clipboard-text-outline" size={18} color="#3498DB" />
-                            <Text style={{ marginLeft: 10, fontSize: 11, fontWeight: '900', color: '#3498DB', letterSpacing: 1 }}>{"ORDONNANCE MÉDICALE"</Text>
+                            <Text style={{ marginLeft: 10, fontSize: 11, fontWeight: '900', color: '#3498DB', letterSpacing: 1 }}>ORDONNANCE MÉDICALE</Text>
                          </LinearGradient>
 
                          <View style={{ padding: 16 }}>
@@ -960,7 +960,7 @@ export default function PharmacyScreen({ navigation, route }) {
 
                       {/* Basket section */}
                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                         <Text style={{ fontSize: 11, fontWeight: '900', color: '#64748B', letterSpacing: 1 }}>{"PANIER DE DÉLIVRANCE"</Text>
+                         <Text style={{ fontSize: 11, fontWeight: '900', color: '#64748B', letterSpacing: 1 }}>PANIER DE DÉLIVRANCE</Text>
                          <View style={{ backgroundColor: brandColor + '15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
                             <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{dispenseItems.length} PRODUITS</Text>
                          </View>
@@ -968,8 +968,8 @@ export default function PharmacyScreen({ navigation, route }) {
 
                       {dispenseItems.length === 0 ? (
                          <View style={{ padding: 40, alignItems: 'center', borderRadius: 24, borderWidth: 2, borderStyle: 'dashed', borderColor: isDark ? '#2E2E2E' : '#CBD5E1', marginBottom: 20 }}>
-                            <MaterialCommunityIcons name="help-circle" size={40} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
-                            <Text style={{ color: isDark ? '#555' : '#94A3B8', fontWeight: '800', marginTop: 12, fontSize: 13 }}>{"Le panier est vide"</Text>
+                            <MaterialCommunityIcons name="help-circle" size={40} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
+                            <Text style={{ color: isDark ? '#555' : '#94A3B8', fontWeight: '800', marginTop: 12, fontSize: 13 }}>Le panier est vide</Text>
                          </View>
                       ) : (
                           <View style={{ marginBottom: 20 }}>
@@ -982,12 +982,12 @@ export default function PharmacyScreen({ navigation, route }) {
                                       <View style={{ flex: 1 }}>
                                          <Text style={{ color: isDark ? '#FFF' : '#1A1A1A', fontWeight: '900', fontSize: 15 }}>{item.name}</Text>
                                          <Text style={{ color: brandColor, fontWeight: '900', fontSize: 13, marginTop: 4 }}>
-                                            {Number(item.price || 0).toLocaleString()} <Text style={{ fontSize: 9 }}>{"FC"</Text> × {item.quantity} = {Number((item.price || 0) * item.quantity).toLocaleString()} FC
+                                            {Number(item.price || 0).toLocaleString()} <Text style={{ fontSize: 9 }}>FC</Text> × {item.quantity} = {Number((item.price || 0) * item.quantity).toLocaleString()} FC
                                          </Text>
                                       </View>
                                       <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderRadius: 16, padding: 4, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
                                          <TouchableOpacity onPress={() => { if (item.quantity > 1) setDispenseItems(prev => prev.map(i => i.medicine_id === item.medicine_id ? { ...i, quantity: i.quantity - 1 } : i)); }} style={{ padding: 8 }}>
-                                            <MaterialIcons name="help-circle" size={18} color={brandColor} />
+                                            <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
                                          </TouchableOpacity>
                                          <Text style={{ color: isDark ? '#FFF' : '#1A1A1A', fontWeight: '900', minWidth: 30, textAlign: 'center', fontSize: 15 }}>{item.quantity}</Text>
                                          <TouchableOpacity onPress={() => setDispenseItems(prev => prev.map(i => i.medicine_id === item.medicine_id ? { ...i, quantity: i.quantity + 1 } : i))} style={{ padding: 8 }}>
@@ -1005,7 +1005,7 @@ export default function PharmacyScreen({ navigation, route }) {
 
                       <View style={{ height: 1, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', marginVertical: 20 }} />
                       
-                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#64748B', letterSpacing: 1, marginBottom: 12 }}>{"COMPLÉTER LA DÉLIVRANCE"</Text>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: '#64748B', letterSpacing: 1, marginBottom: 12 }}>COMPLÉTER LA DÉLIVRANCE</Text>
                       <FlatList 
                          horizontal 
                          data={medicines} 
@@ -1027,7 +1027,7 @@ export default function PharmacyScreen({ navigation, route }) {
                             <TextInput style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '900', fontSize: 16 }} placeholder="Qté" keyboardType="numeric" value={dispenseQty} onChangeText={setDispenseQty} />
                          </View>
                          <TouchableOpacity onPress={addDispenseItem} style={{ width: 100, height: 56, borderRadius: 18, backgroundColor: brandColor + '20', alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ color: brandColor, fontWeight: '900', fontSize: 14 }}>{"AJOUTER"</Text>
+                            <Text style={{ color: brandColor, fontWeight: '900', fontSize: 14 }}>AJOUTER</Text>
                          </TouchableOpacity>
                       </View>
 
@@ -1036,10 +1036,10 @@ export default function PharmacyScreen({ navigation, route }) {
                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <View>
                                <Text style={{ color: 'rgba(255,255,255,0.7)', fontWeight: '900', fontSize: 10, letterSpacing: 1 }}>TOTAL À FACTURER</Text>
-                               <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 32, marginTop: 4 }}>{Number(dispenseTotal).toLocaleString()} <Text style={{ fontSize: 14 }}>{"FC"</Text></Text>
+                               <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 32, marginTop: 4 }}>{Number(dispenseTotal).toLocaleString()} <Text style={{ fontSize: 14 }}>FC</Text></Text>
                             </View>
                             <View style={{ width: 56, height: 56, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
-                               <MaterialCommunityIcons name="help-circle" size={28} color="#FFF" />
+                               <MaterialCommunityIcons name="pill" size={28} color="#FFF" />
                             </View>
                          </View>
                          <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 16 }} />
@@ -1050,7 +1050,7 @@ export default function PharmacyScreen({ navigation, route }) {
                       </LinearGradient>
                      <TouchableOpacity style={styles.modalSubmit} onPress={handleDispense} disabled={isSubmitting}>
                         <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 30 }}>
-                           <Text style={{ color: '#FFF', fontWeight: '900' }}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["DÉLIVRER"] || "DÉLIVRER"}</Text>
+                           <Text style={{ color: '#FFF', fontWeight: '900' }}>"DÉLIVRER"</Text>
                         </LinearGradient>
                      </TouchableOpacity>
                   </ScrollView>

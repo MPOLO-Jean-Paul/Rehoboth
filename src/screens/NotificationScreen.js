@@ -171,9 +171,9 @@ export default function NotificationScreen({ navigation }) {
           onPress={() => navigation.goBack()}
           style={[styles.backButton, { backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9' }]}
         >
-          <MaterialIcons name="arrow-back" size={22} color={isDark ? '#F1F5F9' : '#0A0A0A'} />
+          <MaterialIcons name="arrow-back" size={22} color={isDark ? "#F1F5F9" : '#0A0A0A'} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: isDark ? '#F1F5F9' : '#0A0A0A' }]}>{"Notifications"</Text>
+        <Text style={[styles.headerTitle, { color: isDark ? '#F1F5F9' : '#0A0A0A' }]}>Notifications</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity
             onPress={markAllAsRead}
@@ -193,7 +193,7 @@ export default function NotificationScreen({ navigation }) {
       </View>
 
       <FloatingActionDock
-        title={"Notifications'
+        title="Notifications"
         actions={[
           { key: 'back', icon: 'arrow-back', onPress: () => navigation.goBack() },
           { key: 'read-all', icon: 'done-all', onPress: markAllAsRead },
@@ -204,11 +204,11 @@ export default function NotificationScreen({ navigation }) {
       />
 
       {loading ? (
-        <ActivityIndicator size="" color={Theme.colors.primary} style={{ marginTop: 50 }} />
+        <ActivityIndicator size="small" color={Theme.colors.primary} style={{ marginTop: 50 }} />
       ) : !notificationsEnabled ? (
         <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons name="bell-cancel" size={64} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
-          <Text style={[styles.emptyText, { color: isDark ? '#F1F5F9' : '#1A1A1A' }]}>{"Notifications désactivées"</Text>
+          <MaterialCommunityIcons name="bell-cancel" size={64} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
+          <Text style={[styles.emptyText, { color: isDark ? '#F1F5F9' : '#1A1A1A' }]}>Notifications désactivées</Text>
           <Text style={{ color: isDark ? '#888888' : '#94A3B8', textAlign: 'center', paddingHorizontal: 40, marginTop: 10 }}>Activez les notifications dans votre profil pour recevoir des alertes en temps réel.</Text>
         </View>
       ) : (
@@ -220,8 +220,8 @@ export default function NotificationScreen({ navigation }) {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[Theme.colors.primary]} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons name="bell-off-outline" size={64} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
-              <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["Aucune notification"] || "Aucune notification"}</Text>
+              <MaterialCommunityIcons name="bell-off-outline" size={64} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
+              <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>"Aucune notification"</Text>
             </View>
           }
         />

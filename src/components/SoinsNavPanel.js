@@ -16,7 +16,7 @@ export default function SoinsNavPanel({ isOpen, anim, onClose, isDark: _ignored,
     { id: 'queue', title: 'Triage & Accueil', icon: 'heart-pulse', desc: "File d'attente standard" },
     { id: 'urgencies', title: 'Urgences', icon: 'ambulance', desc: 'Prise en charge rapide' },
     { id: 'control', title: 'Contrôle & Suivi', icon: 'radar', desc: 'État des malades transférés' },
-    { id: 'history', title: 'Historique Transferts', icon: 'history', desc: 'Registre de vos transferts' },
+    { id: 'history', title: 'Historique Transferts', icon: 'history', desc: 'Registre de vos transferts" },
   ];
 
   return (

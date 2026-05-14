@@ -20,6 +20,7 @@ import { Theme } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
 
 const { width, height } = Theme.layout;
+const normalizeSearch = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 export default function DoctorScreen({ navigation, route }) {
   const { themeMode, toggleTheme, lang, toggleLang, isOnline, brandColor, user } = useTheme();
@@ -142,7 +143,7 @@ export default function DoctorScreen({ navigation, route }) {
   const fetchMedicines = async () => {
     try {
       const resp = await api.get('/pharmacy/medicines');
-      setMedicines(resp.data);
+      setMedicines(Array.isArray(resp.data) ? resp.data : (resp.data?.data || []));
     } catch (e) { }
   };
 
@@ -218,16 +219,16 @@ export default function DoctorScreen({ navigation, route }) {
       return;
     }
 
-    const query = text.toLowerCase();
+    const query = normalizeSearch(text);
     if (type === 'lab') {
       const filtered = labCatalog.filter(t => 
-        t.code.toLowerCase().includes(query) || 
-        t.label.toLowerCase().includes(query)
+        normalizeSearch(t.code).includes(query) || 
+        normalizeSearch(t.label).includes(query)
       );
       setSuggestions(filtered.slice(0, 5));
     } else {
       const filtered = medicines.filter(m => 
-        m.name.toLowerCase().includes(query)
+        normalizeSearch(m.name).includes(query) || normalizeSearch(m.dosage).includes(query)
       );
       setSuggestions(filtered.slice(0, 5));
     }
@@ -244,7 +245,9 @@ export default function DoctorScreen({ navigation, route }) {
         ...newItems[activeSearchIndex], 
         name: item.name, 
         medicine_id: item.id,
-        price: item.price
+        price: item.price,
+        dosage: newItems[activeSearchIndex]?.dosage || item.dosage || '',
+        instructions: newItems[activeSearchIndex]?.instructions || item.unit || ''
       };
       setPrescriptionItems(newItems);
     }
@@ -294,7 +297,7 @@ export default function DoctorScreen({ navigation, route }) {
 
   const handleForward = async () => {
     if (!selectedVisit) return;
-    if (!diagnosis && nextService !== 'completed') return showToast("Le diagnostic est obligatoire", 'error');
+    if (!diagnosis && nextService !== 'completed') return showToast("Le diagnostic est obligatoire", "error");
 
     setIsSubmitting(true);
     try {
@@ -511,7 +514,7 @@ export default function DoctorScreen({ navigation, route }) {
 
               {activeView === 'appointments' && (
                 <FadeInView style={[styles.rdvCard, { backgroundColor: brandColor + '10', borderColor: brandColor + '30' }]}>
-                  <Text style={[styles.rdvTitle, { color: brandColor }]}>{"PLANIFIER UN RENDEZ-VOUS"</Text>
+                  <Text style={[styles.rdvTitle, { color: brandColor }]}>PLANIFIER UN RENDEZ-VOUS</Text>
 
                   <Text style={[styles.inputLabel, { color: isDark ? '#AAAAAA' : '#64748B' }]}>SÉLECTIONNER UN PATIENT</Text>
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
@@ -524,18 +527,18 @@ export default function DoctorScreen({ navigation, route }) {
                           borderColor: rdvForm.patient_id === v.patient?.id ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0')
                         }]}
                       >
-                        <MaterialCommunityIcons name="account" size={14} color={rdvForm.patient_id === v.patient?.id ? '#FFF' : brandColor} />
+                        <MaterialCommunityIcons name="account" size={14} color={rdvForm.patient_id === v.patient?.id ? "#FFF" : brandColor} />
                         <Text style={[styles.patientChipText, { color: rdvForm.patient_id === v.patient?.id ? '#FFF' : (isDark ? '#E2E8F0' : '#1A1A1A') }]}>{v.patient?.first_name} {v.patient?.last_name}</Text>
                       </TouchableOpacity>
                     ))}
                   </ScrollView>
 
                   <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder={"Date (JJ/MM/AAAA)" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.date} onChangeText={v => setRdvForm(prev => ({ ...prev, date: v }))} />
-                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder="Heure (HH:MM)" placeholderTextColor={isDark ? '#888888' : '#94A3B8'} value={rdvForm.time} onChangeText={v => setRdvForm(prev => ({ ...prev, time: v }))} />
+                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder="Date (JJ/MM/AAAA)" placeholderTextColor={isDark ? "#888888" : '#94A3B8'} value={rdvForm.date} onChangeText={v => setRdvForm(prev => ({ ...prev, date: v }))} />
+                    <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]} placeholder="Heure (HH:MM)" placeholderTextColor={isDark ? "#888888" : '#94A3B8'} value={rdvForm.time} onChangeText={v => setRdvForm(prev => ({ ...prev, time: v }))} />
                   </View>
-                  <TouchableOpacity onPress={() => showToast("Rendez-vous planifié", 'success')} style={styles.rdvSubmit}>
-                    <Text style={{ color: '#FFF', fontWeight: '900' }}>{"VALIDER LE RENDEZ-VOUS"</Text>
+                  <TouchableOpacity onPress={() => showToast("Rendez-vous planifié", "success")} style={styles.rdvSubmit}>
+                    <Text style={{ color: '#FFF', fontWeight: '900' }}>VALIDER LE RENDEZ-VOUS</Text>
                   </TouchableOpacity>
                 </FadeInView>
               )}
@@ -546,7 +549,7 @@ export default function DoctorScreen({ navigation, route }) {
                 currentList.length > 0 ? currentList.map(renderVisitCard) : (
                   <View style={styles.emptyContainer}>
                     <MaterialCommunityIcons name="help-circle" size={64} color={brandColor} style={{ opacity: 0.3 }} />
-                    <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>{"Aucun patient dans cette file"</Text>
+                    <Text style={[styles.emptyText, { color: isDark ? '#888888' : '#94A3B8' }]}>Aucun patient dans cette file</Text>
                   </View>
                 )
               )}
@@ -554,8 +557,8 @@ export default function DoctorScreen({ navigation, route }) {
           ) : (
             <FadeInView style={{ paddingTop: 10 }}>
               <TouchableOpacity style={styles.backBtn} onPress={() => setSelectedVisit(null)}>
-                <MaterialIcons name="help-circle" size={20} color={brandColor} />
-                <Text style={[styles.backBtnText, { color: brandColor }]}>{"RETOUR À LA LISTE"</Text>
+                <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
+                <Text style={[styles.backBtnText, { color: brandColor }]}>RETOUR À LA LISTE</Text>
               </TouchableOpacity>
 
               <View style={[styles.patientHeader, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }]}>
@@ -573,7 +576,7 @@ export default function DoctorScreen({ navigation, route }) {
                 </View>
 
                 <View style={[styles.insuranceBadge, { backgroundColor: selectedVisit.patient?.is_insured ? '#22C55E15' : '#F9AB0015' }]}>
-                  <MaterialCommunityIcons name={selectedVisit.patient?.is_insured ? "" : "account-lock"} size={14} color={selectedVisit.patient?.is_insured ? '#22C55E' : '#F9AB00'} />
+                  <MaterialCommunityIcons name={selectedVisit.patient?.is_insured ? "" : "account-lock"} size={14} color={selectedVisit.patient?.is_insured ? "#22C55E" : '#F9AB00'} />
                   <Text style={[styles.insuranceText, { color: selectedVisit.patient?.is_insured ? '#22C55E' : '#F9AB00' }]}>
                     {selectedVisit.patient?.is_insured ? `ASSURÉ : ${selectedVisit.patient?.insurance_company || 'OUI'}` : "PATIENT PRIVÉ"}
                   </Text>
@@ -588,8 +591,8 @@ export default function DoctorScreen({ navigation, route }) {
 
               {/* PATIENT HISTORY */}
               <TouchableOpacity style={[styles.sectionHeader, { marginTop: 0 }]} activeOpacity={0.7}>
-                <Text style={styles.fieldHeading}>{"HISTORIQUE MÉDICAL"</Text>
-                <MaterialIcons name="help-circle" size={16} color="#64748B" />
+                <Text style={styles.fieldHeading}>HISTORIQUE MÉDICAL</Text>
+                <MaterialCommunityIcons name="help-circle" size={16} color="#64748B" />
               </TouchableOpacity>
               <View style={[styles.historyContainer, { backgroundColor: isDark ? '#111827' : '#F1F5F9' }]}>
                 {histLoading ? <ActivityIndicator color={brandColor} /> :
@@ -602,7 +605,7 @@ export default function DoctorScreen({ navigation, route }) {
                         </View>
                       ))}
                     </ScrollView>
-                  ) : <Text style={{ color: '#64748B', fontSize: 11, fontStyle: 'italic' }}>{"Aucun antécédent enregistré dans le système."</Text>
+                  ) : <Text style={{ color: '#64748B', fontSize: 11, fontStyle: 'italic' }}>Aucun antécédent enregistré dans le système.</Text>
                 }
               </View>
 
@@ -612,7 +615,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                   <MaterialCommunityIcons name="help-circle" size={18} color="#EF4444" />
                   <TextInput editable={false} style={[styles.vitalInput, { color: isDark ? '#FFF' : '#0A0A0A' }]} value={vitals.temp} />
-                  <Text style={styles.vitalUnit}>{"°C"</Text>
+                  <Text style={styles.vitalUnit}>°C</Text>
                 </View>
                 <View style={[styles.vitalBox, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                   <MaterialCommunityIcons name="help-circle" size={18} color="#3B82F6" />
@@ -627,7 +630,7 @@ export default function DoctorScreen({ navigation, route }) {
               <View style={[styles.nursingBox, { backgroundColor: isDark ? '#111827' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                   <MaterialCommunityIcons name="comment-text-outline" size={14} color="#64748B" />
-                  <Text style={styles.nursingLabel}>{"NOTE DE TRIAGE"</Text>
+                  <Text style={styles.nursingLabel}>NOTE DE TRIAGE</Text>
                 </View>
                 <Text style={[styles.nursingText, { color: isDark ? '#E2E8F0' : '#1A1A1A' }]}>
                   {selectedVisit.nursing_notes || 'Le patient n\'a pas de notes spécifiques de l\'infirmier.'}
@@ -639,7 +642,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={[styles.resultsBox, { backgroundColor: brandColor + '10', borderColor: brandColor + '30' }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
                     <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
-                    <Text style={[styles.resultsTitle, { color: brandColor }]}>{"RÉSULTATS DU LABORATOIRE"</Text>
+                    <Text style={[styles.resultsTitle, { color: brandColor }]}>RÉSULTATS DU LABORATOIRE</Text>
                   </View>
                   <View style={[styles.resultsContent, { backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }]}>
                     <Text style={{ color: isDark ? '#E2E8F0' : '#1A1A1A', lineHeight: 22, fontSize: 14 }}>
@@ -654,7 +657,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <Text style={[styles.fieldHeading, { marginBottom: 0 }]}>DIAGNOSTIC & OBSERVATIONS</Text>
                 <TouchableOpacity onPress={() => toggleActionPanel(true)} style={styles.modelBtn}>
                   <MaterialCommunityIcons name="clipboard-pulse" size={14} color={brandColor} />
-                  <Text style={styles.modelBtnText}>{"MODÈLES"</Text>
+                  <Text style={styles.modelBtnText}>MODÈLES</Text>
                 </TouchableOpacity>
               </View>
 
@@ -672,7 +675,7 @@ export default function DoctorScreen({ navigation, route }) {
               <View style={[styles.textAreaContainer, { height: 130, borderColor: isDark ? '#2E2E2E' : '#E2E8F0', backgroundColor: isDark ? '#1A1A1A' : '#FFF' }]}>
                 <TextInput
                   style={[styles.textArea, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                  placeholder={"Conduite à tenir / Observations cliniques..." placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                  placeholder="Conduite à tenir / Observations cliniques..." placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
                   multiline
                   value={consultationNotes}
                   onChangeText={setConsultationNotes}
@@ -684,7 +687,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={[brandColor + '15', brandColor + '05']} style={styles.ordonnanceHeader}>
                     <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
-                    <Text style={[styles.ordonnanceTitle, { color: brandColor }]}>{"BON DE LABORATOIRE"</Text>
+                    <Text style={[styles.ordonnanceTitle, { color: brandColor }]}>BON DE LABORATOIRE</Text>
                   </LinearGradient>
                   
                   <View style={styles.ordonnanceBody}>
@@ -720,7 +723,7 @@ export default function DoctorScreen({ navigation, route }) {
                       style={[styles.ordonnanceAddBtn, { borderColor: brandColor + '30' }]}
                     >
                       <MaterialIcons name="add-circle-outline" size={20} color={brandColor} />
-                      <Text style={[styles.ordonnanceAddText, { color: brandColor }]}>{"AJOUTER UN EXAMEN"</Text>
+                      <Text style={[styles.ordonnanceAddText, { color: brandColor }]}>AJOUTER UN EXAMEN</Text>
                     </TouchableOpacity>
                   </View>
                 </FadeInView>
@@ -730,7 +733,7 @@ export default function DoctorScreen({ navigation, route }) {
                 <FadeInView style={styles.ordonnanceContainer}>
                   <LinearGradient colors={['#10B98115', '#10B98105']} style={styles.ordonnanceHeader}>
                     <MaterialCommunityIcons name="help-circle" size={20} color="#10B981" />
-                    <Text style={[styles.ordonnanceTitle, { color: '#10B981' }]}>{"ORDONNANCE MÉDICALE"</Text>
+                    <Text style={[styles.ordonnanceTitle, { color: '#10B981' }]}>ORDONNANCE MÉDICALE</Text>
                   </LinearGradient>
 
                   <View style={styles.ordonnanceBody}>
@@ -758,7 +761,7 @@ export default function DoctorScreen({ navigation, route }) {
                         
                         <View style={styles.medCardBody}>
                           <View style={{ flex: 1 }}>
-                            <Text style={styles.medInputLabel}>{"DOSAGE (EX: 500MG)"</Text>
+                            <Text style={styles.medInputLabel}>DOSAGE (EX: 500MG)</Text>
                             <TextInput
                               style={[styles.medQtyInput, { color: isDark ? '#FFF' : '#0A0A0A', width: '100%', marginBottom: 10 }]}
                               placeholder="500mg, 1 amp, etc."
@@ -767,7 +770,7 @@ export default function DoctorScreen({ navigation, route }) {
                               onChangeText={(v) => { const n = [...prescriptionItems]; n[index].dosage = v; setPrescriptionItems(n); }}
                             />
                             
-                            <Text style={styles.medInputLabel}>{"POSOLOGIE / INSTRUCTIONS"</Text>
+                            <Text style={styles.medInputLabel}>POSOLOGIE / INSTRUCTIONS</Text>
                             <TextInput
                               style={[styles.medInstructionInput, { color: isDark ? '#E2E8F0' : '#475569', minHeight: 60 }]}
                               placeholder="1 comp x 3 / jour pendant 5 jours..."
@@ -778,10 +781,10 @@ export default function DoctorScreen({ navigation, route }) {
                             />
                           </View>
                           <View style={[styles.medQtyGroup, { marginLeft: 10 }]}>
-                            <Text style={styles.medInputLabel}>{"QTÉ"</Text>
+                            <Text style={styles.medInputLabel}>QTÉ</Text>
                             <TextInput
                               style={[styles.medQtyInput, { color: isDark ? '#FFF' : '#0A0A0A' }]}
-                              keyboardType=""
+                              keyboardType="numeric"
                               value={String(item.quantity || 1)}
                               onChangeText={(v) => { const n = [...prescriptionItems]; n[index].quantity = v; setPrescriptionItems(n); }}
                             />
@@ -795,7 +798,7 @@ export default function DoctorScreen({ navigation, route }) {
                       style={[styles.ordonnanceAddBtn, { borderColor: '#10B98130' }]}
                     >
                       <MaterialIcons name="add-circle-outline" size={20} color="#10B981" />
-                      <Text style={[styles.ordonnanceAddText, { color: '#10B981' }]}>{"AJOUTER UN PRODUIT"</Text>
+                      <Text style={[styles.ordonnanceAddText, { color: '#10B981' }]}>AJOUTER UN PRODUIT</Text>
                     </TouchableOpacity>
                   </View>
                 </FadeInView>
@@ -831,7 +834,7 @@ export default function DoctorScreen({ navigation, route }) {
                   {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                     <>
                       <MaterialIcons name="done-all" size={24} color="#FFF" style={{ marginRight: 10 }} />
-                      <Text style={styles.submitText}>{"VALIDER & TRANSMETTRE"</Text>
+                      <Text style={styles.submitText}>VALIDER & TRANSMETTRE</Text>
                     </>
                   )}
                 </LinearGradient>

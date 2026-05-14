@@ -46,14 +46,14 @@ class GlobalErrorBoundary extends React.Component {
               </LinearGradient>
             </View>
 
-            <Text style={styles.oopsText}>{"SYSTÈME INTERROMPU"</Text>
+            <Text style={styles.oopsText}>SYSTÈME INTERROMPU</Text>
             <Text style={styles.title}>Une erreur critique est survenue</Text>
-            <Text style={styles.description}>{"L'application a rencontré un problème technique inattendu. Vos données de session sont probablement en sécurité, mais l'interface doit être réinitialisée."</Text>
+            <Text style={styles.description}>L'application a rencontré un problème technique inattendu. Vos données de session sont probablement en sécurité, mais l'interface doit être réinitialisée.</Text>
 
             <View style={styles.errorCard}>
               <View style={styles.errorHeader}>
                 <MaterialCommunityIcons name="help-circle" size={16} color="#EF4444" />
-                <Text style={styles.errorLabel}>{"DÉTAILS TECHNIQUES"</Text>
+                <Text style={styles.errorLabel}>DÉTAILS TECHNIQUES</Text>
               </View>
               <ScrollView style={styles.errorScroll} showsVerticalScrollIndicator={false}>
                 <Text style={styles.errorText}>
@@ -79,7 +79,7 @@ class GlobalErrorBoundary extends React.Component {
                 style={styles.btnGradient}
               >
                 <MaterialCommunityIcons name="help-circle" size={24} color="#FFF" />
-                <Text style={styles.btnText}>{"REDÉMARRER L'APPLICATION"</Text>
+                <Text style={styles.btnText}>REDÉMARRER L'APPLICATION</Text>
               </LinearGradient>
             </TouchableOpacity>
 

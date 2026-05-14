@@ -20,8 +20,9 @@ export function resolveMediaUrl(value) {
       const media = new URL(rawUrl);
       const api = new URL(api.defaults.baseURL);
 
-      if (media.host !== api.host && media.pathname.includes('/storage/')) {
-        const storagePath = media.pathname.slice(media.pathname.indexOf('/storage/'));
+      if (media.host !== api.host && (media.pathname.includes('/storage/') || media.pathname.includes('/media/'))) {
+        const marker = media.pathname.includes('/media/') ? '/media/' : '/storage/';
+        const storagePath = media.pathname.slice(media.pathname.indexOf(marker));
         return `${apiOrigin()}${storagePath}`;
       }
     } catch {
@@ -35,7 +36,7 @@ export function resolveMediaUrl(value) {
     .replace(/^public\//, '')
     .replace(/^storage\//, '');
 
-  return `${apiOrigin()}/storage/${cleanPath}`;
+  return `${apiOrigin()}/media/${cleanPath}`;
 }
 
 export function withCacheBust(url, version = Date.now()) {

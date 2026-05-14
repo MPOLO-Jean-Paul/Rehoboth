@@ -187,7 +187,7 @@ export default function MaternityScreen({ navigation, route }) {
   const renderCases = () => (
     <View>
       {renderStats()}
-      {cases.length === 0 ? <Text style={styles.empty}>{"Aucun dossier maternité actif."</Text> : cases.map(renderCaseCard)}
+      {cases.length === 0 ? <Text style={styles.empty}>Aucun dossier maternité actif.</Text> : cases.map(renderCaseCard)}
     </View>
   );
 
@@ -210,7 +210,7 @@ export default function MaternityScreen({ navigation, route }) {
   );
 
   const renderDetails = () => {
-    if (!selectedCase) return <Text style={styles.empty}>{"Sélectionnez un dossier."</Text>;
+    if (!selectedCase) return <Text style={styles.empty}>Sélectionnez un dossier.</Text>;
 
     return (
       <View>
@@ -240,7 +240,7 @@ export default function MaternityScreen({ navigation, route }) {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>{"Accouchement"</Text>
+          <Text style={styles.sectionTitle}>Accouchement</Text>
           <Segmented value={delivery.delivery_type} onChange={(delivery_type) => setDelivery({ ...delivery, delivery_type })} options={['vaginal', 'cesarean', 'assisted']} />
           <View style={styles.row}>
             <Field label="" value={delivery.baby_gender} onChangeText={(v) => setDelivery({ ...delivery, baby_gender: v })} compact />
@@ -251,13 +251,13 @@ export default function MaternityScreen({ navigation, route }) {
           <Field label="Notes" value={delivery.notes} onChangeText={(v) => setDelivery({ ...delivery, notes: v })} multiline />
           <ActionButton label="Valider accouchement" icon="baby-face-outline" onPress={saveDelivery} />
           <TouchableOpacity style={styles.secondaryButton} onPress={discharge}>
-            <Text style={styles.secondaryButtonText}>{"Sortie maternité"</Text>
+            <Text style={styles.secondaryButtonText}>Sortie maternité</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Historique</Text>
-          {(selectedCase.follow_ups || []).length === 0 ? <Text style={styles.emptySmall}>{"Aucun suivi enregistré."</Text> : selectedCase.follow_ups.map((f) => (
+          {(selectedCase.follow_ups || []).length === 0 ? <Text style={styles.emptySmall}>Aucun suivi enregistré.</Text> : selectedCase.follow_ups.map((f) => (
             <View key={f.id} style={styles.timelineItem}>
               <Text style={styles.timelineTitle}>{f.type} · {f.user?.name || 'Agent'}</Text>
               <Text style={styles.cardMeta}>{f.notes || 'Sans notes'}</Text>
@@ -290,7 +290,7 @@ export default function MaternityScreen({ navigation, route }) {
 
   const ActionButton = ({ label, icon, onPress }) => (
     <TouchableOpacity style={styles.primaryButton} onPress={onPress}>
-      <MaterialCommunityIcons name={icon} size={20} color="" />
+      <MaterialCommunityIcons name={icon} size={20} color={brandColor} />
       <Text style={styles.primaryButtonText}>{label}</Text>
     </TouchableOpacity>
   );

@@ -319,7 +319,7 @@ export default function HomeScreen({ navigation }) {
               </LinearGradient>
               <View>
                 <Text style={[tw`font-black mb-0.5`, { fontSize: S.fs(9), color: C.textSecondary, letterSpacing: 0 }]}>{lang === 'en' ? 'WELCOME TO' : 'BIENVENUE SUR'}</Text>
-                <Text style={[tw`font-black leading-7`, { fontSize: S.fs(20), color: C.text, letterSpacing: 0 }]}>{"REHOBOTH"</Text>
+                <Text style={[tw`font-black leading-7`, { fontSize: S.fs(20), color: C.text, letterSpacing: 0 }]}>REHOBOTH</Text>
               </View>
             </View>
 
@@ -329,7 +329,7 @@ export default function HomeScreen({ navigation }) {
                 style={[tw`flex-row items-center px-3 border ml-2`, { height: S.vs(38), borderRadius: S.ms(19), backgroundColor: C.headerBtn, borderColor: C.border, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 4 }]}
                 onPress={toggleLang}
               >
-                <MaterialIcons name="help-circle" size={S.ms(18)} color={isDark ? '#FFF' : brandColor} />
+                <MaterialCommunityIcons name="help-circle" size={S.ms(18)} color={isDark ? "#FFF" : brandColor} />
                 <Text style={[tw`font-bold ml-1.5`, { fontSize: S.fs(12), color: C.text }]}>{lang.toUpperCase()}</Text>
               </PressableScale>
 
@@ -377,7 +377,7 @@ export default function HomeScreen({ navigation }) {
               <FadeInView delay={500} duration={600} style={tw`flex-1 items-center justify-center opacity-90`}>
                 <View style={[tw`rounded-full items-center justify-center mb-1.5`, { width: S.ms(44), height: S.ms(44) }]}>
                   {isOnline ? (
-                    <MaterialCommunityIcons name="wifi" size={S.ms(22)} color={isDark ? '#4ADE80' : '#16A34A'} />
+                    <MaterialCommunityIcons name="wifi" size={S.ms(22)} color={isDark ? "#4ADE80" : '#16A34A'} />
                   ) : (
                     <MaterialCommunityIcons name="wifi-off" size={S.ms(22)} color="#EF4444" />
                   )}

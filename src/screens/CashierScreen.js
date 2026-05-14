@@ -22,6 +22,9 @@ import { useTheme } from '../hooks/useTheme';
 import { isValidPhone, detectOperator, operatorColor } from '../utils/phoneValidator';
 
 const { width, height } = Theme.layout;
+const mobileMethodOperator = { orange: 'orange', airtel: 'airtel', mpesa: 'vodacom' };
+const invoiceCurrency = (invoice) => String(invoice?.payment_currency || invoice?.currency || invoice?.metadata?.currency || 'CDF').toUpperCase() === 'USD' ? 'USD' : 'CDF';
+const currencyLabel = (currency) => currency === 'USD' ? 'USD' : 'FC';
 const paymentMethods = [
    { id: 'cash', icon: 'cash-marker', label: 'CASH', color: '#22C55E', type: 'icon' },
    {
@@ -69,7 +72,7 @@ export default function CashierScreen({ navigation, route }) {
    const [activeInvoice, setActiveInvoice] = useState(null);
    const [paymentMethod, setPaymentMethod] = useState('cash');
    const [paymentPhone, setPaymentPhone] = useState('');
-   const [isSimulating, setIsSimulating] = useState(false);
+   const [isMobilePaymentProcessing, setIsMobilePaymentProcessing] = useState(false);
    const [bottomLoading, setBottomLoading] = useState(false);
    const [isInsuranceVerified, setIsInsuranceVerified] = useState(false);
    const [verifyingInsurance, setVerifyingInsurance] = useState(false);
@@ -182,7 +185,7 @@ export default function CashierScreen({ navigation, route }) {
          const res = await api.get(`/insurances/${insId}/report`);
          setInsuranceReport(res.data);
       } catch (e) {
-         showToast("Erreur rapport assurance", 'error');
+         showToast("Erreur rapport assurance", "error");
       } finally {
          setReportLoading(false);
       }
@@ -191,7 +194,7 @@ export default function CashierScreen({ navigation, route }) {
    const handleSettleInvoices = async () => {
       if (!paymentRef || !insuranceReport?.invoices) return;
       const pendingIds = insuranceReport.invoices.filter(i => i.status === 'insurance_billed').map(i => i.id);
-      if (pendingIds.length === 0) return showToast("Aucune facture en attente", 'info');
+      if (pendingIds.length === 0) return showToast("Aucune facture en attente", "info");
 
       setIsSubmitting(true);
       try {
@@ -199,12 +202,30 @@ export default function CashierScreen({ navigation, route }) {
             invoice_ids: pendingIds,
             payment_reference: paymentRef
          });
-         showToast("Règlement enregistré", 'success');
+         showToast("Règlement enregistré", "success");
          setShowSettleModal(false);
          setPaymentRef('');
          fetchInsuranceReport(selectedInsurance.id);
       } catch (e) {
-         showToast("Erreur règlement", 'error');
+         showToast("Erreur règlement", "error");
+      } finally {
+         setIsSubmitting(false);
+      }
+   };
+
+   const handleSendInsuranceReport = async () => {
+      if (!selectedInsurance?.id) return;
+
+      setIsSubmitting(true);
+      try {
+         const now = new Date();
+         const res = await api.post(`/insurances/${selectedInsurance.id}/send-report`, {
+            month: now.getMonth() + 1,
+            year: now.getFullYear(),
+         });
+         showToast(res.data.message || "Relevé envoyé par email", "success");
+      } catch (e) {
+         showToast(e.response?.data?.message || "Erreur lors de l'envoi du relevé", "error");
       } finally {
          setIsSubmitting(false);
       }
@@ -217,7 +238,7 @@ export default function CashierScreen({ navigation, route }) {
          showToast(res.data.message, 'success');
          fetchAccountingData();
       } catch (e) {
-         showToast("Erreur lors de la clôture", 'error');
+         showToast("Erreur lors de la clôture", "error");
       } finally {
          setLoading(false);
       }
@@ -278,36 +299,41 @@ export default function CashierScreen({ navigation, route }) {
       setIsInsuranceVerified(false);
       setInsuranceError(null);
       // We also need to update the activeInvoice patient status temporarily in UI or just handle it in process
-      showToast("Passage en mode privé (Cash/Mobile)", 'info');
+      showToast("Passage en mode privé (Cash/Mobile)", "info");
    };
 
    const handleProcessPayment = async () => {
       if (paymentMethod !== 'cash' && paymentMethod !== 'insurance') {
+         const detected = detectOperator(paymentPhone);
          if (!isValidPhone(paymentPhone)) {
-            return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom requis)", 'error');
+            return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom requis)", "error");
+         }
+         if (mobileMethodOperator[paymentMethod] && detected.key !== mobileMethodOperator[paymentMethod]) {
+            return showToast(`Ce numéro appartient à ${detected.operator}. Sélectionnez le bon opérateur.`, "error");
          }
       }
-      if (paymentMethod !== 'cash') {
-         setIsSimulating(true);
-         await new Promise(r => setTimeout(r, 3000));
-         setIsSimulating(false);
-      }
       setPayingId(activeInvoice.id);
+      setIsMobilePaymentProcessing(paymentMethod !== 'cash' && paymentMethod !== 'insurance');
       try {
-         await api.post(`/invoices/${activeInvoice.id}/pay`, {
+         const res = await api.post(`/invoices/${activeInvoice.id}/pay`, {
             payment_method: paymentMethod,
-            payment_phone: paymentPhone
+            payment_phone: paymentPhone,
+            payment_currency: invoiceCurrency(activeInvoice),
          });
-         showToast(t.paySuccess, 'success');
-         setShowPaymentModal(false);
-         setPaymentPhone('');
-         fetchInvoices();
-         fetchHistory();
+         if (res.status === 202 || res.data?.payment_status === 'pending') {
+            showToast(res.data.message || 'Paiement en attente de confirmation', 'warning');
+         } else {
+            showToast(t.paySuccess, 'success');
+            setShowPaymentModal(false);
+            setPaymentPhone('');
+            fetchInvoices();
+            fetchHistory();
+         }
       } catch (e) {
          const msg = e.response?.data?.message || t.error;
          showToast(msg, 'error');
       }
-      finally { setPayingId(null); }
+      finally { setPayingId(null); setIsMobilePaymentProcessing(false); }
    };
 
    const printReceipt = async (invoice) => {
@@ -330,7 +356,7 @@ export default function CashierScreen({ navigation, route }) {
              <div class="header">
                <h1 class="title">POLYCLINIQUE</h1>
                <p class="subtitle">REÇU DE PAIEMENT</p>
-               <p class="subtitle">Date: ${new Date(invoice.updated_at || invoice.created_at).toLocaleString('fr-FR')}</p>
+               <p class="subtitle">Date: ${new Date(invoice.updated_at || invoice.created_at).toLocaleString("fr-FR")}</p>
              </div>
              <div class="row">
                <span>Référence:</span>
@@ -342,11 +368,11 @@ export default function CashierScreen({ navigation, route }) {
              </div>
              <div class="row">
                <span>Service:</span>
-               <span class="bold">${(invoice.service || 'Non spécifié').toUpperCase()}</span>
+               <span class="bold">${(invoice.service || "Non spécifié").toUpperCase()}</span>
              </div>
              <div class="row">
                <span>Méthode:</span>
-               <span class="bold">${(invoice.payment_method || 'CASH').toUpperCase()}</span>
+               <span class="bold">${(invoice.payment_method || "CASH").toUpperCase()}</span>
              </div>
              <div class="row total">
                <span class="bold">MONTANT PAYÉ:</span>
@@ -428,7 +454,7 @@ export default function CashierScreen({ navigation, route }) {
       setIsSubmitting(true);
       try {
          await api.post('/cashier/accounting/auto-settings', { enabled: autoJournalEnabled, frequency: autoJournalFreq });
-         showToast("Paramètres du journal automatique enregistrés", 'success');
+         showToast("Paramètres du journal automatique enregistrés", "success");
          setShowAutoModal(false);
          fetchAccountingData();
       } catch (e) {
@@ -446,7 +472,7 @@ export default function CashierScreen({ navigation, route }) {
          const res = await api.get(`/cashier/accounting/journals/${j.reference || j.id}`);
          setSelectedJournal(res.data);
       } catch (e) {
-         showToast("Erreur lors du chargement des détails", 'error');
+         showToast("Erreur lors du chargement des détails", "error");
          setShowJournalDetails(false);
       } finally {
          setJournalLoading(false);
@@ -503,7 +529,7 @@ export default function CashierScreen({ navigation, route }) {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
                <View style={{ flex: 1 }}>
                   <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 9, fontWeight: '900', letterSpacing: 1 }}>{t.amount.toUpperCase()}</Text>
-                  <Text style={{ fontSize: 22, fontWeight: '900', color: '#22C55E' }} numberOfLines={1} adjustsFontSizeToFit>{item.amount.toLocaleString()} <Text style={{ fontSize: 12 }}>{"FC"</Text></Text>
+                  <Text style={{ fontSize: 22, fontWeight: '900', color: '#22C55E' }} numberOfLines={1} adjustsFontSizeToFit>{item.amount.toLocaleString()} <Text style={{ fontSize: 12 }}>FC</Text></Text>
                </View>
 
                {activeTab === 'pending' ? (
@@ -513,7 +539,7 @@ export default function CashierScreen({ navigation, route }) {
                      style={{ minWidth: 140, height: 48, borderRadius: 16, overflow: 'hidden', elevation: 4, shadowColor: brandColor, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8 }}
                   >
                      <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 }}>
-                        {payingId === item.id ? <ActivityIndicator size="" color="#FFF" /> : (
+                        {payingId === item.id ? <ActivityIndicator size="small" color="#FFF" /> : (
                            <>
                               <MaterialIcons name="account-balance-wallet" size={20} color="#FFF" style={{ marginRight: 8 }} />
                               <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 13, letterSpacing: 0.5 }}>{t.pay.toUpperCase()}</Text>
@@ -525,7 +551,7 @@ export default function CashierScreen({ navigation, route }) {
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                      <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#22C55E15', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, marginRight: 10 }}>
                         <MaterialIcons name="check-circle" size={16} color="#22C55E" />
-                        <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 6 }}>{"PAYÉ"</Text>
+                        <Text style={{ color: '#22C55E', fontWeight: '900', fontSize: 11, marginLeft: 6 }}>PAYÉ</Text>
                      </View>
                      <TouchableOpacity onPress={() => printReceipt(item)} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
                         <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
@@ -589,7 +615,7 @@ export default function CashierScreen({ navigation, route }) {
                                     >
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                           <View>
-                                             <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>{"EN ATTENTE D'ENCAISSEMENT"</Text>
+                                             <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1.5 }}>EN ATTENTE D'ENCAISSEMENT</Text>
                                              <Text style={{ color: '#FFF', fontSize: 32, fontWeight: '900', marginTop: 8 }}>
                                                 {invoices.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 16 }}>FC</Text>
                                              </Text>
@@ -643,9 +669,9 @@ export default function CashierScreen({ navigation, route }) {
                            loading ? (
                               <View>{[1, 2, 3, 4].map(i => <SkeletonItem key={i} height={130} style={{ marginBottom: 16, borderRadius: 28 }} />)}</View>
                            ) : renderEmptyState(
-                              search ? "account-search-outline" : (activeTab === 'pending' ? "wallet-giftcard" : "history"),
-                              search ? "Aucun résultat" : (activeTab === 'pending' ? "Aucune facture" : "Historique vide"),
-                              search ? `Aucun patient ne correspond à "${search}" dans cette liste.` : (activeTab === 'pending' ? "Il n'y a aucune facture en attente de paiement pour le moment." : "Aucune transaction n'a été enregistrée pour cette période.")
+                              search ? "account-search-outline" : (activeTab === "pending" ? "wallet-giftcard" : "history"),
+                              search ? "Aucun résultat" : (activeTab === "pending" ? "Aucune facture" : "Historique vide"),
+                              search ? `Aucun patient ne correspond à "${search}" dans cette liste.` : (activeTab === "pending" ? "Il n'y a aucune facture en attente de paiement pour le moment." : "Aucune transaction n'a été enregistrée pour cette période.")
                            )
                         }
                      />
@@ -656,7 +682,7 @@ export default function CashierScreen({ navigation, route }) {
                      <ScrollView contentContainerStyle={{ paddingTop: 125 + insets.top, paddingBottom: 130 + insets.bottom, paddingHorizontal: 20 }}>
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                              <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>{"RECETTES"</Text>
+                              <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>RECETTES</Text>
                               <View style={{ flexDirection: 'row', backgroundColor: isDark ? '#1A1A1A' : '#E2E8F0', borderRadius: 14, padding: 4 }}>
                                  {['day', 'week', 'month', 'all'].map(p => (
                                     <TouchableOpacity key={p} onPress={() => setRecettePeriod(p)} style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: recettePeriod === p ? brandColor : 'transparent' }}>
@@ -670,7 +696,7 @@ export default function CashierScreen({ navigation, route }) {
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                  <View>
                                     <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 11, fontWeight: '900', letterSpacing: 2 }}>TOTAL ENCAISSÉ</Text>
-                                    <Text style={{ fontSize: 42, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{history.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 18 }}>{"FC"</Text></Text>
+                                    <Text style={{ fontSize: 42, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{history.reduce((acc, inv) => acc + Number(inv.amount), 0).toLocaleString()} <Text style={{ fontSize: 18 }}>FC</Text></Text>
                                  </View>
                                  <View style={{ width: 60, height: 60, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' }}>
                                     <MaterialCommunityIcons name="help-circle" size={32} color="#FFF" />
@@ -679,7 +705,7 @@ export default function CashierScreen({ navigation, route }) {
                               <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 24 }} />
                               <View style={{ flexDirection: 'row', gap: 20 }}>
                                  <View>
-                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>{"TRANSACTIONS"</Text>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 10, fontWeight: '800' }}>TRANSACTIONS</Text>
                                     <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900' }}>{history.length}</Text>
                                  </View>
                                  <View>
@@ -689,7 +715,7 @@ export default function CashierScreen({ navigation, route }) {
                               </View>
                            </LinearGradient>
 
-                           <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5, marginLeft: 4 }}>{"RÉPARTITION PAR DÉPARTEMENT"</Text>
+                           <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 16, letterSpacing: 1.5, marginLeft: 4 }}>RÉPARTITION PAR DÉPARTEMENT</Text>
                            <View style={{ gap: 12 }}>
                               {Object.entries(history.reduce((acc, inv) => {
                                  const s = inv.service || 'AUTRE';
@@ -699,11 +725,11 @@ export default function CashierScreen({ navigation, route }) {
                                  <View key={i} style={{ padding: 20, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2 }}>
                                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                        <View style={{ width: 44, height: 44, borderRadius: 16, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                                          <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                                          <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                                        </View>
                                        <View>
                                           <Text style={{ fontWeight: '800', color: isDark ? '#E2E8F0' : '#1A1A1A', fontSize: 14 }}>{service.toUpperCase()}</Text>
-                                          <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#94A3B8' }}>{"Performance Service"</Text>
+                                          <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#94A3B8' }}>Performance Service</Text>
                                        </View>
                                     </View>
                                     <Text style={{ fontWeight: '900', color: brandColor, fontSize: 16 }}>{amount.toLocaleString()} FC</Text>
@@ -721,10 +747,10 @@ export default function CashierScreen({ navigation, route }) {
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                               <View>
                                  <Text style={{ fontSize: 24, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -0.5 }}>ASSURANCES</Text>
-                                 <Text style={{ fontSize: 11, color: brandColor, fontWeight: '900', marginTop: 4 }}>{"GESTION DES COMPTES SOCIÉTÉS"</Text>
+                                 <Text style={{ fontSize: 11, color: brandColor, fontWeight: '900', marginTop: 4 }}>GESTION DES COMPTES SOCIÉTÉS</Text>
                               </View>
                               <TouchableOpacity onPress={() => fetchInsurances()} style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center' }}>
-                                 <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                                 <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                               </TouchableOpacity>
                            </View>
 
@@ -743,14 +769,14 @@ export default function CashierScreen({ navigation, route }) {
                                           <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{ins.name}</Text>
                                           <Text style={{ fontSize: 12, color: isDark ? '#888888' : '#94A3B8', fontWeight: '700', marginTop: 2 }}>{ins.email || 'Aucun email contact'}</Text>
                                        </View>
-                                       <MaterialIcons name="chevron-right" size={24} color={isDark ? '#2E2E2E' : '#CBD5E1'} />
+                                       <MaterialIcons name="chevron-right" size={24} color={isDark ? "#2E2E2E" : '#CBD5E1'} />
                                     </View>
 
                                     <View style={{ height: 1, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', marginBottom: 20 }} />
 
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                        <View>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>{"STATUT CONTRAT"</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', letterSpacing: 1 }}>STATUT CONTRAT</Text>
                                           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 6 }}>
                                              <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: ins.status === 'active' ? '#22C55E' : '#EF4444', marginRight: 8 }} />
                                              <Text style={{ fontSize: 13, fontWeight: '900', color: ins.status === 'active' ? '#22C55E' : '#EF4444' }}>{ins.status === 'active' ? 'ACTIF' : 'INACTIF'}</Text>
@@ -774,7 +800,7 @@ export default function CashierScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
                               <View>
-                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{"COMPTABILITÉ"</Text>
+                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>COMPTABILITÉ</Text>
                                  <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>Gestion des journaux et balances</Text>
                               </View>
                               <TouchableOpacity onPress={handleExportAccounting} style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: isDark ? '#1A1A1A' : '#FFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
@@ -785,8 +811,8 @@ export default function CashierScreen({ navigation, route }) {
                            {/* BALANCE DES PAIEMENTS CARD */}
                            <View style={{ backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 28, borderRadius: 35, marginBottom: 32, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20 }}>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: 1 }}>{"RÉPARTITION DES FLUX"</Text>
-                                 <MaterialIcons name="help-circle" size={20} color={brandColor} />
+                                 <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: 1 }}>RÉPARTITION DES FLUX</Text>
+                                 <MaterialCommunityIcons name="help-circle" size={20} color={brandColor} />
                               </View>
 
                               <View style={{ gap: 20 }}>
@@ -794,7 +820,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                           <View style={{ width: 12, height: 12, borderRadius: 4, backgroundColor: brandColor, marginRight: 10 }} />
-                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>{"ASSURANCES (PRISE EN CHARGE)"</Text>
+                                          <Text style={{ fontWeight: '800', color: isDark ? '#AAAAAA' : '#475569', fontSize: 12 }}>ASSURANCES (PRISE EN CHARGE)</Text>
                                        </View>
                                        <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{(accountingData.insured || 0).toLocaleString()} FC</Text>
                                     </View>
@@ -822,15 +848,15 @@ export default function CashierScreen({ navigation, route }) {
                            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 32 }}>
                               <TouchableOpacity onPress={handleCreateJournal} style={{ flex: 1, backgroundColor: brandColor, paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', elevation: 4 }}>
                                  <MaterialIcons name="add-chart" size={22} color="#FFF" />
-                                 <Text style={{ color: '#FFF', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{"NOUVEAU"</Text>
+                                 <Text style={{ color: '#FFF', fontSize: 8, fontWeight: '900', marginTop: 5 }}>NOUVEAU</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={() => setShowAutoModal(true)} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: autoJournalEnabled ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
-                                 <MaterialIcons name="help-circle" size={22} color={autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A')} />
+                                 <MaterialCommunityIcons name="help-circle" size={22} color={autoJournalEnabled ? brandColor : (isDark ? "#F1F5F9" : '#0A0A0A')} />
                                  <Text style={{ color: autoJournalEnabled ? brandColor : (isDark ? '#F1F5F9' : '#0A0A0A'), fontSize: 8, fontWeight: '900', marginTop: 5 }}>AUTO : {autoJournalEnabled ? autoJournalFreq.toUpperCase() : 'OFF'}</Text>
                               </TouchableOpacity>
                               <TouchableOpacity onPress={handleCloseSession} style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', paddingVertical: 15, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                                 <MaterialIcons name="lock-clock" size={22} color={isDark ? '#F1F5F9' : '#0A0A0A'} />
-                                 <Text style={{ color: isDark ? '#F1F5F9' : '#0A0A0A', fontSize: 8, fontWeight: '900', marginTop: 5 }}>{"CLÔTURE"</Text>
+                                 <MaterialIcons name="lock-clock" size={22} color={isDark ? "#F1F5F9" : '#0A0A0A'} />
+                                 <Text style={{ color: isDark ? '#F1F5F9' : '#0A0A0A', fontSize: 8, fontWeight: '900', marginTop: 5 }}>CLÔTURE</Text>
                               </TouchableOpacity>
                            </View>
 
@@ -861,19 +887,19 @@ export default function CashierScreen({ navigation, route }) {
                               <TouchableOpacity key={i} onPress={() => viewJournalDetails(j)} style={{ padding: 18, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 28, marginBottom: 15, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2 }}>
                                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                     <LinearGradient colors={isDark ? ['#0A0A0A', '#1A1A1A'] : ['#F8FAFC', '#F1F5F9']} style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 18, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                                       <MaterialCommunityIcons name={j.status === 'open' ? "book-open-page-variant" : "book-check"} size={26} color={j.status === 'open' ? "#22C55E" : brandColor} />
+                                       <MaterialCommunityIcons name={j.status === 'open' ? "book-open-page-variant" : "book-check"} size={26} color={j.status === "open" ? "#22C55E" : brandColor} />
                                     </LinearGradient>
                                     <View>
                                        <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 16 }}>{j.month.toUpperCase()}</Text>
                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                                           <Text style={{ fontSize: 11, color: isDark ? '#555555' : '#94A3B8', fontWeight: '700' }}>{j.count} Opérations • </Text>
-                                          <Text style={{ fontSize: 10, color: j.status === 'open' ? "#22C55E" : (isDark ? '#555555' : '#94A3B8'), fontWeight: '900' }}>{j.status === 'open' ? 'EN COURS' : 'VÉRIFIÉ'}</Text>
+                                          <Text style={{ fontSize: 10, color: j.status === 'open' ? "#22C55E" : (isDark ? "#555555" : '#94A3B8'), fontWeight: '900' }}>{j.status === 'open' ? 'EN COURS' : 'VÉRIFIÉ'}</Text>
                                        </View>
                                     </View>
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={{ fontWeight: '900', color: brandColor, fontSize: 15 }}>{Number(j.total).toLocaleString()} FC</Text>
-                                    <MaterialIcons name="chevron-right" size={22} color={isDark ? '#2E2E2E' : '#CBD5E1'} style={{ marginTop: 2 }} />
+                                    <MaterialIcons name="chevron-right" size={22} color={isDark ? "#2E2E2E" : '#CBD5E1'} style={{ marginTop: 2 }} />
                                  </View>
                               </TouchableOpacity>
                            ))}
@@ -887,7 +913,7 @@ export default function CashierScreen({ navigation, route }) {
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                               <View>
-                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{"RAPPORTS"</Text>
+                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>RAPPORTS</Text>
                                  <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>Analyse des flux financiers</Text>
                               </View>
                               <TouchableOpacity style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: isDark ? '#1A1A1A' : '#FFF', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9' }}>
@@ -924,12 +950,12 @@ export default function CashierScreen({ navigation, route }) {
                                     <LinearGradient colors={isDark ? ['#1A1A1A', '#0A0A0A'] : ['#FFF', '#F8FAFC']} style={{ padding: 24, borderRadius: 32, marginBottom: 32, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 12, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 20 }}>
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                           <View>
-                                             <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{"PERFORMANCE GLOBALE"</Text>
+                                             <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>PERFORMANCE GLOBALE</Text>
                                              <Text style={{ fontSize: 36, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginTop: 8 }}>{totalRev.toLocaleString()} <Text style={{ fontSize: 16, color: brandColor }}>FC</Text></Text>
 
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, backgroundColor: trend >= 0 ? '#22C55E15' : '#EF444415', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, alignSelf: 'flex-start' }}>
                                                 <MaterialIcons name={trend >= 0 ? "trending-up" : "trending-down"} size={14} color={trend >= 0 ? "#22C55E" : "#EF4444"} />
-                                                <Text style={{ fontSize: 11, fontWeight: '900', color: trend >= 0 ? "#22C55E" : "#EF4444", marginLeft: 4 }}>{trend > 0 ? '+' : ''}{trend}% vs hier</Text>
+                                                <Text style={{ fontSize: 11, fontWeight: '900', color: trend >= 0 ? "#22C55E" : "#EF4444", marginLeft: 4 }}>{trend > 0 ? "+" : ''}{trend}% vs hier</Text>
                                              </View>
                                           </View>
                                           <View style={{ width: 60, height: 60, borderRadius: 20, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center' }}>
@@ -941,13 +967,13 @@ export default function CashierScreen({ navigation, route }) {
 
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                                           <View style={{ flex: 1 }}>
-                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>{"TOTAL ACTES"</Text>
+                                             <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>TOTAL ACTES</Text>
                                              <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#E2E8F0' : '#1A1A1A', marginTop: 4 }}>{history.length}</Text>
                                           </View>
                                           <View style={{ width: 1, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', marginHorizontal: 20 }} />
                                           <View style={{ flex: 1 }}>
                                              <Text style={{ color: isDark ? '#555555' : '#94A3B8', fontSize: 10, fontWeight: '900' }}>PANIER MOYEN</Text>
-                                             <Text style={{ fontSize: 20, fontWeight: '900', color: '#22C55E', marginTop: 4 }}>{history.length > 0 ? Math.round(totalRev / history.length).toLocaleString() : 0} <Text style={{ fontSize: 10 }}>{"FC"</Text></Text>
+                                             <Text style={{ fontSize: 20, fontWeight: '900', color: '#22C55E', marginTop: 4 }}>{history.length > 0 ? Math.round(totalRev / history.length).toLocaleString() : 0} <Text style={{ fontSize: 10 }}>FC</Text></Text>
                                           </View>
                                        </View>
                                     </LinearGradient>
@@ -974,7 +1000,7 @@ export default function CashierScreen({ navigation, route }) {
                                                    <Text style={{ fontSize: 11, color: '#22C55E', fontWeight: '700' }}>{data.count} Actes réalisés</Text>
                                                 </View>
                                              </View>
-                                             <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 18 }}>{data.paid.toLocaleString()} <Text style={{ fontSize: 11 }}>{"FC"</Text></Text>
+                                             <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 18 }}>{data.paid.toLocaleString()} <Text style={{ fontSize: 11 }}>FC</Text></Text>
                                           </View>
 
                                           <View style={{ padding: 20 }}>
@@ -988,7 +1014,7 @@ export default function CashierScreen({ navigation, route }) {
                                                             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: brandColor, marginRight: 10 }} />
                                                             <Text style={{ fontSize: 13, color: isDark ? '#E2E8F0' : '#475569', fontWeight: '700' }}>{srv.toUpperCase()}</Text>
                                                          </View>
-                                                         <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{val.toLocaleString()} <Text style={{ fontSize: 9 }}>{"FC"</Text></Text>
+                                                         <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{val.toLocaleString()} <Text style={{ fontSize: 9 }}>FC</Text></Text>
                                                       </View>
                                                       <View style={{ height: 6, backgroundColor: isDark ? '#0A0A0A' : '#F1F5F9', borderRadius: 3, overflow: 'hidden' }}>
                                                          <View style={{ width: `${percentage}%`, height: '100%', backgroundColor: brandColor, borderRadius: 3 }} />
@@ -1019,10 +1045,10 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ padding: 24, borderBottomWidth: 1, borderBottomColor: isDark ? '#1A1A1A' : '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <View>
                      <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#F1F5F9' : '#0A0A0A', letterSpacing: -0.8 }}>RÉSUMÉ ANALYTIQUE</Text>
-                     <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#555555' : '#94A3B8' }}>{"Performance et flux de trésorerie"</Text>
+                     <Text style={{ fontSize: 11, fontWeight: '700', color: isDark ? '#555555' : '#94A3B8' }}>Performance et flux de trésorerie</Text>
                   </View>
                   <TouchableOpacity onPress={() => toggleBottomTab('summary')} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                     <MaterialIcons name="help-circle" size={24} color={brandColor} />
+                     <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
                   </TouchableOpacity>
                </View>
                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 24, paddingBottom: 60 + insets.bottom }}>
@@ -1034,7 +1060,7 @@ export default function CashierScreen({ navigation, route }) {
                         <LinearGradient colors={Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 28, borderRadius: 32, marginBottom: 30, elevation: 8, shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 15 }}>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                               <View>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>{"RECETTE AUJOURD'HUI"</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>RECETTE AUJOURD'HUI</Text>
                                  <Text style={{ fontSize: 38, fontWeight: '900', color: '#FFF', marginTop: 8 }}>{Number(summary.today?.total || 0).toLocaleString()} <Text style={{ fontSize: 16 }}>FC</Text></Text>
                               </View>
                               <View style={{ width: 50, height: 50, borderRadius: 15, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center' }}>
@@ -1054,7 +1080,7 @@ export default function CashierScreen({ navigation, route }) {
                         {/* SECONDARY STATS ROW */}
                         <View style={{ flexDirection: 'row', gap: 15, marginBottom: 30 }}>
                            <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{"SITUATION HEBDO"</Text>
+                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>SITUATION HEBDO</Text>
                               <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{Number(summary.week?.total || 0).toLocaleString()} FC</Text>
                               <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: summary.week?.growth >= 0 ? '#22C55E' : '#EF4444' }}>{summary.week?.growth > 0 ? '+' : ''}{summary.week?.growth}%</Text>
@@ -1062,7 +1088,7 @@ export default function CashierScreen({ navigation, route }) {
                               </View>
                            </View>
                            <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 28, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}>
-                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>{"PANIER MOYEN"</Text>
+                              <Text style={{ fontSize: 9, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 10 }}>PANIER MOYEN</Text>
                               <Text style={{ fontSize: 18, fontWeight: '900', color: brandColor }}>{summary.today?.count > 0 ? Math.round(summary.today.total / summary.today.count).toLocaleString() : 0} FC</Text>
                               <Text style={{ fontSize: 10, color: isDark ? '#555555' : '#94A3B8', marginTop: 10, fontWeight: '700' }}>PAR TRANSACTION</Text>
                            </View>
@@ -1071,7 +1097,7 @@ export default function CashierScreen({ navigation, route }) {
                         {/* PROGRESS TO GOAL */}
                         <View style={{ marginBottom: 35, paddingHorizontal: 10 }}>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-                              <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>{"OBJECTIF DU MOIS"</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '900', color: isDark ? '#F1F5F9' : '#1A1A1A' }}>OBJECTIF DU MOIS</Text>
                               <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor }}>65%</Text>
                            </View>
                            <View style={{ height: 10, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', borderRadius: 5, overflow: 'hidden' }}>
@@ -1096,7 +1122,7 @@ export default function CashierScreen({ navigation, route }) {
                                  </View>
                                  <View style={{ alignItems: 'flex-end' }}>
                                     <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', fontSize: 15 }}>{s.total.toLocaleString()}</Text>
-                                    <Text style={{ fontSize: 10, color: brandColor, fontWeight: '800' }}>{"FC"</Text>
+                                    <Text style={{ fontSize: 10, color: brandColor, fontWeight: '800' }}>FC</Text>
                                  </View>
                               </View>
                            );
@@ -1140,14 +1166,14 @@ export default function CashierScreen({ navigation, route }) {
          />
 
          {/* PAYMENT MODAL (Simplified for design brief) */}
-         <Modal visible={showPaymentModal} animationType="" transparent>
+         <Modal visible={showPaymentModal} animationType="fade" transparent>
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
                <View style={{ backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 24, paddingBottom: 40 + insets.bottom }}>
                   <View style={{ width: 40, height: 4, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignSelf: 'center', borderRadius: 2, marginBottom: 20 }} />
 
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"RÈGLEMENT FACTURE"</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>RÈGLEMENT FACTURE</Text>
                         <Text style={{ color: brandColor, fontWeight: '900', fontSize: 18 }}>{activeInvoice?.amount.toLocaleString()} FC</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowPaymentModal(false)}><MaterialIcons name='close' size={28} color={isDark ? '#FFF' : '#0A0A0A'} /></TouchableOpacity>
@@ -1177,7 +1203,7 @@ export default function CashierScreen({ navigation, route }) {
 
                         {insuranceError && (
                            <TouchableOpacity onPress={switchToPrivate} style={{ marginTop: 20, paddingVertical: 12, backgroundColor: '#EF444415', borderRadius: 12, alignItems: 'center', borderWidth: 1, borderColor: '#EF444430' }}>
-                              <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 11 }}>{"PASSER EN MODE PRIVÉ (CASH)"</Text>
+                              <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 11 }}>PASSER EN MODE PRIVÉ (CASH)</Text>
                            </TouchableOpacity>
                         )}
                      </FadeInView>
@@ -1187,7 +1213,7 @@ export default function CashierScreen({ navigation, route }) {
                            <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', letterSpacing: 1.5 }}>MODE DE PAIEMENT :</Text>
                            {activeInvoice?.patient?.is_insured && (
                               <TouchableOpacity onPress={() => { setPaymentMethod('insurance'); setIsInsuranceVerified(false); setInsuranceError(null); }}>
-                                 <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10 }}>{"RETOURNER À L'ASSURANCE"</Text>
+                                 <Text style={{ color: brandColor, fontWeight: '900', fontSize: 10 }}>RETOURNER À L'ASSURANCE</Text>
                               </TouchableOpacity>
                            )}
                         </View>
@@ -1202,7 +1228,7 @@ export default function CashierScreen({ navigation, route }) {
                                     <MaterialCommunityIcons name={m.icon} size={32} color={paymentMethod === m.id ? m.color : (isDark ? '#555555' : '#94A3B8')} />
                                  ) : (
                                     <View style={{ width: 54, height: 36, marginBottom: 4, borderRadius: 8, backgroundColor: '#FFF', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 }}>
-                                       <Image source={m.logo} style={{ width: '100%', height: '100%' }} resizeMode="" />
+                                       <Image source={m.logo} style={{ width: '100%', height: '100%' }} resizeMode="contain" />
                                     </View>
                                  )}
                                  <Text style={{ fontSize: 9, fontWeight: '900', color: paymentMethod === m.id ? m.color : (isDark ? '#555555' : '#94A3B8'), marginTop: 6 }}>{m.label}</Text>
@@ -1214,17 +1240,26 @@ export default function CashierScreen({ navigation, route }) {
 
                   {paymentMethod !== 'cash' && paymentMethod !== 'insurance' && (
                      <FadeInView style={{ marginBottom: 24 }}>
+                        <View style={{ padding: 16, borderRadius: 20, backgroundColor: brandColor + '10', borderWidth: 1, borderColor: brandColor + '25', marginBottom: 12 }}>
+                           <Text style={{ color: brandColor, fontWeight: '900', fontSize: 11 }}>MONTANT À DÉBITER</Text>
+                           <Text style={{ color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '900', fontSize: 22, marginTop: 4 }}>
+                              {Number(activeInvoice?.amount || 0).toLocaleString()} {currencyLabel(invoiceCurrency(activeInvoice))}
+                           </Text>
+                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '700', fontSize: 10, marginTop: 4 }}>
+                              Compte marchand {invoiceCurrency(activeInvoice) === 'USD' ? 'USD' : 'CDF'} sélectionné automatiquement.
+                           </Text>
+                        </View>
                         <TextInput
                            style={{ height: 64, borderRadius: 24, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', paddingHorizontal: 24, fontSize: 20, fontWeight: '900', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}
-                           placeholder={"Entrez le numéro mobile...'
-                           keyboardType=""
+                           placeholder="Entrez le numéro mobile..."
+                           keyboardType="numeric"
                            value={paymentPhone}
                            onChangeText={setPaymentPhone}
                         />
                         
                         {(paymentPhone || '').length >= 2 && (
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: -10, marginBottom: 10, marginLeft: 5 }}>
-                            {detectOperator(paymentPhone).valid ? (
+                           {detectOperator(paymentPhone).valid ? (
                               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: operatorColor(detectOperator(paymentPhone).operator) + '15', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
                                 <MaterialCommunityIcons name="check-circle" size={10} color={operatorColor(detectOperator(paymentPhone).operator)} />
                                 <Text style={{ fontSize: 9, fontWeight: '800', color: operatorColor(detectOperator(paymentPhone).operator), marginLeft: 4 }}>
@@ -1234,10 +1269,15 @@ export default function CashierScreen({ navigation, route }) {
                             ) : paymentPhone.length >= 9 && (
                               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
                                 <MaterialCommunityIcons name="alert-circle" size={10} color="#EF4444" />
-                                <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>{"NUMÉRO INVALIDE"</Text>
+                                <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>NUMÉRO INVALIDE</Text>
                               </View>
                             )}
                           </View>
+                        )}
+                        {detectOperator(paymentPhone).valid && mobileMethodOperator[paymentMethod] && detectOperator(paymentPhone).key !== mobileMethodOperator[paymentMethod] && (
+                           <Text style={{ color: '#EF4444', fontWeight: '800', fontSize: 11, marginLeft: 5 }}>
+                              Ce numéro est {detectOperator(paymentPhone).operator}; choisissez l'opérateur correspondant.
+                           </Text>
                         )}
                      </FadeInView>
                   )}
@@ -1248,7 +1288,7 @@ export default function CashierScreen({ navigation, route }) {
                      style={{ height: 70, borderRadius: 35, overflow: 'hidden', opacity: (paymentMethod === 'insurance' && insuranceError) ? 0.5 : 1 }}
                   >
                      <LinearGradient colors={insuranceError ? ['#94A3B8', '#64748B'] : Theme.colors.brandGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSimulating || verifyingInsurance ? <ActivityIndicator color="" /> : (
+                        {isMobilePaymentProcessing || verifyingInsurance ? <ActivityIndicator color={brandColor} /> : (
                            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>
                               {paymentMethod === 'insurance'
                                  ? (isInsuranceVerified ? 'VALIDER LA PRISE EN CHARGE' : 'VÉRIFIER LE STATUT CONTRAT')
@@ -1284,13 +1324,13 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ width: '100%', backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderRadius: 40, padding: 30, borderWidth: 1, borderColor: isDark ? '#1A1A1A' : '#E2E8F0', elevation: 20 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
                      <View>
-                        <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"JOURNAL AUTO"</Text>
+                        <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>JOURNAL AUTO</Text>
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>AUTOMATISATION DES CYCLES</Text>
                      </View>
-                     <TouchableOpacity onPress={() => setShowAutoModal(false)}><MaterialIcons name="close" size={28} color={isDark ? '#FFF' : '#0A0A0A'} /></TouchableOpacity>
+                     <TouchableOpacity onPress={() => setShowAutoModal(false)}><MaterialIcons name="close" size={28} color={isDark ? "#FFF" : '#0A0A0A'} /></TouchableOpacity>
                   </View>
 
-                  <Text style={{ fontSize: 13, color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '600', marginBottom: 25, lineHeight: 20 }}>{"Activez l'ouverture et la clôture automatique des journaux selon la durée souhaitée."</Text>
+                  <Text style={{ fontSize: 13, color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '600', marginBottom: 25, lineHeight: 20 }}>Activez l'ouverture et la clôture automatique des journaux selon la durée souhaitée.</Text>
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 30, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', padding: 20, borderRadius: 24 }}>
                      <Text style={{ fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{autoJournalEnabled ? 'ACTIVÉ' : 'DÉSACTIVÉ'}</Text>
@@ -1319,7 +1359,7 @@ export default function CashierScreen({ navigation, route }) {
 
                   <TouchableOpacity onPress={handleSaveAutoSettings} disabled={isSubmitting} style={{ height: 60, borderRadius: 30, overflow: 'hidden', elevation: 4 }}>
                      <LinearGradient colors={Theme.colors.brandGradient} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: '#FFF', fontWeight: '900', letterSpacing: 1 }}>{"ENREGISTRER"</Text>}
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ color: "#FFF", fontWeight: '900', letterSpacing: 1 }}>ENREGISTRER</Text>}
                      </LinearGradient>
                   </TouchableOpacity>
                </View>
@@ -1327,16 +1367,16 @@ export default function CashierScreen({ navigation, route }) {
          </Modal>
 
          {/* JOURNAL DETAILS MODAL */}
-         <Modal visible={showJournalDetails} animationType="" transparent>
+         <Modal visible={showJournalDetails} animationType="fade" transparent>
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'flex-end' }}>
                <View style={{ height: height * 0.9, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
                   <View style={{ padding: 24, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderBottomWidth: 1, borderBottomColor: isDark ? '#2E2E2E' : '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"DÉTAILS JOURNAL"</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DÉTAILS JOURNAL</Text>
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedJournal?.reference || 'CHARGEMENT...'}</Text>
                      </View>
                      <TouchableOpacity onPress={() => setShowJournalDetails(false)} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialIcons name="help-circle" size={24} color={brandColor} />
+                        <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 
@@ -1344,7 +1384,7 @@ export default function CashierScreen({ navigation, route }) {
                      {journalLoading ? (
                         <View style={{ marginTop: 100, alignItems: 'center' }}>
                            <ActivityIndicator size="large" color={brandColor} />
-                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{"RÉCUPÉRATION DES OPÉRATIONS..."</Text>
+                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>RÉCUPÉRATION DES OPÉRATIONS...</Text>
                         </View>
                      ) : selectedJournal && (
                         <FadeInView>
@@ -1355,7 +1395,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{Number(selectedJournal.closing_amount).toLocaleString()} FC</Text>
                               </View>
                               <View style={{ flex: 1, backgroundColor: '#22C55E10', padding: 20, borderRadius: 24, borderWidth: 1, borderColor: '#22C55E20' }}>
-                                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', marginBottom: 8 }}>{"ACTES TOTAL"</Text>
+                                 <Text style={{ fontSize: 9, fontWeight: '900', color: '#22C55E', marginBottom: 8 }}>ACTES TOTAL</Text>
                                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{selectedJournal.invoices_count}</Text>
                               </View>
                            </View>
@@ -1366,7 +1406,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{new Date(selectedJournal.opened_at).toLocaleString()}</Text>
                               </View>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
-                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>{"CLÔTURÉ LE"</Text>
+                                 <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8' }}>CLÔTURÉ LE</Text>
                                  <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{selectedJournal.closed_at ? new Date(selectedJournal.closed_at).toLocaleString() : 'EN COURS'}</Text>
                               </View>
                               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -1375,7 +1415,7 @@ export default function CashierScreen({ navigation, route }) {
                               </View>
                            </View>
 
-                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1.5 }}>{"LISTE DES OPÉRATIONS"</Text>
+                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#888888' : '#94A3B8', marginBottom: 20, letterSpacing: 1.5 }}>LISTE DES OPÉRATIONS</Text>
                            {selectedJournal.invoices?.length === 0 ? (
                               <Text style={{ textAlign: 'center', color: '#64748B', marginTop: 20 }}>Aucune opération trouvée.</Text>
                            ) : selectedJournal.invoices.map((inv, idx) => (
@@ -1401,11 +1441,11 @@ export default function CashierScreen({ navigation, route }) {
                <View style={{ height: height * 0.9, backgroundColor: isDark ? '#0A0A0A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
                   <View style={{ padding: 24, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderBottomWidth: 1, borderBottomColor: isDark ? '#2E2E2E' : '#E2E8F0', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                      <View>
-                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{"RELEVÉ MENSUEL"</Text>
+                        <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>RELEVÉ MENSUEL</Text>
                         <Text style={{ fontSize: 12, color: brandColor, fontWeight: '800' }}>{selectedInsurance?.name}</Text>
                      </View>
                      <TouchableOpacity onPress={() => { setSelectedInsurance(null); setInsuranceReport(null); }} style={{ width: 44, height: 44, borderRadius: 15, backgroundColor: isDark ? '#2E2E2E' : '#F1F5F9', alignItems: 'center', justifyContent: 'center' }}>
-                        <MaterialIcons name="help-circle" size={24} color={brandColor} />
+                        <MaterialCommunityIcons name="help-circle" size={24} color={brandColor} />
                      </TouchableOpacity>
                   </View>
 
@@ -1413,7 +1453,7 @@ export default function CashierScreen({ navigation, route }) {
                      {reportLoading ? (
                         <View style={{ marginTop: 100, alignItems: 'center' }}>
                            <ActivityIndicator size="large" color={brandColor} />
-                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>{"GÉNÉRATION DU RAPPORT..."</Text>
+                           <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', fontWeight: '900', marginTop: 20, fontSize: 12 }}>GÉNÉRATION DU RAPPORT...</Text>
                         </View>
                      ) : insuranceReport && (
                         <FadeInView>
@@ -1424,7 +1464,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.total_amount.toLocaleString()} FC</Text>
                               </View>
                               <View style={{ flex: 1, backgroundColor: '#22C55E', padding: 20, borderRadius: 24 }}>
-                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>{"RÉGLÉ"</Text>
+                                 <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 9, fontWeight: '900' }}>RÉGLÉ</Text>
                                  <Text style={{ color: '#FFF', fontSize: 18, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.settled_amount.toLocaleString()} FC</Text>
                               </View>
                            </View>
@@ -1435,7 +1475,7 @@ export default function CashierScreen({ navigation, route }) {
                                  <Text style={{ color: '#FFF', fontSize: 24, fontWeight: '900', marginTop: 4 }}>{insuranceReport.summary.pending_amount.toLocaleString()} FC</Text>
                               </View>
                               <TouchableOpacity onPress={() => setShowSettleModal(true)} style={{ backgroundColor: '#FFF', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
-                                 <Text style={{ color: '#F9AB00', fontWeight: '900', fontSize: 11 }}>{"RÉGLER"</Text>
+                                 <Text style={{ color: '#F9AB00', fontWeight: '900', fontSize: 11 }}>RÉGLER</Text>
                               </TouchableOpacity>
                            </View>
 
@@ -1455,8 +1495,12 @@ export default function CashierScreen({ navigation, route }) {
                               </View>
                            ))}
 
-                           <TouchableOpacity style={{ marginTop: 20, height: 60, borderRadius: 20, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: brandColor + '20' }}>
-                              <Text style={{ color: brandColor, fontWeight: '900' }}>{"ENVOYER LE RELEVÉ PAR EMAIL"</Text>
+                           <TouchableOpacity
+                              onPress={handleSendInsuranceReport}
+                              disabled={isSubmitting}
+                              style={{ marginTop: 20, height: 60, borderRadius: 20, backgroundColor: brandColor + '10', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: brandColor + '20', opacity: isSubmitting ? 0.6 : 1 }}
+                           >
+                              <Text style={{ color: brandColor, fontWeight: '900' }}>{isSubmitting ? 'ENVOI EN COURS...' : 'ENVOYER LE RELEVÉ PAR EMAIL'}</Text>
                            </TouchableOpacity>
                         </FadeInView>
                      )}
@@ -1466,20 +1510,20 @@ export default function CashierScreen({ navigation, route }) {
          </Modal>
 
          {/* SETTLE MODAL */}
-         <Modal visible={showSettleModal} transparent animationType="">
+         <Modal visible={showSettleModal} transparent animationType="fade">
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
                <View style={{ width: '100%', backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderRadius: 32, padding: 24 }}>
-                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12 }}>{"VALIDER RÈGLEMENT"</Text>
+                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 12 }}>VALIDER RÈGLEMENT</Text>
                   <Text style={{ color: isDark ? '#AAAAAA' : '#64748B', marginBottom: 20 }}>Veuillez entrer la référence du paiement (Bordereau ou Chèque).</Text>
                   <TextInput
                      style={{ height: 60, backgroundColor: isDark ? '#1A1A1A' : '#F1F5F9', borderRadius: 16, paddingHorizontal: 20, color: isDark ? '#FFF' : '#0A0A0A', fontWeight: '900', marginBottom: 20 }}
-                     placeholder={"Référence paiement..." placeholderTextColor=""
+                     placeholder="Référence paiement..." placeholderTextColor={C.placeholder}
                      value={paymentRef}
                      onChangeText={setPaymentRef}
                   />
                   <View style={{ flexDirection: 'row', gap: 12 }}>
                      <TouchableOpacity onPress={() => setShowSettleModal(false)} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
-                        <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B' }}>{"ANNULER"</Text>
+                        <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B' }}>ANNULER</Text>
                      </TouchableOpacity>
                      <TouchableOpacity onPress={handleSettleInvoices} disabled={isSubmitting} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: brandColor, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontWeight: '900', color: '#FFF' }}>VALIDER</Text>

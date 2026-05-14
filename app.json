@@ -33,15 +33,22 @@
         {}
       ],
       [
+        "expo-notifications",
+        {
+          "color": "#0B5CAD",
+          "defaultChannel": "default"
+        }
+      ],
+      [
         "./plugins/withNdkVersion.js",
         "26.1.10909125"
       ]
     ],
+    "owner": "kibundulu",
     "extra": {
       "eas": {
-        "projectId": "5bb3b737-f28d-4602-acad-3de60369af1a"
+        "projectId": "1655af98-1be9-4ca5-aef2-103f035ae8bb"
       }
-    },
-    "owner": "mpolo"
+    }
   }
 }

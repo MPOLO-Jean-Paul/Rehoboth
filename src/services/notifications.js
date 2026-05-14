@@ -4,6 +4,7 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 import api from './api';
 
 let Notifications = null;
+const EAS_PROJECT_ID = Constants?.expoConfig?.extra?.eas?.projectId || Constants?.easConfig?.projectId;
 
 // expo-notifications works in Expo Go since SDK 53 on both iOS and Android
 try {
@@ -79,7 +80,7 @@ export async function registerForPushNotificationsAsync() {
 
       try {
         token = (await Notifications.getExpoPushTokenAsync({
-          projectId: '5bb3b737-f28d-4602-acad-3de60369af1a',
+          projectId: EAS_PROJECT_ID,
         })).data;
         console.log('[Rehoboth] Push Token enregistré:', token);
       } catch (firebaseError) {

@@ -33,7 +33,7 @@ export default function DoctorNavPanel({ isOpen, anim, onClose, activeView, setA
              <MaterialCommunityIcons name="stethoscope" size={24} color="#FFF" />
           </LinearGradient>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.title, { color: C.text }]}>{"CABINET MÉDICAL"</Text>
+            <Text style={[styles.title, { color: C.text }]}>CABINET MÉDICAL</Text>
             <Text style={{ color: brandColor, fontSize: 10, fontWeight: '800', marginTop: 2 }}>MODULE MÉDECIN</Text>
           </View>
           <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: C.closeBg }]}>

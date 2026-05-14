@@ -267,8 +267,8 @@ export default function ReceptionScreen({ navigation, route }) {
    };
 
    const handleAddCatalogItem = async () => {
-      if (!newCatalogItem.label || !newCatalogItem.price) return showToast("Veuillez remplir tous les champs", 'error');
-      if (newCatalogItem.type === 'Autre' && !newCatalogItem.service) return showToast("Veuillez renseigner le service concerné", 'error');
+      if (!newCatalogItem.label || !newCatalogItem.price) return showToast("Veuillez remplir tous les champs", "error");
+      if (newCatalogItem.type === 'Autre' && !newCatalogItem.service) return showToast("Veuillez renseigner le service concerné", "error");
       
       setIsSubmitting(true);
       try {
@@ -277,7 +277,7 @@ export default function ReceptionScreen({ navigation, route }) {
             type: newCatalogItem.type === 'Autre' ? newCatalogItem.service : 'Examen'
          };
          await api.post('/reception/catalog/add', payload);
-         showToast("Ajouté avec succès au catalogue. L'administrateur pourra le modifier.", 'success');
+         showToast("Ajouté avec succès au catalogue. L'administrateur pourra le modifier.", "success");
          setNewCatalogItem({ type: 'Examen', label: '', price: '', service: '' });
       } catch (e) {
          showToast(parseError(e), 'error');
@@ -288,7 +288,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
    const checkInsurance = async () => {
       if (!form.insurance_id || !form.insurance_code) {
-         return showToast("Sélectionnez une assurance et entrez un code", 'error');
+         return showToast("Sélectionnez une assurance et entrez un code", "error");
       }
 
       setIsVerifying(true);
@@ -317,7 +317,7 @@ export default function ReceptionScreen({ navigation, route }) {
    const handleCreate = async () => {
       if (!form.first_name || !form.last_name) return showToast(t.error, 'error');
       if (form.contact_info && !isValidPhone(form.contact_info)) {
-         return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom, Africell requis)", 'error');
+         return showToast("Numéro de téléphone invalide (Orange, Airtel, Vodacom, Africell requis)", "error");
       }
       setIsSubmitting(true);
       try {
@@ -327,9 +327,9 @@ export default function ReceptionScreen({ navigation, route }) {
 
          Alert.alert(
             t.success,
-            "Voulez-vous imprimer la fiche d'accueil ?",
+            "Voulez-vous imprimer la fiche d'accueil ? ",
             [
-               { text: t.cancel, style: 'cancel' },
+               { text: t.cancel, style: "cancel" },
                { text: "IMPRIMER", onPress: () => printPatientSheet(createdPatient) }
             ]
          );
@@ -345,7 +345,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
    const printPatientSheet = async (patient) => {
       const escapeHtml = (value = '') =>
-         String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+         String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", "&#39;");
 
       const htmlContent = `
       <html>
@@ -370,7 +370,7 @@ export default function ReceptionScreen({ navigation, route }) {
             <div class="logo-text">REHOBOTH</div>
             <div style="text-align: right;">
               <div style="font-size: 14px; font-weight: bold;">FICHE D'ACCUEIL</div>
-              <div style="font-size: 12px; color: #666;">Date: ${new Date().toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US')}</div>
+              <div style="font-size: 12px; color: #666;">Date: ${new Date().toLocaleDateString(lang === "fr" ? 'fr-FR' : 'en-US')}</div>
             </div>
           </div>
           <div class="title">FICHE D'ENREGISTREMENT PATIENT</div>
@@ -390,7 +390,7 @@ export default function ReceptionScreen({ navigation, route }) {
            </div>
           <div class="section">
              <div class="label">Type de Prise en Charge</div>
-             <div class="badge ${patient.is_insured ? 'insured' : 'private'}">
+             <div class="badge ${patient.is_insured ? "insured" : 'private'}">
                  ${patient.is_insured ? "ASSURÉ (" + escapeHtml(patient.insurance_company || "NON SPÉCIFIÉ") + ")" : "PATIENT PRIVÉ"}
               </div>
            </div>
@@ -497,7 +497,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, padding: 10, backgroundColor: brandColor + '10', borderRadius: 12, alignSelf: 'flex-start' }}
                                  >
                                     <MaterialIcons name="arrow-back" size={18} color={brandColor} />
-                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{"RETOUR AUX DOSSIERS"</Text>
+                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX DOSSIERS</Text>
                                  </TouchableOpacity>
 
                                  {groupedByDate[selectedDateFolder]?.filter(p => `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase())).map((p, i) => (
@@ -509,7 +509,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <View style={{ flex: 1, marginLeft: 16 }}>
                                              <Text style={{ fontSize: 16, fontWeight: '800', color: C.text }}>{p.first_name} {p.last_name}</Text>
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                                                <MaterialIcons name="help-circle" size={12} color={brandColor} />
+                                                <MaterialCommunityIcons name="help-circle" size={12} color={brandColor} />
                                                 <Text style={{ color: C.sub, fontSize: 11, marginLeft: 4 }}>{new Date(p.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                                              </View>
                                           </View>
@@ -577,7 +577,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     <View style={{ height: 50, backgroundColor: C.bg, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, borderWidth: 1, borderColor: brandColor }}>
                                        <MaterialIcons name="search" size={18} color={brandColor} />
                                        <TextInput
-                                          placeholder={"Taper nom, postnom ou prénom..." placeholderTextColor={C.placeholder}
+                                          placeholder="Taper nom, postnom ou prénom..." placeholderTextColor={C.placeholder}
                                           style={{ flex: 1, marginLeft: 10, color: C.text, fontWeight: '700' }}
                                           value={searchDossierQuery}
                                           onChangeText={setSearchDossierQuery}
@@ -610,7 +610,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                                          });
                                                          setIsSearchDossierOpen(false);
                                                          setSearchDossierQuery('');
-                                                         showToast("", 'success');
+                                                         showToast("", "success");
                                                       }}
                                                       style={{ padding: 12, borderBottomWidth: 1, borderBottomColor: C.divider, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
                                                    >
@@ -619,7 +619,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                                          <Text style={{ fontSize: 9, color: brandColor, fontWeight: '900' }}>{p.age} ANS • Né(e) en {p.birth_year}</Text>
                                                       </View>
                                                       <View style={{ backgroundColor: brandColor + '15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10 }}>
-                                                         <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{"SÉLECTIONNER"</Text>
+                                                         <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>SÉLECTIONNER</Text>
                                                       </View>
                                                    </TouchableOpacity>
                                                 ))
@@ -633,28 +633,28 @@ export default function ReceptionScreen({ navigation, route }) {
                               {form.id && (
                                  <FadeInView style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#22C55E15', padding: 16, borderRadius: 24, marginBottom: 25, borderWidth: 1, borderColor: '#22C55E30' }}>
                                     <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: '#22C55E', alignItems: 'center', justifyContent: 'center' }}>
-                                       <MaterialIcons name="help-circle" size={24} color="#FFF" />
+                                       <MaterialCommunityIcons name="help-circle" size={24} color="#FFF" />
                                     </View>
                                     <View style={{ flex: 1, marginLeft: 16 }}>
-                                       <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>{"DOSSIER CHARGÉ"</Text>
+                                       <Text style={{ color: '#22C55E', fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>DOSSIER CHARGÉ</Text>
                                        <Text style={{ color: C.text, fontSize: 15, fontWeight: '800' }}>{form.first_name} {form.last_name}</Text>
                                     </View>
                                     <TouchableOpacity onPress={() => setForm({ ...form, id: null, complaints: '' })} style={{ padding: 8 }}>
-                                       <MaterialIcons name="help-circle" size={20} color="#EF4444" />
+                                       <MaterialCommunityIcons name="help-circle" size={20} color="#EF4444" />
                                     </TouchableOpacity>
                                  </FadeInView>
                               )}
 
                               <Text style={styles.label}>{t.lastName.toUpperCase()}</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={"Ex: Mukendi" placeholderTextColor={C.placeholder} value={form.last_name} onChangeText={v => setForm({ ...form, last_name: v })} />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Mukendi" placeholderTextColor={C.placeholder} value={form.last_name} onChangeText={v => setForm({ ...form, last_name: v })} />
 
                               <Text style={styles.label}>POSTNOM</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={"Ex: Kalonji" placeholderTextColor={C.placeholder} value={form.post_name} onChangeText={v => setForm({ ...form, post_name: v })} />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Kalonji" placeholderTextColor={C.placeholder} value={form.post_name} onChangeText={v => setForm({ ...form, post_name: v })} />
 
                               <Text style={styles.label}>{t.firstName.toUpperCase()}</Text>
                               <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Jean" placeholderTextColor={C.placeholder} value={form.first_name} onChangeText={v => setForm({ ...form, first_name: v })} />
 
-                              <Text style={styles.label}>{"SEXE"</Text>
+                              <Text style={styles.label}>SEXE</Text>
                               <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
                                  {['M', 'F'].map(g => (
                                     <TouchableOpacity
@@ -684,16 +684,16 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor }}>{new Date().getFullYear() - parseInt(form.birth_year)} ANS</Text>
                                        )}
                                     </View>
-                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={"1990' keyboardType="" value={form.birth_year} onChangeText={v => setForm({ ...form, birth_year: v })} />
+                                    <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="1990" keyboardType="numeric" value={form.birth_year} onChangeText={v => setForm({ ...form, birth_year: v })} />
                                  </View>
                                  <View style={{ flex: 1 }}>
-                                    <Text style={styles.label}>{"PATHOLOGIE (SI CONNUE)"</Text>
+                                    <Text style={styles.label}>PATHOLOGIE (SI CONNUE)</Text>
                                     <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: Diabète" value={form.pathology} onChangeText={v => setForm({ ...form, pathology: v })} />
                                  </View>
                               </View>
 
                               <Text style={styles.label}>{t.phone.toUpperCase()}</Text>
-                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder={"Ex: +243..." placeholderTextColor={C.placeholder} value={form.contact_info} onChangeText={v => setForm({ ...form, contact_info: v })} keyboardType="" />
+                              <TextInput style={[styles.input, { color: C.text, backgroundColor: C.bg, borderColor: C.border }]} placeholder="Ex: +243..." placeholderTextColor={C.placeholder} value={form.contact_info} onChangeText={v => setForm({ ...form, contact_info: v })} keyboardType="phone-pad" />
                               
                               {(form.contact_info || '').length >= 2 && (
                                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: -12, marginBottom: 15, marginLeft: 5 }}>
@@ -707,7 +707,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                   ) : form.contact_info.length >= 9 && (
                                     <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#EF444415', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 }}>
                                       <MaterialCommunityIcons name="alert-circle" size={10} color="#EF4444" />
-                                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>{"NUMÉRO INVALIDE"</Text>
+                                      <Text style={{ fontSize: 9, fontWeight: '800', color: '#EF4444', marginLeft: 4 }}>NUMÉRO INVALIDE</Text>
                                     </View>
                                   )}
                                 </View>
@@ -728,29 +728,34 @@ export default function ReceptionScreen({ navigation, route }) {
                                  <FadeInView>
                                     <Text style={styles.label}>{t.insuranceCompany.toUpperCase()}</Text>
                                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-                                       {(insurances || []).map(ins => (
+                                       {(insurances || []).map(ins => {
+                                          const expired = ins.status === 'expired' || ins.is_expired || (ins.contract_end_date && new Date(ins.contract_end_date) < new Date());
+                                          return (
                                           <TouchableOpacity
                                              key={ins.id}
+                                             disabled={expired}
                                              onPress={() => setForm({ ...form, insurance_id: ins.id })}
                                              style={{
                                                 paddingHorizontal: 16,
                                                 paddingVertical: 10,
                                                 borderRadius: 12,
                                                 borderWidth: 2,
-                                                borderColor: form.insurance_id === ins.id ? brandColor : C.divider,
-                                                backgroundColor: form.insurance_id === ins.id ? brandColor + '10' : 'transparent'
+                                                borderColor: expired ? '#EF4444' : (form.insurance_id === ins.id ? brandColor : C.divider),
+                                                backgroundColor: form.insurance_id === ins.id ? brandColor + '10' : 'transparent',
+                                                opacity: expired ? 0.45 : 1
                                              }}
                                           >
                                              <Text style={{ color: form.insurance_id === ins.id ? brandColor : C.sub, fontWeight: '700', fontSize: 12 }}>{ins.name}</Text>
+                                             {expired ? <Text style={{ color: '#EF4444', fontSize: 8, fontWeight: '900' }}>CONTRAT EXPIRÉ</Text> : null}
                                           </TouchableOpacity>
-                                       ))}
+                                       );})}
                                     </View>
 
                                     <Text style={styles.label}>CODE D'ASSURÉ</Text>
                                     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                                        <TextInput
                                           style={[styles.input, { flex: 1, color: C.text, backgroundColor: C.bg, borderColor: C.border, marginBottom: 0 }]}
-                                          placeholder={"Ex: MERY-123" placeholderTextColor={C.placeholder}
+                                          placeholder="Ex: MERY-123" placeholderTextColor={C.placeholder}
                                           value={form.insurance_code}
                                           onChangeText={v => { setForm({ ...form, insurance_code: v }); setVerifiedMember(null); }}
                                        />
@@ -759,7 +764,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           disabled={isVerifying}
                                           style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: brandColor, alignItems: 'center', justifyContent: 'center', elevation: 2 }}
                                        >
-                                          {isVerifying ? <ActivityIndicator color="" size="small" /> : <MaterialIcons name="fact-check" size={24} color="#FFF" />}
+                                          {isVerifying ? <ActivityIndicator color={brandColor} size="small" /> : <MaterialIcons name="fact-check" size={24} color="#FFF" />}
                                        </TouchableOpacity>
                                     </View>
 
@@ -789,7 +794,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                      {activeView === 'patients_all' && (
                         <FadeInView>
-                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>{"ARCHIVE PAR ANNÉE"</Text>
+                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>ARCHIVE PAR ANNÉE</Text>
 
                            {selectedYearFolder ? (
                               <View>
@@ -797,8 +802,8 @@ export default function ReceptionScreen({ navigation, route }) {
                                     onPress={() => setSelectedYearFolder(null)}
                                     style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 15, padding: 10, backgroundColor: brandColor + '10', borderRadius: 12, alignSelf: 'flex-start' }}
                                  >
-                                    <MaterialIcons name="help-circle" size={18} color={brandColor} />
-                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>{"RETOUR AUX ARCHIVES"</Text>
+                                    <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
+                                    <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX ARCHIVES</Text>
                                  </TouchableOpacity>
 
                                  <Text style={{ fontSize: 14, fontWeight: '900', color: brandColor, marginBottom: 15 }}>LISTE DES PATIENTS NÉS EN {selectedYearFolder}</Text>
@@ -809,7 +814,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                           <View style={{ flex: 1 }}>
                                              <Text style={{ fontSize: 17, fontWeight: '900', color: C.text }}>{p.first_name} {p.last_name}</Text>
                                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                                                <MaterialIcons name="help-circle" size={12} color={C.sub} />
+                                                <MaterialCommunityIcons name="help-circle" size={12} color={C.sub} />
                                                 <Text style={{ fontSize: 12, color: C.sub, marginLeft: 4 }}>{p.age} ANS ({p.birth_year || 'N/A'})</Text>
                                                 {p.pathology && (
                                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 12 }}>
@@ -848,7 +853,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                      {activeView === 'insurances_all' && (
                         <FadeInView>
-                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>{"ANALYSE RENTABILITÉ ASSURANCES"</Text>
+                           <Text style={{ fontSize: 20, fontWeight: '900', color: C.text, marginBottom: 20 }}>ANALYSE RENTABILITÉ ASSURANCES</Text>
                            {(insurances || []).map(ins => {
                               const patientCount = ins.patients_count || 0;
                               const consumption = ins.real_consumption || 0;
@@ -870,7 +875,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 }}>
                                        <View>
-                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>{"FORFAIT MENSUEL"</Text>
+                                          <Text style={{ fontSize: 9, fontWeight: '900', color: C.sub }}>FORFAIT MENSUEL</Text>
                                           <Text style={{ fontSize: 15, fontWeight: '900', color: C.text }}>{flatFee.toLocaleString()} FC</Text>
                                        </View>
                                        <View style={{ alignItems: 'flex-end' }}>
@@ -894,8 +899,8 @@ export default function ReceptionScreen({ navigation, route }) {
                      {activeView === 'bilan_day' && (
                         <FadeInView>
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>{"BILAN D'ACTIVITÉ"</Text>
-                              <TouchableOpacity onPress={() => fetchServiceRevenues(false, bilanPeriod)}><MaterialIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
+                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>BILAN D'ACTIVITÉ</Text>
+                              <TouchableOpacity onPress={() => fetchServiceRevenues(false, bilanPeriod)}><MaterialCommunityIcons name="help-circle" size={24} color={brandColor} /></TouchableOpacity>
                            </View>
 
                            <View style={{ flexDirection: 'row', backgroundColor: C.surface, borderRadius: 20, padding: 5, marginBottom: 20, borderWidth: 1, borderColor: C.divider, elevation: 2 }}>
@@ -929,7 +934,7 @@ export default function ReceptionScreen({ navigation, route }) {
                            </View>
 
                            <View style={{ backgroundColor: C.surface, borderRadius: 32, padding: 24, borderWidth: 1, borderColor: C.divider, marginBottom: 25 }}>
-                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>{"DÉTAILS DES RECETTES PAR SERVICE"</Text>
+                              <Text style={{ fontSize: 12, fontWeight: '900', color: brandColor, letterSpacing: 1.5, marginBottom: 20 }}>DÉTAILS DES RECETTES PAR SERVICE</Text>
 
                               {serviceRevenues.length > 0 ? serviceRevenues.map((item, i) => {
                                  const icons = {
@@ -960,7 +965,7 @@ export default function ReceptionScreen({ navigation, route }) {
                               }) : (
                                  <View style={{ alignItems: 'center', padding: 20 }}>
                                     <MaterialCommunityIcons name="help-circle" size={40} color={C.divider} />
-                                    <Text style={{ color: C.sub, fontSize: 12, marginTop: 10, fontWeight: '700' }}>{"Aucune recette aujourd'hui"</Text>
+                                    <Text style={{ color: C.sub, fontSize: 12, marginTop: 10, fontWeight: '700' }}>Aucune recette aujourd'hui</Text>
                                  </View>
                               )}
                            </View>
@@ -970,7 +975,7 @@ export default function ReceptionScreen({ navigation, route }) {
 
                               {[
                                  { label: "Assurés (Contrats)", count: insuredCount, color: brandColor },
-                                 { label: "Privés (Cash)", count: privateCount, color: '#22C55E' }
+                                 { label: "Privés (Cash)", count: privateCount, color: "#22C55E" }
                               ].map((item, i) => (
                                  <View key={i} style={{ marginBottom: 16 }}>
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -989,12 +994,12 @@ export default function ReceptionScreen({ navigation, route }) {
                      {activeView === 'catalog' && (
                         <FadeInView>
                            <View style={{ marginBottom: 25 }}>
-                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>{"NOUVEAU SERVICE / EXAMEN"</Text>
+                              <Text style={{ fontSize: 20, fontWeight: '900', color: C.text }}>NOUVEAU SERVICE / EXAMEN</Text>
                               <Text style={{ color: C.sub, marginTop: 4 }}>Ajoutez un nouvel élément au catalogue. L'administrateur pourra le modifier.</Text>
                            </View>
 
                            <View style={{ backgroundColor: C.surface, borderRadius: 28, padding: 24, borderWidth: 1, borderColor: C.divider, elevation: 4 }}>
-                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{"TYPE DE SERVICE"</Text>
+                              <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>TYPE DE SERVICE</Text>
                               <View style={{ flexDirection: 'row', gap: 12, marginBottom: 20 }}>
                                  {['Examen', 'Autre'].map(type => (
                                     <TouchableOpacity
@@ -1021,7 +1026,7 @@ export default function ReceptionScreen({ navigation, route }) {
                               <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>LIBELLÉ DU SERVICE / EXAMEN</Text>
                               <TextInput
                                  style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
-                                 placeholder={"Ex: Échographie, Test Goutte Epaisse..." placeholderTextColor={C.placeholder}
+                                 placeholder="Ex: Échographie, Test Goutte Epaisse..." placeholderTextColor={C.placeholder}
                                  value={newCatalogItem.label}
                                  onChangeText={v => setNewCatalogItem({ ...newCatalogItem, label: v })}
                               />
@@ -1029,15 +1034,14 @@ export default function ReceptionScreen({ navigation, route }) {
                               <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>PRIX (FC)</Text>
                               <TextInput
                                  style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
-                                 placeholder={"Ex: 5000" placeholderTextColor={C.placeholder}
-                                 keyboardType=""
-                                 value={newCatalogItem.price}
+                                 placeholder="Ex: 5000" placeholderTextColor={C.placeholder}
+                                 keyboardType="numeric" value={newCatalogItem.price}
                                  onChangeText={v => setNewCatalogItem({ ...newCatalogItem, price: v })}
                               />
 
                               {newCatalogItem.type === 'Autre' && (
                                  <FadeInView>
-                                    <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>{"NOM DU SERVICE CONCERNÉ"</Text>
+                                    <Text style={{ fontSize: 10, fontWeight: '900', letterSpacing: 2, color: '#64748B', marginBottom: 16 }}>NOM DU SERVICE CONCERNÉ</Text>
                                     <TextInput
                                        style={{ height: 54, paddingHorizontal: 16, borderRadius: 16, color: C.text, backgroundColor: C.bg, borderWidth: 1, borderColor: C.border, marginBottom: 20 }}
                                        placeholder="Ex: Soins, Maternité, Chirurgie..."
@@ -1053,7 +1057,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                     {isSubmitting ? <ActivityIndicator color="#FFF" /> : (
                                        <>
                                           <MaterialIcons name="add-circle-outline" size={20} color="#FFF" style={{ marginRight: 10 }} />
-                                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 15, letterSpacing: 1 }}>{"AJOUTER AU CATALOGUE"</Text>
+                                          <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 15, letterSpacing: 1 }}>AJOUTER AU CATALOGUE</Text>
                                        </>
                                     )}
                                  </LinearGradient>
@@ -1075,7 +1079,7 @@ export default function ReceptionScreen({ navigation, route }) {
                <View style={{ padding: 20, borderBottomWidth: 1, borderBottomColor: C.divider, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ fontSize: 16, fontWeight: '900', color: C.text }}>{bt.receptionStatsTitle}</Text>
                   <TouchableOpacity onPress={() => toggleBottomTab('stats')} style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: C.closeBg, alignItems: 'center', justifyContent: 'center' }}>
-                     <MaterialIcons name="help-circle" size={18} color={brandColor} />
+                     <MaterialCommunityIcons name="help-circle" size={18} color={brandColor} />
                   </TouchableOpacity>
                </View>
                <ScrollView style={{ padding: 16 }}>

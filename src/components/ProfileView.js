@@ -139,7 +139,7 @@ export default function ProfileView({ onBack }) {
            </View>
         </View>
 
-        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1.5, marginBottom: 12, marginTop: 10 }}>{"INFORMATIONS DU PROFIL"</Text>
+        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1.5, marginBottom: 12, marginTop: 10 }}>INFORMATIONS DU PROFIL</Text>
         
         <View style={[styles.infoCard, { backgroundColor: C.surface, borderColor: C.divider }]}>
           <InfoRow 
@@ -171,14 +171,14 @@ export default function ProfileView({ onBack }) {
           />
         </View>
 
-        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1.5, marginBottom: 12, marginTop: 10 }}>{"SÉCURITÉ & CONNEXION"</Text>
+        <Text style={{ fontSize: 12, fontWeight: '900', color: C.sub, letterSpacing: 1.5, marginBottom: 12, marginTop: 10 }}>SÉCURITÉ & CONNEXION</Text>
         <View style={[styles.infoCard, { backgroundColor: C.surface, borderColor: C.divider }]}>
           <TouchableOpacity onPress={() => showToast("", "info")} style={styles.infoRow}>
             <View style={[styles.infoIconBox, { backgroundColor: '#F59E0B' + '15' }]}>
               <MaterialCommunityIcons name="lock-outline" size={20} color="#F59E0B" />
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={[styles.infoLabel, { color: C.sub }]}>{"Mot de passe"</Text>
+              <Text style={[styles.infoLabel, { color: C.sub }]}>Mot de passe</Text>
               <Text style={[styles.infoValue, { color: C.text }]}>••••••••</Text>
             </View>
           </TouchableOpacity>

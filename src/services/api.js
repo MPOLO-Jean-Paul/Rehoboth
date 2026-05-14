@@ -49,9 +49,11 @@ const logApiWarning = (label, details) => {
 // Intercepteur pour charger le Token d'authentification
 api.interceptors.request.use(
   async (config) => {
+    const requestUrl = String(config?.url || '');
+
     // ⚠️ CRITICAL: Never send an old token during a login attempt
     // Some backends reject login requests if an invalid Authorization header is present.
-    if (config.url.endsWith('/login')) {
+    if (requestUrl.endsWith('/login')) {
       return config;
     }
 

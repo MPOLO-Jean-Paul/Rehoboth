@@ -111,7 +111,7 @@ export default function PremiumRightPanel({
         {subtitle ? <Text style={{ fontSize: 12, color: sub, marginTop: 1 }}>{subtitle}</Text> : null}
       </View>
       {rightElement || (showChevron && onPress && (
-        <MaterialIcons name="chevron-right" size={20} color={dark ? '#636366' : '#C7C7CC'} />
+        <MaterialIcons name="chevron-right" size={20} color={dark ? "#636366" : '#C7C7CC'} />
       ))}
     </TouchableOpacity>
   );
@@ -156,7 +156,7 @@ export default function PremiumRightPanel({
               </View>
             </TouchableOpacity>
             
-            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>{"Paramètres"</Text>
+            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>Paramètres</Text>
 
             {/* Profile Card */}
             <TouchableOpacity 
@@ -180,7 +180,7 @@ export default function PremiumRightPanel({
                   shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 12
                 }}
               >
-                <MaterialCommunityIcons name={roleIcon} size={28} color="" />
+                <MaterialCommunityIcons name={roleIcon} size={28} color={brandColor} />
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 18, fontWeight: '900', color: txt }}>{accountName}</Text>
@@ -198,7 +198,7 @@ export default function PremiumRightPanel({
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}>
 
             {/* COMPTE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"COMPTE"</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>COMPTE</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
                 icon={<MaterialCommunityIcons name="help-circle" size={18} color="#FFF" />}
@@ -211,7 +211,7 @@ export default function PremiumRightPanel({
             </View>
 
             {/* APPARENCE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"APPARENCE"</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>APPARENCE</Text>
 
             {/* Thème */}
             <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>Thème de l'application</Text>
@@ -239,7 +239,7 @@ export default function PremiumRightPanel({
             </View>
 
             {/* Langue */}
-            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>{"Langue de l'interface"</Text>
+            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>Langue de l'interface</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
               <RadioRow
                 label=""
@@ -256,10 +256,10 @@ export default function PremiumRightPanel({
             </View>
 
             {/* NOTIFICATIONS */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>{"NOTIFICATIONS"</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>NOTIFICATIONS</Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
-                icon={<MaterialIcons name={notificationsEnabled ? 'notifications-active' : 'notifications-off'} size={18} color="" />}
+                icon={<MaterialIcons name={notificationsEnabled ? 'notifications-active' : 'notifications-off'} size={18} color={brandColor} />}
                 iconBg="#34C759"
                 label="Notifications push"
                 subtitle={notificationsEnabled ? 'Alertes activées' : 'Alertes désactivées'}

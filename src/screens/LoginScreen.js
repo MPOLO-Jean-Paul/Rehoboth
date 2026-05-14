@@ -155,7 +155,7 @@ export default function LoginScreen({ navigation }) {
   const handleBiometricLogin = async () => {
     const session = await loadAuthSession();
     if (!session.token || !session.role) {
-      showToast("Veuillez vous connecter normalement une première fois.", 'info');
+      showToast("Veuillez vous connecter normalement une première fois.", "info");
       return;
     }
 
@@ -172,7 +172,7 @@ export default function LoginScreen({ navigation }) {
         email: session.lastUserEmail,
         role: session.role,
       });
-      showToast(t.success || "Connecté", 'success');
+      showToast(t.success || "Connecté", "success");
       navigateToDashboard(session.role);
     }
   };
@@ -242,7 +242,7 @@ export default function LoginScreen({ navigation }) {
       setHasStoredSession(true);
 
       setUser(response.data.user);
-      showToast(t.success || "Connecté", 'success');
+      showToast(t.success || "Connecté", "success");
 
       registerForPushNotificationsAsync()
         .then(pushToken => { if (pushToken) savePushToken(pushToken); })
@@ -271,7 +271,7 @@ export default function LoginScreen({ navigation }) {
         if (__DEV__) {
           console.warn('[Login] Connexion interrompue:', e.message);
         }
-        showToast(t.loginError || "Connexion impossible pour le moment.", 'warning');
+        showToast(t.loginError || "Connexion impossible pour le moment.", "warning");
       }
     } finally {
       setLoading(false);
@@ -307,7 +307,7 @@ export default function LoginScreen({ navigation }) {
               ]}
               onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
             >
-              <MaterialIcons name="arrow-back-ios-new" size={18} color={isDark ? '#FFF' : '#0A0A0A'} />
+              <MaterialIcons name="arrow-back-ios-new" size={18} color={isDark ? "#FFF" : '#0A0A0A'} />
             </TouchableOpacity>
           </Animated.View>
 
@@ -347,7 +347,7 @@ export default function LoginScreen({ navigation }) {
                 {t.loginTitle || 'REHOBOTH'}
               </Text>
               <View style={[tw`px-5 py-1.5 mb-3 border`, { borderRadius: 999, backgroundColor: C.brandLight, borderColor: C.brandMedium }]}>
-                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>{"ESPACE HOSPITALIER SÉCURISÉ"</Text>
+                <Text style={[tw`text-[10px] font-black`, { color: brandColor, letterSpacing: 0 }]}>ESPACE HOSPITALIER SÉCURISÉ</Text>
               </View>
               <Text style={[tw`text-sm text-center leading-5 px-3`, { color: isDark ? '#CBD5E1' : '#475569' }]}>
                 {t.loginSubtitle || 'Accédez à votre espace sécurisé Rehoboth'}
@@ -370,10 +370,10 @@ export default function LoginScreen({ navigation }) {
                     ? { borderColor: brandColor, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : '#FFF' } 
                     : { borderColor: isDark ? 'rgba(148, 163, 184, 0.16)' : C.border, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF' }
                 ]}>
-                  <Feather name="help-circle" size={20} color={emailFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
+                  <Feather name="help-circle" size={20} color={emailFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder={"agent@mdcd.com" placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                    placeholder="agent@mdcd.com" placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize=""
@@ -399,10 +399,10 @@ export default function LoginScreen({ navigation }) {
                     ? { borderColor: brandColor, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : '#FFF' } 
                     : { borderColor: isDark ? 'rgba(148, 163, 184, 0.16)' : C.border, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF' }
                 ]}>
-                  <Feather name="shield" size={20} color={passFocused ? brandColor : (isDark ? '#555555' : '#94A3B8')} style={tw`mr-4`} />
+                  <Feather name="shield" size={20} color={passFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
-                    placeholder={"••••••••" placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                    placeholder="••••••••" placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
                     value={password}
                     onChangeText={setPassword}
                     autoCapitalize=""
@@ -446,7 +446,7 @@ export default function LoginScreen({ navigation }) {
                   {biometricsChecked && isBiometricSupported && hasStoredSession ? (
                     <TouchableOpacity onPress={handleBiometricLogin} style={tw`flex-row items-center`}>
                       <MaterialCommunityIcons name={biometricType === 'face' ? 'face-recognition' : 'fingerprint'} size={18} color={brandColor} style={tw`mr-1`} />
-                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>{"Biométrie"</Text>
+                      <Text style={tw`text-sm font-black text-[${brandColor}]`}>Biométrie</Text>
                     </TouchableOpacity>
                   ) : (
                     <TouchableOpacity onPress={showLoginHelp}>
@@ -480,7 +480,7 @@ export default function LoginScreen({ navigation }) {
                   {loading ? (
                     <View style={tw`flex-row items-center`}>
                       <ActivityIndicator color="#FFF" style={tw`mr-3`} />
-                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>{"AUTHENTIFICATION..."</Text>
+                      <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black`, { letterSpacing: 0 }]}>AUTHENTIFICATION...</Text>
                     </View>
                   ) : (
                     <>
@@ -496,7 +496,7 @@ export default function LoginScreen({ navigation }) {
               
               <FadeInView delay={500}>
                 <View style={tw`items-center mt-1`}>
-                  <Text style={tw`text-xs font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'} mb-3`}>{(typeof t !== 'undefined' && t.dynamic ? t.dynamic : {})["© 2026 REHOBOTH SYSTEM"] || "© 2026 REHOBOTH SYSTEM"}</Text>
+                  <Text style={tw`text-xs font-bold ${isDark ? 'text-gray-500' : 'text-gray-400'} mb-3`}>"© 2026 REHOBOTH SYSTEM"</Text>
                 </View>
               </FadeInView>
 
