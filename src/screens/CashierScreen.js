@@ -72,6 +72,10 @@ export default function CashierScreen({ navigation, route }) {
    const [activeInvoice, setActiveInvoice] = useState(null);
    const [paymentMethod, setPaymentMethod] = useState('cash');
    const [paymentPhone, setPaymentPhone] = useState('');
+   const [paidAmount, setPaidAmount] = useState('');
+   const [expenses, setExpenses] = useState([]);
+   const [expenseForm, setExpenseForm] = useState({ category: 'fourniture', amount: '', description: '', payment_method: 'cash' });
+   const [showExpenseModal, setShowExpenseModal] = useState(false);
    const [isMobilePaymentProcessing, setIsMobilePaymentProcessing] = useState(false);
    const [bottomLoading, setBottomLoading] = useState(false);
    const [isInsuranceVerified, setIsInsuranceVerified] = useState(false);
@@ -107,13 +111,15 @@ export default function CashierScreen({ navigation, route }) {
       fetchHistory();
       fetchAccountingData();
       fetchInsurances();
+      fetchExpenses();
 
       const startInterval = () => {
          return setInterval(() => {
             fetchInvoices(true);
             fetchHistory(true);
-            if (activeView === 'accounting') fetchAccountingData(true);
+            if (activeView === 'recettes') fetchHistory(true);
             if (activeView === 'insurances') fetchInsurances(true);
+            if (activeView === 'expenses') fetchExpenses(true);
          }, 10000);
       };
 
@@ -141,7 +147,7 @@ export default function CashierScreen({ navigation, route }) {
          if (['pending', 'history', 'summary'].includes(requestedTab)) {
             setActiveTab(requestedTab);
             setActiveView('dashboard');
-         } else if (['insurances', 'accounting', 'reports', 'recettes'].includes(requestedTab)) {
+         } else if (['insurances', 'accounting', 'reports', 'recettes', 'expenses'].includes(requestedTab)) {
             setActiveView(requestedTab);
          }
          navigation.setParams({ tab: null });
@@ -151,6 +157,7 @@ export default function CashierScreen({ navigation, route }) {
          const inv = invoices.find(i => String(i.id) === String(route.params.invoiceId));
          if (inv) {
             setActiveInvoice(inv);
+            setPaidAmount(String(inv.amount - (inv.paid_amount || 0)));
             setShowPaymentModal(true);
             setActiveView('dashboard');
             setActiveTab('pending');
@@ -264,6 +271,32 @@ export default function CashierScreen({ navigation, route }) {
       }
    };
 
+   const fetchExpenses = async (isBg = false) => {
+      try {
+         const res = await api.get('/expenses');
+         setExpenses(res.data.data || res.data || []);
+      } catch (e) { console.log('fetch expenses error', e); }
+   };
+
+   const handleCreateExpense = async () => {
+      if (!expenseForm.amount || !expenseForm.description) {
+         return showToast("Le montant et la description sont obligatoires", "error");
+      }
+      setIsSubmitting(true);
+      try {
+         const payload = { ...expenseForm, expense_date: new Date().toISOString().split('T')[0] };
+         await api.post('/expenses', payload);
+         showToast("Dépense enregistrée", "success");
+         setExpenseForm({ category: 'fourniture', amount: '', description: '', payment_method: 'cash' });
+         setShowExpenseModal(false);
+         fetchExpenses();
+      } catch (e) {
+         showToast("Erreur lors de l'enregistrement", "error");
+      } finally {
+         setIsSubmitting(false);
+      }
+   };
+
    const handleStartPayment = (inv) => {
       setActiveInvoice(inv);
       setIsInsuranceVerified(false);
@@ -312,18 +345,30 @@ export default function CashierScreen({ navigation, route }) {
             return showToast(`Ce numéro appartient à ${detected.operator}. Sélectionnez le bon opérateur.`, "error");
          }
       }
+      
+      const remaining = activeInvoice.amount - (activeInvoice.paid_amount || 0);
+      const amountToPay = parseFloat(paidAmount) || remaining;
+      const isPartial = amountToPay < remaining;
+      
       setPayingId(activeInvoice.id);
       setIsMobilePaymentProcessing(paymentMethod !== 'cash' && paymentMethod !== 'insurance');
       try {
-         const res = await api.post(`/invoices/${activeInvoice.id}/pay`, {
+         const endpoint = isPartial ? `/invoices/${activeInvoice.id}/pay-advance` : `/invoices/${activeInvoice.id}/pay`;
+         const payload = {
             payment_method: paymentMethod,
             payment_phone: paymentPhone,
-            payment_currency: invoiceCurrency(activeInvoice),
-         });
+            payment_currency: invoiceCurrency(activeInvoice)
+         };
+         if (isPartial) {
+            payload.amount = amountToPay;
+         }
+
+         const res = await api.post(endpoint, payload);
+         
          if (res.status === 202 || res.data?.payment_status === 'pending') {
             showToast(res.data.message || 'Paiement en attente de confirmation', 'warning');
          } else {
-            showToast(t.paySuccess, 'success');
+            showToast(isPartial ? 'Acompte enregistré avec succès' : t.paySuccess, 'success');
             setShowPaymentModal(false);
             setPaymentPhone('');
             fetchInvoices();
@@ -401,6 +446,7 @@ export default function CashierScreen({ navigation, route }) {
       { id: 'dashboard', icon: 'cash-register', label: 'Caisse', sub: 'Factures en attente' },
       { id: 'recettes', icon: 'currency-usd', label: 'Recettes', sub: 'Journal de caisse' },
       { id: 'insurances', icon: 'shield-account-outline', label: 'Assurances', sub: 'Comptes sociétés' },
+      { id: 'expenses', icon: 'cash-minus', label: 'Dépenses', sub: 'Sorties de fonds' },
       { id: 'accounting', icon: 'calculator-variant', label: 'Comptabilité', sub: 'Journaux et balances' },
       { id: 'reports', icon: 'file-chart-outline', label: 'Rapports', sub: 'Analyse des flux financiers' },
    ];
@@ -907,6 +953,54 @@ export default function CashierScreen({ navigation, route }) {
                      </ScrollView>
                   )}
 
+                  {/* --- SECTION DÉPENSES --- */}
+                  {activeView === 'expenses' && (
+                     <ScrollView contentContainerStyle={{ paddingTop: 125 + insets.top, paddingBottom: 130 + insets.bottom, paddingHorizontal: 20 }}>
+                        <FadeInView>
+                           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+                              <View>
+                                 <Text style={{ fontSize: 26, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', letterSpacing: -1 }}>{t.dynamic['D\u00c9PENSES'] || 'D\u00c9PENSES'}</Text>
+                                 <Text style={{ fontSize: 12, fontWeight: '700', color: isDark ? '#888888' : '#94A3B8' }}>{t.dynamic['Gestion des sorties de fonds'] || 'Gestion des sorties de fonds'}</Text>
+                              </View>
+                              <TouchableOpacity onPress={() => setShowExpenseModal(true)} style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16, backgroundColor: brandColor }}>
+                                 <MaterialIcons name="add" size={20} color="#FFF" />
+                                 <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 12, marginLeft: 4 }}>{t.dynamic['NOUVELLE D\u00c9PENSE'] || 'NOUVELLE D\u00c9PENSE'}</Text>
+                              </TouchableOpacity>
+                           </View>
+
+                           {expenses.length === 0 ? (
+                              renderEmptyState(
+                                 "cash-minus",
+                                 t.dynamic['Aucune d\u00e9pense'] || 'Aucune d\u00e9pense',
+                                 t.dynamic['Vous n\'avez enregistr\u00e9 aucune d\u00e9pense pour le moment.'] || 'Vous n\'avez enregistr\u00e9 aucune d\u00e9pense pour le moment.'
+                              )
+                           ) : (
+                              expenses.map((exp, i) => (
+                                 <FadeInView key={exp.id || i} delay={i * 50}>
+                                    <View style={{ padding: 18, backgroundColor: isDark ? '#1A1A1A' : '#FFF', borderRadius: 24, marginBottom: 16, borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#F1F5F9', elevation: 2, flexDirection: 'row', alignItems: 'center' }}>
+                                       <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: '#EF444415', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
+                                          <MaterialCommunityIcons name="cash-minus" size={24} color="#EF4444" />
+                                       </View>
+                                       <View style={{ flex: 1 }}>
+                                          <Text style={{ fontSize: 15, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>{exp.description}</Text>
+                                          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                                             <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#64748B', fontWeight: '800' }}>{new Date(exp.created_at).toLocaleDateString()}</Text>
+                                             <Text style={{ fontSize: 11, color: isDark ? '#888888' : '#64748B', fontWeight: '800', marginHorizontal: 6 }}>•</Text>
+                                             <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', backgroundColor: brandColor + '15', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 }}>{(t.dynamic[exp.category] || String(exp.category)).toUpperCase()}</Text>
+                                          </View>
+                                       </View>
+                                       <View style={{ alignItems: 'flex-end' }}>
+                                          <Text style={{ fontSize: 16, fontWeight: '900', color: '#EF4444' }}>- {Number(exp.amount).toLocaleString()} FC</Text>
+                                          <Text style={{ fontSize: 10, color: isDark ? '#888888' : '#94A3B8', fontWeight: '800', marginTop: 2 }}>{String(exp.payment_method).toUpperCase()}</Text>
+                                       </View>
+                                    </View>
+                                 </FadeInView>
+                              ))
+                           )}
+                        </FadeInView>
+                     </ScrollView>
+                  )}
+
                   {/* --- SECTION RAPPORTS --- */}
                   {activeView === 'reports' && (
                      <ScrollView contentContainerStyle={{ paddingTop: 125 + insets.top, paddingBottom: 130 + insets.bottom, paddingHorizontal: 20 }}>
@@ -1147,7 +1241,7 @@ export default function CashierScreen({ navigation, route }) {
                   if (tabId === 'history') fetchHistory();
                   else fetchInvoices();
                   if (activeBottomTab) toggleBottomTab('summary');
-                  if (activeView !== 'dashboard') setActiveView('dashboard');
+                  if (activeView !== 'dashboard' && activeView !== 'expenses') setActiveView('dashboard');
                }
             }}
          />
@@ -1238,6 +1332,23 @@ export default function CashierScreen({ navigation, route }) {
                      </>
                   )}
 
+                  {paymentMethod !== 'insurance' && (
+                     <View style={{ marginBottom: 15 }}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                           <Text style={{ fontSize: 11, fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B', letterSpacing: 1.5 }}>{t.dynamic['MONTANT PAY\u00c9 :'] || 'MONTANT PAY\u00c9 :'}</Text>
+                           <Text style={{ fontSize: 10, fontWeight: '700', color: brandColor }}>{t.dynamic['Reste \u00e0 payer :'] || 'Reste \u00e0 payer :'} {(activeInvoice?.amount - (activeInvoice?.paid_amount || 0)).toLocaleString()} FC</Text>
+                        </View>
+                        <TextInput
+                           style={{ height: 60, borderRadius: 20, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', color: isDark ? '#FFF' : '#0A0A0A', paddingHorizontal: 20, fontSize: 18, fontWeight: '900', borderWidth: 1, borderColor: isDark ? '#2E2E2E' : '#E2E8F0' }}
+                           placeholder={t.dynamic["Entrez le montant de l'acompte..."] || "Entrez le montant de l'acompte..."}
+                           placeholderTextColor={isDark ? '#555555' : '#94A3B8'}
+                           keyboardType="numeric"
+                           value={paidAmount}
+                           onChangeText={setPaidAmount}
+                        />
+                     </View>
+                  )}
+
                   {paymentMethod !== 'cash' && paymentMethod !== 'insurance' && (
                      <FadeInView style={{ marginBottom: 24 }}>
                         <View style={{ padding: 16, borderRadius: 20, backgroundColor: brandColor + '10', borderWidth: 1, borderColor: brandColor + '25', marginBottom: 12 }}>
@@ -1291,8 +1402,8 @@ export default function CashierScreen({ navigation, route }) {
                         {isMobilePaymentProcessing || verifyingInsurance ? <ActivityIndicator color={brandColor} /> : (
                            <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 16, letterSpacing: 1 }}>
                               {paymentMethod === 'insurance'
-                                 ? (isInsuranceVerified ? 'VALIDER LA PRISE EN CHARGE' : 'VÉRIFIER LE STATUT CONTRAT')
-                                 : (paymentMethod === 'cash' ? 'VALIDER L\'ENCAISSEMENT' : 'LANCER LA TRANSACTION')}
+                                 ? (isInsuranceVerified ? t.dynamic['VALIDER LA PRISE EN CHARGE'] || 'VALIDER LA PRISE EN CHARGE' : t.dynamic['V\u00c9RIFIER LE STATUT CONTRAT'] || 'V\u00c9RIFIER LE STATUT CONTRAT')
+                                 : (parseFloat(paidAmount) < (activeInvoice?.amount - (activeInvoice?.paid_amount || 0)) ? (t.dynamic["VALIDER L'ACOMPTE"] || "VALIDER L'ACOMPTE") : (paymentMethod === 'cash' ? (t.dynamic["VALIDER L'ENCAISSEMENT"] || "VALIDER L'ENCAISSEMENT") : (t.dynamic['LANCER LA TRANSACTION'] || 'LANCER LA TRANSACTION')))}
                            </Text>
                         )}
                      </LinearGradient>
@@ -1527,6 +1638,60 @@ export default function CashierScreen({ navigation, route }) {
                      </TouchableOpacity>
                      <TouchableOpacity onPress={handleSettleInvoices} disabled={isSubmitting} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: brandColor, alignItems: 'center', justifyContent: 'center' }}>
                         <Text style={{ fontWeight: '900', color: '#FFF' }}>VALIDER</Text>
+                     </TouchableOpacity>
+                  </View>
+               </View>
+            </View>
+         </Modal>
+
+         {/* EXPENSE MODAL */}
+         <Modal visible={showExpenseModal} transparent animationType="fade">
+            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', alignItems: 'center', justifyContent: 'flex-end' }}>
+               <View style={{ width: '100%', backgroundColor: isDark ? '#0A0A0A' : '#FFF', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 + insets.bottom }}>
+                  <Text style={{ fontSize: 20, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20 }}>{t.dynamic['NOUVELLE D\u00c9PENSE'] || 'NOUVELLE D\u00c9PENSE'}</Text>
+                  
+                  <Text style={styles.label}>{t.dynamic['CAT\u00c9GORIE'] || 'CAT\u00c9GORIE'}</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16 }}>
+                     {['fourniture', 'materiel', 'salaire', 'autre'].map(c => (
+                        <TouchableOpacity key={c} onPress={() => setExpenseForm(prev => ({ ...prev, category: c }))} style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12, backgroundColor: expenseForm.category === c ? brandColor : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: expenseForm.category === c ? brandColor : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
+                           <Text style={{ fontSize: 10, fontWeight: '900', color: expenseForm.category === c ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B') }}>{(t.dynamic[c] || c).toUpperCase()}</Text>
+                        </TouchableOpacity>
+                     ))}
+                  </View>
+
+                  <Text style={styles.label}>{t.dynamic['MONTANT (FC)'] || 'MONTANT (FC)'}</Text>
+                  <TextInput
+                     style={[styles.input, { marginBottom: 16 }]}
+                     placeholder={t.dynamic['Ex: 50000'] || 'Ex: 50000'} placeholderTextColor={C.placeholder}
+                     keyboardType="numeric"
+                     value={expenseForm.amount}
+                     onChangeText={v => setExpenseForm(prev => ({ ...prev, amount: v }))}
+                  />
+
+                  <Text style={styles.label}>{t.dynamic['DESCRIPTION'] || 'DESCRIPTION'}</Text>
+                  <TextInput
+                     style={[styles.input, { height: 80, textAlignVertical: 'top', marginBottom: 16, paddingTop: 16 }]}
+                     placeholder={t.dynamic['D\u00e9tails de la d\u00e9pense...'] || 'D\u00e9tails de la d\u00e9pense...'} placeholderTextColor={C.placeholder}
+                     multiline
+                     value={expenseForm.description}
+                     onChangeText={v => setExpenseForm(prev => ({ ...prev, description: v }))}
+                  />
+
+                  <Text style={styles.label}>{t.dynamic['M\u00c9THODE'] || 'M\u00c9THODE'}</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24 }}>
+                     {['cash', 'mobile'].map(m => (
+                        <TouchableOpacity key={m} onPress={() => setExpenseForm(prev => ({ ...prev, payment_method: m }))} style={{ flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 12, backgroundColor: expenseForm.payment_method === m ? '#EF4444' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: expenseForm.payment_method === m ? '#EF4444' : (isDark ? '#2E2E2E' : '#E2E8F0') }}>
+                           <Text style={{ fontSize: 10, fontWeight: '900', color: expenseForm.payment_method === m ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B') }}>{(t.dynamic[m] || m).toUpperCase()}</Text>
+                        </TouchableOpacity>
+                     ))}
+                  </View>
+
+                  <View style={{ flexDirection: 'row', gap: 12 }}>
+                     <TouchableOpacity onPress={() => setShowExpenseModal(false)} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: isDark ? '#2E2E2E' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ fontWeight: '900', color: isDark ? '#AAAAAA' : '#64748B' }}>{t.cancel || 'ANNULER'}</Text>
+                     </TouchableOpacity>
+                     <TouchableOpacity onPress={handleCreateExpense} disabled={isSubmitting} style={{ flex: 1, height: 54, borderRadius: 16, backgroundColor: '#EF4444', alignItems: 'center', justifyContent: 'center' }}>
+                        {isSubmitting ? <ActivityIndicator color="#FFF" /> : <Text style={{ fontWeight: '900', color: '#FFF' }}>{t.dynamic['ENREGISTRER'] || 'ENREGISTRER'}</Text>}
                      </TouchableOpacity>
                   </View>
                </View>

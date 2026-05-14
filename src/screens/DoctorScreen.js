@@ -61,6 +61,7 @@ export default function DoctorScreen({ navigation, route }) {
 
   // Hospitalization State
   const [hospForm, setHospForm] = useState({ ward: '', diagnosis: '', daily_rate: '25000' });
+  const [dischargeForm, setDischargeForm] = useState({ type: 'guerison', summary: '', follow_up_date: '' });
 
   const [isRightOpen, setIsRightOpen] = useState(false);
   const rightAnim = useRef(new Animated.Value(width)).current;
@@ -75,9 +76,12 @@ export default function DoctorScreen({ navigation, route }) {
   // Rendez-vous form state
   const [rdvForm, setRdvForm] = useState({ patient_id: null, date: '', time: '' });
 
-  // Action Panel State
   const [isActionPanelOpen, setIsActionPanelOpen] = useState(false);
   const actionPanelAnim = useRef(new Animated.Value(-width)).current;
+
+  const [showTimelineModal, setShowTimelineModal] = useState(false);
+  const [selectedTimeline, setSelectedTimeline] = useState(null);
+  const [timelineLoading, setTimelineLoading] = useState(false);
 
   // Scroll position for sticky header effects
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -194,6 +198,20 @@ export default function DoctorScreen({ navigation, route }) {
     finally { setHistLoading(false); }
   };
 
+  const fetchTimeline = async (patientId) => {
+    setTimelineLoading(true);
+    setShowTimelineModal(true);
+    try {
+      const resp = await api.get(`/patients/${patientId}`);
+      setSelectedTimeline(resp.data);
+    } catch (e) {
+      showToast("Impossible de charger l'historique", 'error');
+      setShowTimelineModal(false);
+    } finally {
+      setTimelineLoading(false);
+    }
+  };
+
   const fetchStats = async () => {
     setBottomLoading(true);
     try {
@@ -297,7 +315,7 @@ export default function DoctorScreen({ navigation, route }) {
 
   const handleForward = async () => {
     if (!selectedVisit) return;
-    if (!diagnosis && nextService !== 'completed') return showToast("Le diagnostic est obligatoire", "error");
+    if (!diagnosis && nextService !== 'completed' && nextService !== 'discharge') return showToast("Le diagnostic est obligatoire", "error");
 
     setIsSubmitting(true);
     try {
@@ -334,6 +352,19 @@ export default function DoctorScreen({ navigation, route }) {
           consultation_notes: consultationNotes,
           notes: soinsNotes || 'Orientation maternité'
         });
+      } else if (nextService === 'discharge') {
+         let formattedDate = null;
+         if (dischargeForm.follow_up_date) {
+            const parts = dischargeForm.follow_up_date.split('/');
+            if (parts.length === 3) formattedDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
+            else formattedDate = dischargeForm.follow_up_date;
+         }
+
+         await api.post(`/visits/${selectedVisit.id}/discharge`, {
+            discharge_type: dischargeForm.type,
+            discharge_summary: dischargeForm.summary || diagnosis || consultationNotes,
+            follow_up_date: formattedDate
+         });
       } else {
         await api.post(`/visits/${selectedVisit.id}/forward`, {
           next_service: nextService,
@@ -374,6 +405,7 @@ export default function DoctorScreen({ navigation, route }) {
     setPrescriptionItems([{ name: '', dosage: '', instructions: '', quantity: 1, price: 0 }]);
     setSelectedLabTests([{ code: '' }]);
     setHospForm({ ward: '', diagnosis: '', daily_rate: '25000' });
+    setDischargeForm({ type: 'guerison', summary: '', follow_up_date: '' });
   };
 
   const handleLogout = async () => {
@@ -566,11 +598,22 @@ export default function DoctorScreen({ navigation, route }) {
                   <View style={styles.headerAvatar}>
                     <Text style={styles.headerAvatarText}>{selectedVisit.patient?.first_name?.[0]}{selectedVisit.patient?.last_name?.[0]}</Text>
                   </View>
-                  <View style={{ marginLeft: 16 }}>
-                    <Text style={[styles.headerName, { color: isDark ? '#FFF' : '#0A0A0A' }]}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
-                    <Text style={{ color: brandColor, fontSize: 13, fontWeight: '900', marginTop: 2 }}>
-                       {selectedVisit.patient?.gender === 'M' ? 'HOMME' : 'FEMME'} • {selectedVisit.patient?.age} ANS
-                    </Text>
+                  <View style={{ marginLeft: 16, flex: 1 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <View>
+                        <Text style={[styles.headerName, { color: isDark ? '#FFF' : '#0A0A0A' }]}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
+                        <Text style={{ color: brandColor, fontSize: 13, fontWeight: '900', marginTop: 2 }}>
+                          {selectedVisit.patient?.gender === 'M' ? 'HOMME' : 'FEMME'} • {selectedVisit.patient?.age} ANS
+                        </Text>
+                      </View>
+                      <TouchableOpacity 
+                        onPress={() => fetchTimeline(selectedVisit.patient_id)}
+                        style={{ backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, borderWidth: 1, borderColor: brandColor + '30', flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <MaterialCommunityIcons name="history" size={16} color={brandColor} />
+                        <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900', marginLeft: 6 }}>VOIR DOSSIER</Text>
+                      </TouchableOpacity>
+                    </View>
                     <Text style={{ color: isDark ? '#888888' : '#94A3B8', fontSize: 10, fontWeight: '700', marginTop: 2 }}>Né(e) en {selectedVisit.patient?.birth_year || 'N/A'}</Text>
                   </View>
                 </View>
@@ -804,16 +847,51 @@ export default function DoctorScreen({ navigation, route }) {
                 </FadeInView>
               )}
 
+              {nextService === 'discharge' && (
+                 <FadeInView style={styles.ordonnanceContainer}>
+                    <LinearGradient colors={['#EF444415', '#EF444405']} style={styles.ordonnanceHeader}>
+                       <MaterialCommunityIcons name="exit-run" size={20} color="#EF4444" />
+                       <Text style={[styles.ordonnanceTitle, { color: '#EF4444' }]}>{t.dynamic['SORTIE DU PATIENT'] || 'SORTIE DU PATIENT'}</Text>
+                    </LinearGradient>
+                    <View style={styles.ordonnanceBody}>
+                       <Text style={styles.inputLabel}>{t.dynamic['MOTIF DE SORTIE'] || 'MOTIF DE SORTIE'}</Text>
+                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
+                          {[
+                             { id: 'guerison', label: t.dynamic['GU\u00c9RISON'] || 'GU\u00c9RISON' },
+                             { id: 'refere', label: t.dynamic['R\u00c9F\u00c9R\u00c9 AILLEURS'] || 'R\u00c9F\u00c9R\u00c9 AILLEURS' },
+                             { id: 'evasion', label: t.dynamic['\u00c9VASION / ABANDON'] || '\u00c9VASION / ABANDON' },
+                             { id: 'deces', label: t.dynamic['D\u00c9C\u00c8S'] || 'D\u00c9C\u00c8S' }
+                          ].map(item => (
+                             <TouchableOpacity
+                                key={item.id}
+                                onPress={() => setDischargeForm({ ...dischargeForm, type: item.id })}
+                                style={{ padding: 10, borderRadius: 12, backgroundColor: dischargeForm.type === item.id ? '#EF4444' : (isDark ? '#1A1A1A' : '#F1F5F9'), borderWidth: 1, borderColor: dischargeForm.type === item.id ? '#EF4444' : (isDark ? '#2E2E2E' : '#E2E8F0') }}
+                             >
+                                <Text style={{ color: dischargeForm.type === item.id ? '#FFF' : (isDark ? '#AAAAAA' : '#64748B'), fontWeight: '800', fontSize: 11 }}>{item.label}</Text>
+                             </TouchableOpacity>
+                          ))}
+                       </View>
+                       
+                       <Text style={styles.inputLabel}>{t.dynamic['DATE DE SUIVI (OPTIONNEL)'] || 'DATE DE SUIVI (OPTIONNEL)'}</Text>
+                       <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0', marginBottom: 16, height: 50 }]} placeholder={t.dynamic['JJ/MM/AAAA'] || 'JJ/MM/AAAA'} placeholderTextColor={isDark ? "#888888" : '#94A3B8'} value={dischargeForm.follow_up_date} onChangeText={v => setDischargeForm({ ...dischargeForm, follow_up_date: v })} />
+                       
+                       <Text style={styles.inputLabel}>{t.dynamic['R\u00c9SUM\u00c9 DE SORTIE (OPTIONNEL)'] || 'R\u00c9SUM\u00c9 DE SORTIE (OPTIONNEL)'}</Text>
+                       <TextInput style={[styles.rdvInput, { backgroundColor: isDark ? '#1A1A1A' : '#FFF', color: isDark ? '#FFF' : '#0A0A0A', borderColor: isDark ? '#2E2E2E' : '#E2E8F0', minHeight: 80, textAlignVertical: 'top' }]} placeholder={t.dynamic['Instructions de sortie...'] || 'Instructions de sortie...'} placeholderTextColor={isDark ? "#888888" : '#94A3B8'} value={dischargeForm.summary} onChangeText={v => setDischargeForm({ ...dischargeForm, summary: v })} multiline />
+                    </View>
+                 </FadeInView>
+              )}
+
               {/* ORIENTATION */}
-              <Text style={styles.fieldHeading}>ORIENTATION DU PATIENT</Text>
+              <Text style={styles.fieldHeading}>{t.dynamic['ORIENTATION DU PATIENT'] || 'ORIENTATION DU PATIENT'}</Text>
               <View style={styles.serviceSelector}>
                 {[
-                  { id: 'pharmacie', label: 'PHARMACIE', icon: 'pill' },
-                  { id: 'labo', label: 'LABORATOIRE', icon: 'flask' },
+                  { id: 'pharmacie', label: t.dynamic['PHARMACIE'] || 'PHARMACIE', icon: 'pill' },
+                  { id: 'labo', label: t.dynamic['LABORATOIRE'] || 'LABORATOIRE', icon: 'flask' },
                   { id: 'soins', label: 'SOINS / INJ', icon: 'medical-bag' },
-                  { id: 'maternite', label: 'MATERNITÉ', icon: 'mother-heart' },
+                  { id: 'maternite', label: t.dynamic['MATERNIT\u00c9'] || 'MATERNIT\u00c9', icon: 'mother-heart' },
                   { id: 'hospitalisation', label: 'HOSPIT.', icon: 'bed-outline' },
-                  { id: 'completed', label: 'TERMINER', icon: 'check-all' }
+                  { id: 'discharge', label: t.dynamic['SORTIE'] || 'SORTIE', icon: 'exit-run' },
+                  { id: 'completed', label: t.dynamic['TERMINER ICI'] || 'TERMINER', icon: 'check-all' }
                 ].map(s => (
                   <TouchableOpacity
                     key={s.id}
@@ -843,6 +921,98 @@ export default function DoctorScreen({ navigation, route }) {
           )}
         </View>
       </ScrollView>
+
+      <Modal visible={showTimelineModal} animationType="slide" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ height: height * 0.9, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 25, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#E2E8F0' }}>
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DOSSIER MÉDICAL</Text>
+                <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', letterSpacing: 1 }}>HISTORIQUE COMPLET DU MALADE</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowTimelineModal(false)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: isDark ? '#333' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialIcons name="close" size={24} color={isDark ? '#FFF' : '#0A0A0A'} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              {timelineLoading ? (
+                <View style={{ padding: 40, alignItems: 'center' }}>
+                  <ActivityIndicator color={brandColor} size="large" />
+                  <Text style={{ marginTop: 15, color: isDark ? '#888' : '#64748B', fontWeight: '700' }}>Chargement du dossier...</Text>
+                </View>
+              ) : selectedTimeline ? (
+                <View style={{ padding: 20 }}>
+                  <LinearGradient colors={[brandColor, '#4F46E5']} style={{ padding: 25, borderRadius: 32, marginBottom: 25, elevation: 8 }}>
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF' }}>{selectedTimeline.patient?.first_name} {selectedTimeline.patient?.last_name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 }}>
+                        <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{selectedTimeline.patient?.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</Text>
+                      </View>
+                      <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Né(e) en {selectedTimeline.patient?.birth_year} ({selectedTimeline.patient?.age} ans)</Text>
+                    </View>
+                    <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 15 }} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <View>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>STATUT DOSSIER</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.status?.toUpperCase() || 'ACTIF'}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>TYPE DE CHARGE</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+
+                  <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20, letterSpacing: 1.5 }}>TIMELINE DES SOINS</Text>
+
+                  {selectedTimeline.timeline?.length > 0 ? (
+                    selectedTimeline.timeline.map((item, idx) => (
+                      <View key={idx} style={{ flexDirection: 'row', marginBottom: 25 }}>
+                        <View style={{ alignItems: 'center', width: 40, marginRight: 15 }}>
+                          <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                            <MaterialCommunityIcons 
+                              name={
+                                item.type === 'vitals' ? 'heart-pulse' :
+                                item.type === 'diagnosis' ? 'clipboard-text-pulse' :
+                                item.type === 'lab' ? 'flask' :
+                                item.type === 'prescription' ? 'pill' :
+                                item.type === 'invoice' ? 'cash-multiple' : 'calendar-clock'
+                              } 
+                              size={20} color={brandColor} 
+                            />
+                          </View>
+                          {idx < selectedTimeline.timeline.length - 1 && (
+                            <View style={{ flex: 1, width: 2, backgroundColor: isDark ? '#333' : '#E2E8F0', marginVertical: 4 }} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 18, borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#333' : '#E2E8F0' }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1 }}>{item.type.toUpperCase()} • {new Date(item.date).toLocaleDateString()}</Text>
+                            <Text style={{ fontSize: 9, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                          </View>
+                          <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 4 }}>{item.title}</Text>
+                          <Text style={{ fontSize: 12, color: isDark ? '#888' : '#64748B', lineHeight: 18 }}>{item.content}</Text>
+                          {item.meta && (
+                            <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#E2E8F0' }}>
+                              <Text style={{ fontSize: 10, fontStyle: 'italic', color: brandColor }}>{item.meta}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={{ alignItems: 'center', paddingVertical: 40, opacity: 0.5 }}>
+                      <MaterialCommunityIcons name="history" size={48} color={isDark ? '#888' : '#94A3B8'} />
+                      <Text style={{ marginTop: 15, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>Aucun événement enregistré.</Text>
+                    </View>
+                  )}
+                </View>
+              ) : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* FOOTER */}
       <PremiumFooter

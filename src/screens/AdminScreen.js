@@ -102,6 +102,11 @@ export default function AdminScreen({ navigation }) {
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetService, setResetService] = useState('pharmacie');
   const [resetPassword, setResetPassword] = useState('');
+
+  const [showTimelineModal, setShowTimelineModal] = useState(false);
+  const [selectedTimeline, setSelectedTimeline] = useState(null);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
   const bottomPanelAnim = useRef(new Animated.Value(0)).current;
 
   const leftAnim = useRef(new Animated.Value(-width)).current;
@@ -232,6 +237,20 @@ export default function AdminScreen({ navigation }) {
       showToast(parseError(e), 'error');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const fetchTimeline = async (patientId) => {
+    setTimelineLoading(true);
+    setShowTimelineModal(true);
+    try {
+      const resp = await api.get(`/patients/${patientId}`);
+      setSelectedTimeline(resp.data);
+    } catch (e) {
+      showToast("Impossible de charger l'historique", 'error');
+      setShowTimelineModal(false);
+    } finally {
+      setTimelineLoading(false);
     }
   };
 
@@ -1008,7 +1027,7 @@ export default function AdminScreen({ navigation }) {
                        </View>
 
                        {selectedMonthFolder.patients.map((p, i) => (
-                          <TouchableOpacity key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
+                          <TouchableOpacity key={p.id} onPress={() => fetchTimeline(p.id)} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
                              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: C.divider, alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
                                 <MaterialCommunityIcons name="account-details" size={24} color={brandColor} />
                              </View>
@@ -1106,7 +1125,7 @@ export default function AdminScreen({ navigation }) {
                         </View>
 
                         {selectedYearFolder.records.map(p => (
-                          <View key={p.id} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
+                          <PressableScale key={p.id} onPress={() => fetchTimeline(p.id)} style={[styles.pCardPremium, { backgroundColor: C.surface, borderColor: C.border, padding: 16 }]}>
                              <View style={{ flex: 1 }}>
                                 <Text style={[styles.pName, { color: C.text }]}>{p.first_name} {p.last_name} {p.post_name || ''}</Text>
                                 <Text style={{ color: C.sub, fontSize: 10, fontWeight: '700', marginTop: 3 }}>ID {safePadId(p.id)} • {p.pathology || 'Pas de pathologie'} • {p.is_insured ? (p.insurance?.name || 'Assuré') : 'Privé'}</Text>
@@ -1117,7 +1136,7 @@ export default function AdminScreen({ navigation }) {
                              <TouchableOpacity onPress={() => handleDeletePatient(p)} style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: '#EF444412', alignItems: 'center', justifyContent: 'center' }}>
                                 <MaterialIcons name="delete-outline" size={20} color="#EF4444" />
                              </TouchableOpacity>
-                          </View>
+                          </PressableScale>
                         ))}
                     </View>
                   )}
@@ -1877,6 +1896,98 @@ export default function AdminScreen({ navigation }) {
           </View>
         </View>
       </View>
+
+      <Modal visible={showTimelineModal} animationType="slide" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ height: height * 0.9, backgroundColor: C.bg, borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 25, borderBottomWidth: 1, borderBottomColor: C.divider }}>
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>DOSSIER MÉDICAL</Text>
+                <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', letterSpacing: 1 }}>HISTORIQUE COMPLET DU MALADE</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowTimelineModal(false)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.divider, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialIcons name="close" size={24} color={C.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              {timelineLoading ? (
+                <View style={{ padding: 40, alignItems: 'center' }}>
+                  <ActivityIndicator color={brandColor} size="large" />
+                  <Text style={{ marginTop: 15, color: C.sub, fontWeight: '700' }}>Chargement du dossier...</Text>
+                </View>
+              ) : selectedTimeline ? (
+                <View style={{ padding: 20 }}>
+                  <LinearGradient colors={[brandColor, '#4F46E5']} style={{ padding: 25, borderRadius: 32, marginBottom: 25, elevation: 8 }}>
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF' }}>{selectedTimeline.patient?.first_name} {selectedTimeline.patient?.last_name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 }}>
+                        <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{selectedTimeline.patient?.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</Text>
+                      </View>
+                      <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Né(e) en {selectedTimeline.patient?.birth_year} ({selectedTimeline.patient?.age} ans)</Text>
+                    </View>
+                    <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 15 }} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <View>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>STATUT DOSSIER</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.status?.toUpperCase() || 'ACTIF'}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>TYPE DE CHARGE</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+
+                  <Text style={{ fontSize: 13, fontWeight: '900', color: C.text, marginBottom: 20, letterSpacing: 1.5 }}>TIMELINE DES SOINS</Text>
+
+                  {selectedTimeline.timeline?.length > 0 ? (
+                    selectedTimeline.timeline.map((item, idx) => (
+                      <View key={idx} style={{ flexDirection: 'row', marginBottom: 25 }}>
+                        <View style={{ alignItems: 'center', width: 40, marginRight: 15 }}>
+                          <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                            <MaterialCommunityIcons 
+                              name={
+                                item.type === 'vitals' ? 'heart-pulse' :
+                                item.type === 'diagnosis' ? 'clipboard-text-pulse' :
+                                item.type === 'lab' ? 'flask' :
+                                item.type === 'prescription' ? 'pill' :
+                                item.type === 'invoice' ? 'cash-multiple' : 'calendar-clock'
+                              } 
+                              size={20} color={brandColor} 
+                            />
+                          </View>
+                          {idx < selectedTimeline.timeline.length - 1 && (
+                            <View style={{ flex: 1, width: 2, backgroundColor: C.divider, marginVertical: 4 }} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: C.surface, padding: 18, borderRadius: 24, borderWidth: 1, borderColor: C.divider }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1 }}>{item.type.toUpperCase()} • {new Date(item.date).toLocaleDateString()}</Text>
+                            <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }}>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                          </View>
+                          <Text style={{ fontSize: 14, fontWeight: '800', color: C.text, marginBottom: 4 }}>{item.title}</Text>
+                          <Text style={{ fontSize: 12, color: C.sub, lineHeight: 18 }}>{item.content}</Text>
+                          {item.meta && (
+                            <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.divider }}>
+                              <Text style={{ fontSize: 10, fontStyle: 'italic', color: brandColor }}>{item.meta}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={{ alignItems: 'center', paddingVertical: 40, opacity: 0.5 }}>
+                      <MaterialCommunityIcons name="history" size={48} color={C.sub} />
+                      <Text style={{ marginTop: 15, color: C.sub, fontWeight: '700' }}>Aucun événement enregistré.</Text>
+                    </View>
+                  )}
+                </View>
+              ) : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       <PremiumLeftDrawer 
         isOpen={isLeftOpen} 

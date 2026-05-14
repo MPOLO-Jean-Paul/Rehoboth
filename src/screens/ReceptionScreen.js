@@ -60,15 +60,19 @@ export default function ReceptionScreen({ navigation, route }) {
       insurance_code: '',
       contact_info: '',
       complaints: '',
-      birth_year: '',
       pathology: '',
       gender: 'M',
+      orientation: 'medecin',
    });
    const [isVerifying, setIsVerifying] = useState(false);
    const [verifiedMember, setVerifiedMember] = useState(null);
 
    const [isSearchDossierOpen, setIsSearchDossierOpen] = useState(false);
    const [searchDossierQuery, setSearchDossierQuery] = useState('');
+
+   const [showTimelineModal, setShowTimelineModal] = useState(false);
+   const [selectedTimeline, setSelectedTimeline] = useState(null);
+   const [timelineLoading, setTimelineLoading] = useState(false);
 
    const [newCatalogItem, setNewCatalogItem] = useState({ type: 'Examen', label: '', price: '', service: '' });
 
@@ -188,7 +192,8 @@ export default function ReceptionScreen({ navigation, route }) {
       return acc;
    }, {});
 
-   const groupedByYear = (patients || []).reduce((acc, p) => {
+   const deceasedPatients = (patients || []).filter(p => p.status === 'deceased');
+   const groupedByYear = (patients || []).filter(p => p.status !== 'deceased').reduce((acc, p) => {
       const year = p?.birth_year || 'Inconnu';
       if (!acc[year]) acc[year] = [];
       acc[year].push(p);
@@ -232,6 +237,20 @@ export default function ReceptionScreen({ navigation, route }) {
          setPatients(Array.isArray(data) ? data : (data.data || []));
       } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
       finally { if (!isBg) setLoading(false); }
+   };
+
+   const fetchTimeline = async (patientId) => {
+      setTimelineLoading(true);
+      setShowTimelineModal(true);
+      try {
+         const resp = await api.get(`/patients/${patientId}`);
+         setSelectedTimeline(resp.data);
+      } catch (e) {
+         showToast("Impossible de charger l'historique", 'error');
+         setShowTimelineModal(false);
+      } finally {
+         setTimelineLoading(false);
+      }
    };
 
    const fetchServiceRevenues = async (isBg = false, period = bilanPeriod) => {
@@ -334,7 +353,7 @@ export default function ReceptionScreen({ navigation, route }) {
             ]
          );
 
-         setForm({ id: null, first_name: '', last_name: '', post_name: '', is_insured: false, insurance_id: null, insurance_code: '', contact_info: '', complaints: '', birth_year: '', pathology: '', gender: 'M' });
+         setForm({ id: null, first_name: '', last_name: '', post_name: '', is_insured: false, insurance_id: null, insurance_code: '', contact_info: '', complaints: '', birth_year: '', pathology: '', gender: 'M', orientation: 'medecin' });
          setActiveTab('list');
          fetchPatients();
       } catch (e) {
@@ -502,7 +521,10 @@ export default function ReceptionScreen({ navigation, route }) {
 
                                  {groupedByDate[selectedDateFolder]?.filter(p => `${p.first_name} ${p.last_name}`.toLowerCase().includes(search.toLowerCase())).map((p, i) => (
                                     <FadeInView key={p.id} delay={i * 50}>
-                                       <PressableScale style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: C.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: C.divider, elevation: 3 }}>
+                                       <PressableScale 
+                                          onPress={() => fetchTimeline(p.id)}
+                                          style={{ flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: C.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: C.divider, elevation: 3 }}
+                                       >
                                           <LinearGradient colors={[brandColor + '20', brandColor + '05']} style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center' }}>
                                              <Text style={{ fontWeight: '900', fontSize: 20, color: brandColor }}>{p.first_name[0]}{p.last_name[0]}</Text>
                                           </LinearGradient>
@@ -606,7 +628,8 @@ export default function ReceptionScreen({ navigation, route }) {
                                                             insurance_code: p.insurance_code || '',
                                                             pathology: p.pathology || '',
                                                             complaints: '',
-                                                            gender: p.gender || 'M'
+                                                            gender: p.gender || 'M',
+                                                            orientation: 'medecin'
                                                          });
                                                          setIsSearchDossierOpen(false);
                                                          setSearchDossierQuery('');
@@ -806,10 +829,10 @@ export default function ReceptionScreen({ navigation, route }) {
                                     <Text style={{ color: brandColor, fontWeight: '900', fontSize: 12, marginLeft: 8 }}>RETOUR AUX ARCHIVES</Text>
                                  </TouchableOpacity>
 
-                                 <Text style={{ fontSize: 14, fontWeight: '900', color: brandColor, marginBottom: 15 }}>LISTE DES PATIENTS NÉS EN {selectedYearFolder}</Text>
+                                 <Text style={{ fontSize: 14, fontWeight: '900', color: brandColor, marginBottom: 15 }}>{selectedYearFolder === 'DÉCÈS' ? 'LISTE DES DÉCÈS ENREGISTRÉS' : `LISTE DES PATIENTS NÉS EN ${selectedYearFolder}`}</Text>
 
-                                 {groupedByYear[selectedYearFolder].map(p => (
-                                    <View key={p.id} style={{ padding: 18, backgroundColor: C.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: C.divider, elevation: 2 }}>
+                                 {(selectedYearFolder === 'DÉCÈS' ? deceasedPatients : groupedByYear[selectedYearFolder]).map(p => (
+                                    <PressableScale key={p.id} onPress={() => fetchTimeline(p.id)} style={{ padding: 18, backgroundColor: C.surface, borderRadius: 24, marginBottom: 12, borderWidth: 1, borderColor: C.divider, elevation: 2 }}>
                                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                           <View style={{ flex: 1 }}>
                                              <Text style={{ fontSize: 17, fontWeight: '900', color: C.text }}>{p.first_name} {p.last_name}</Text>
@@ -828,7 +851,7 @@ export default function ReceptionScreen({ navigation, route }) {
                                              <Text style={{ fontSize: 10, color: p.is_insured ? brandColor : '#22C55E', fontWeight: '900' }}>{p.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
                                           </View>
                                        </View>
-                                    </View>
+                                    </PressableScale>
                                  ))}
                               </View>
                            ) : (
@@ -1147,6 +1170,98 @@ export default function ReceptionScreen({ navigation, route }) {
                );
             })}
          </View>
+
+         <Modal visible={showTimelineModal} animationType="slide" transparent>
+            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+               <View style={{ height: height * 0.9, backgroundColor: C.bg, borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 25, borderBottomWidth: 1, borderBottomColor: C.divider }}>
+                     <View>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: C.text }}>DOSSIER MÉDICAL</Text>
+                        <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', letterSpacing: 1 }}>HISTORIQUE COMPLET DU MALADE</Text>
+                     </View>
+                     <TouchableOpacity onPress={() => setShowTimelineModal(false)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: C.divider, alignItems: 'center', justifyContent: 'center' }}>
+                        <MaterialIcons name="close" size={24} color={C.text} />
+                     </TouchableOpacity>
+                  </View>
+
+                  <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                     {timelineLoading ? (
+                        <View style={{ padding: 40, alignItems: 'center' }}>
+                           <ActivityIndicator color={brandColor} size="large" />
+                           <Text style={{ marginTop: 15, color: C.sub, fontWeight: '700' }}>Chargement du dossier...</Text>
+                        </View>
+                     ) : selectedTimeline ? (
+                        <View style={{ padding: 20 }}>
+                           <LinearGradient colors={[brandColor, '#4F46E5']} style={{ padding: 25, borderRadius: 32, marginBottom: 25, elevation: 8 }}>
+                              <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF' }}>{selectedTimeline.patient?.first_name} {selectedTimeline.patient?.last_name}</Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                 <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 }}>
+                                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{selectedTimeline.patient?.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</Text>
+                                 </View>
+                                 <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Né(e) en {selectedTimeline.patient?.birth_year} ({selectedTimeline.patient?.age} ans)</Text>
+                              </View>
+                              <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 15 }} />
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                 <View>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>STATUT DOSSIER</Text>
+                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.status?.toUpperCase() || 'ACTIF'}</Text>
+                                 </View>
+                                 <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>TYPE DE CHARGE</Text>
+                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
+                                 </View>
+                              </View>
+                           </LinearGradient>
+
+                           <Text style={{ fontSize: 13, fontWeight: '900', color: C.text, marginBottom: 20, letterSpacing: 1.5 }}>TIMELINE DES SOINS</Text>
+
+                           {selectedTimeline.timeline?.length > 0 ? (
+                              selectedTimeline.timeline.map((item, idx) => (
+                                 <View key={idx} style={{ flexDirection: 'row', marginBottom: 25 }}>
+                                    <View style={{ alignItems: 'center', width: 40, marginRight: 15 }}>
+                                       <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                                          <MaterialCommunityIcons 
+                                             name={
+                                                item.type === 'vitals' ? 'heart-pulse' :
+                                                item.type === 'diagnosis' ? 'clipboard-text-pulse' :
+                                                item.type === 'lab' ? 'flask' :
+                                                item.type === 'prescription' ? 'pill' :
+                                                item.type === 'invoice' ? 'cash-multiple' : 'calendar-clock'
+                                             } 
+                                             size={20} color={brandColor} 
+                                          />
+                                       </View>
+                                       {idx < selectedTimeline.timeline.length - 1 && (
+                                          <View style={{ flex: 1, width: 2, backgroundColor: C.divider, marginVertical: 4 }} />
+                                       )}
+                                    </View>
+                                    <View style={{ flex: 1, backgroundColor: C.surface, padding: 18, borderRadius: 24, borderWidth: 1, borderColor: C.divider }}>
+                                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                          <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1 }}>{item.type.toUpperCase()} • {new Date(item.date).toLocaleDateString()}</Text>
+                                          <Text style={{ fontSize: 9, color: C.sub, fontWeight: '700' }}>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                       </View>
+                                       <Text style={{ fontSize: 14, fontWeight: '800', color: C.text, marginBottom: 4 }}>{item.title}</Text>
+                                       <Text style={{ fontSize: 12, color: C.sub, lineHeight: 18 }}>{item.content}</Text>
+                                       {item.meta && (
+                                          <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: C.divider }}>
+                                             <Text style={{ fontSize: 10, fontStyle: 'italic', color: brandColor }}>{item.meta}</Text>
+                                          </View>
+                                       )}
+                                    </View>
+                                 </View>
+                              ))
+                           ) : (
+                              <View style={{ alignItems: 'center', paddingVertical: 40, opacity: 0.5 }}>
+                                 <MaterialCommunityIcons name="history" size={48} color={C.sub} />
+                                 <Text style={{ marginTop: 15, color: C.sub, fontWeight: '700' }}>Aucun événement enregistré.</Text>
+                              </View>
+                           )}
+                        </View>
+                     ) : null}
+                  </ScrollView>
+               </View>
+            </View>
+         </Modal>
 
          <PremiumLeftDrawer
             isOpen={isLeftOpen}

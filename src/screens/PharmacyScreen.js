@@ -44,7 +44,12 @@ export default function PharmacyScreen({ navigation, route }) {
    const [dispenseQty, setDispenseQty] = useState('1');
    const [dispenseItems, setDispenseItems] = useState([]);
    const [paymentMode, setPaymentMode] = useState('cash');
+   const [paymentPhone, setPaymentPhone] = useState('');
    const [insights, setInsights] = useState({ fast_movers: [], slow_movers: [], to_renew: [], all: [] });
+
+   const [showTimelineModal, setShowTimelineModal] = useState(false);
+   const [selectedTimeline, setSelectedTimeline] = useState(null);
+   const [timelineLoading, setTimelineLoading] = useState(false);
 
    // Sales States
    const [salesData, setSalesData] = useState({ total_revenue: 0, items_sold: [] });
@@ -164,6 +169,20 @@ export default function PharmacyScreen({ navigation, route }) {
          Storage.save('pharmacy_data', data);
       } catch (e) { if (!isBg) showToast(parseError(e), 'error'); }
       finally { if (!isBg) setLoading(false); }
+   };
+
+   const fetchTimeline = async (patientId) => {
+     setTimelineLoading(true);
+     setShowTimelineModal(true);
+     try {
+        const resp = await api.get(`/patients/${patientId}`);
+        setSelectedTimeline(resp.data);
+     } catch (e) {
+        showToast("Impossible de charger l'historique", 'error');
+        setShowTimelineModal(false);
+     } finally {
+        setTimelineLoading(false);
+     }
    };
 
    const fetchDeliveryHistory = async (isBg = false) => {
@@ -345,6 +364,7 @@ export default function PharmacyScreen({ navigation, route }) {
 
       setSelectedDispenseMed(null);
       setDispenseQty('1');
+      setPaymentPhone('');
       setPaymentMode(visit?.is_insured ? 'insurance' : 'cash');
       setShowDispenseModal(true);
    };
@@ -371,12 +391,33 @@ export default function PharmacyScreen({ navigation, route }) {
       setDispenseQty('1');
    };
 
+   const detectOperator = (phone) => {
+      const n = phone.replace(/\D/g, '');
+      if (/^(0?84|0?85|0?89|0?08[45])/.test(n)) return 'orange';
+      if (/^(0?97|0?98|0?099[78])/.test(n)) return 'airtel';
+      if (/^(0?81|0?82|0?083[12])/.test(n)) return 'mpesa';
+      return null;
+   };
+
    const handleDispense = async () => {
       if (!selectedVisitForDispense || dispenseItems.length === 0) return showToast(t.error, 'error');
+      if (paymentMode !== 'cash' && paymentMode !== 'insurance') {
+         const op = detectOperator(paymentPhone);
+         if (!op) return showToast('Numéro mobile invalide (Orange/Airtel/M-Pesa)', 'error');
+      }
       setIsSubmitting(true);
       try {
-         await api.post(`/pharmacy/dispense/${selectedVisitForDispense.id}`, { items: dispenseItems, payment_mode: paymentMode });
-         showToast(t.success, 'success'); setShowDispenseModal(false); setSelectedVisitForDispense(null); setDispenseItems([]); fetchData();
+         await api.post(`/pharmacy/dispense/${selectedVisitForDispense.id}`, {
+            items: dispenseItems,
+            payment_mode: paymentMode,
+            payment_phone: paymentMode !== 'cash' && paymentMode !== 'insurance' ? paymentPhone : undefined,
+         });
+         showToast(t.success, 'success');
+         setShowDispenseModal(false);
+         setSelectedVisitForDispense(null);
+         setDispenseItems([]);
+         setPaymentPhone('');
+         fetchData();
       } catch (e) { showToast(parseError(e), 'error'); }
       finally { setIsSubmitting(false); }
    };
@@ -918,10 +959,19 @@ export default function PharmacyScreen({ navigation, route }) {
                      <TouchableOpacity onPress={() => setShowDispenseModal(false)}><MaterialCommunityIcons name="close" size={24} color={brandColor} /></TouchableOpacity>
                   </View>
                   <ScrollView style={{ padding: 20 }} contentContainerStyle={{ paddingBottom: 60 + insets.bottom }} showsVerticalScrollIndicator={false}>
-                      <View style={{ marginBottom: 24, padding: 12, borderLeftWidth: 4, borderLeftColor: brandColor, backgroundColor: isDark ? '#111827' : '#F8FAFC' }}>
-                         <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{selectedVisitForDispense?.patient?.first_name} {selectedVisitForDispense?.patient?.last_name}</Text>
-                         <Text style={{ color: brandColor, fontSize: 12, fontWeight: '900', marginTop: 2 }}>{selectedVisitForDispense?.patient?.gender === 'M' ? 'HOMME' : 'FEMME'} • {selectedVisitForDispense?.patient?.age} ANS</Text>
-                         <Text style={{ color: '#64748B', fontSize: 11, fontWeight: '800', marginTop: 4 }}>Dossier Médical N° {selectedVisitForDispense?.id}</Text>
+                      <View style={{ marginBottom: 24, padding: 12, borderLeftWidth: 4, borderLeftColor: brandColor, backgroundColor: isDark ? '#111827' : '#F8FAFC', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                         <View style={{ flex: 1 }}>
+                            <Text style={{ fontSize: 22, fontWeight: '900', color: isDark ? '#FFF' : '#1A1A1A' }}>{selectedVisitForDispense?.patient?.first_name} {selectedVisitForDispense?.patient?.last_name}</Text>
+                            <Text style={{ color: brandColor, fontSize: 12, fontWeight: '900', marginTop: 2 }}>{selectedVisitForDispense?.patient?.gender === 'M' ? 'HOMME' : 'FEMME'} • {selectedVisitForDispense?.patient?.age} ANS</Text>
+                            <Text style={{ color: '#64748B', fontSize: 11, fontWeight: '800', marginTop: 4 }}>Dossier Médical N° {selectedVisitForDispense?.id}</Text>
+                         </View>
+                         <TouchableOpacity 
+                            onPress={() => fetchTimeline(selectedVisitForDispense?.patient_id)}
+                            style={{ backgroundColor: brandColor + '15', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, borderWidth: 1, borderColor: brandColor + '30', alignItems: 'center' }}
+                         >
+                            <MaterialIcons name="history" size={20} color={brandColor} />
+                            <Text style={{ color: brandColor, fontSize: 8, fontWeight: '900', marginTop: 2 }}>HISTORIQUE</Text>
+                         </TouchableOpacity>
                       </View>
 
                       {/* Prescription document-like card */}
@@ -1042,9 +1092,44 @@ export default function PharmacyScreen({ navigation, route }) {
                                <MaterialCommunityIcons name="pill" size={28} color="#FFF" />
                             </View>
                          </View>
+
+                         {/* Payment Method Selector */}
                          <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 16 }} />
-                         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                            <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Mode: {paymentMode === 'insurance' ? 'Assurance' : 'Cash'}</Text>
+                         <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 1, marginBottom: 10 }}>MODE DE PAIEMENT</Text>
+                         <View style={{ flexDirection: 'row', gap: 8 }}>
+                            {[
+                               { id: 'cash', label: 'CASH', icon: 'cash' },
+                               { id: 'orange', label: 'ORANGE', icon: 'cellphone' },
+                               { id: 'airtel', label: 'AIRTEL', icon: 'cellphone-wireless' },
+                               { id: 'mpesa', label: 'M-PESA', icon: 'bank-transfer' },
+                               { id: 'insurance', label: 'ASSURÉ', icon: 'shield-check' },
+                            ].map(m => (
+                               <TouchableOpacity
+                                  key={m.id}
+                                  onPress={() => setPaymentMode(m.id)}
+                                  style={{ flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 12, backgroundColor: paymentMode === m.id ? '#FFF' : 'rgba(255,255,255,0.15)', borderWidth: 1, borderColor: paymentMode === m.id ? '#FFF' : 'rgba(255,255,255,0.3)' }}
+                               >
+                                  <MaterialCommunityIcons name={m.icon} size={16} color={paymentMode === m.id ? brandColor : '#FFF'} />
+                                  <Text style={{ fontSize: 9, fontWeight: '900', color: paymentMode === m.id ? brandColor : '#FFF', marginTop: 2 }}>{m.label}</Text>
+                               </TouchableOpacity>
+                            ))}
+                         </View>
+
+                         {/* Phone input for mobile money */}
+                         {paymentMode !== 'cash' && paymentMode !== 'insurance' && (
+                            <View style={{ marginTop: 12 }}>
+                               <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', marginBottom: 6 }}>NUMÉRO MOBILE ({detectOperator(paymentPhone) ? detectOperator(paymentPhone).toUpperCase() : '...'})</Text>
+                               <TextInput
+                                  style={{ height: 48, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 16, paddingHorizontal: 16, color: '#FFF', fontWeight: '900', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' }}
+                                  placeholder="08X XXX XXXX" placeholderTextColor="rgba(255,255,255,0.5)"
+                                  keyboardType="phone-pad"
+                                  value={paymentPhone}
+                                  onChangeText={setPaymentPhone}
+                               />
+                            </View>
+                         )}
+
+                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
                             <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>{dispenseItems.length} Produit(s)</Text>
                          </View>
                       </LinearGradient>
@@ -1053,6 +1138,98 @@ export default function PharmacyScreen({ navigation, route }) {
                            <Text style={{ color: '#FFF', fontWeight: '900' }}>DÉLIVRER</Text>
                         </LinearGradient>
                      </TouchableOpacity>
+                  </ScrollView>
+               </View>
+            </View>
+         </Modal>
+
+         <Modal visible={showTimelineModal} animationType="slide" transparent>
+            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+               <View style={{ height: height * 0.9, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 25, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#E2E8F0' }}>
+                     <View>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DOSSIER MÉDICAL</Text>
+                        <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', letterSpacing: 1 }}>HISTORIQUE COMPLET DU MALADE</Text>
+                     </View>
+                     <TouchableOpacity onPress={() => setShowTimelineModal(false)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: isDark ? '#333' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
+                        <MaterialIcons name="close" size={24} color={isDark ? '#FFF' : '#0A0A0A'} />
+                     </TouchableOpacity>
+                  </View>
+
+                  <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+                     {timelineLoading ? (
+                        <View style={{ padding: 40, alignItems: 'center' }}>
+                           <ActivityIndicator color={brandColor} size="large" />
+                           <Text style={{ marginTop: 15, color: isDark ? '#888' : '#64748B', fontWeight: '700' }}>Chargement du dossier...</Text>
+                        </View>
+                     ) : selectedTimeline ? (
+                        <View style={{ padding: 20 }}>
+                           <LinearGradient colors={[brandColor, '#4F46E5']} style={{ padding: 25, borderRadius: 32, marginBottom: 25, elevation: 8 }}>
+                              <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF' }}>{selectedTimeline.patient?.first_name} {selectedTimeline.patient?.last_name}</Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                                 <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 }}>
+                                    <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{selectedTimeline.patient?.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</Text>
+                                 </View>
+                                 <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Né(e) en {selectedTimeline.patient?.birth_year} ({selectedTimeline.patient?.age} ans)</Text>
+                              </View>
+                              <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 15 }} />
+                              <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                 <View>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>STATUT DOSSIER</Text>
+                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.status?.toUpperCase() || 'ACTIF'}</Text>
+                                 </View>
+                                 <View style={{ alignItems: 'flex-end' }}>
+                                    <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>TYPE DE CHARGE</Text>
+                                    <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
+                                 </View>
+                              </View>
+                           </LinearGradient>
+
+                           <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20, letterSpacing: 1.5 }}>TIMELINE DES SOINS</Text>
+
+                           {selectedTimeline.timeline?.length > 0 ? (
+                              selectedTimeline.timeline.map((item, idx) => (
+                                 <View key={idx} style={{ flexDirection: 'row', marginBottom: 25 }}>
+                                    <View style={{ alignItems: 'center', width: 40, marginRight: 15 }}>
+                                       <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                                          <MaterialCommunityIcons 
+                                             name={
+                                                item.type === 'vitals' ? 'heart-pulse' :
+                                                item.type === 'diagnosis' ? 'clipboard-text-pulse' :
+                                                item.type === 'lab' ? 'flask' :
+                                                item.type === 'prescription' ? 'pill' :
+                                                item.type === 'invoice' ? 'cash-multiple' : 'calendar-clock'
+                                             } 
+                                             size={20} color={brandColor} 
+                                          />
+                                       </View>
+                                       {idx < selectedTimeline.timeline.length - 1 && (
+                                          <View style={{ flex: 1, width: 2, backgroundColor: isDark ? '#333' : '#E2E8F0', marginVertical: 4 }} />
+                                       )}
+                                    </View>
+                                    <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 18, borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#333' : '#E2E8F0' }}>
+                                       <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                                          <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1 }}>{item.type.toUpperCase()} • {new Date(item.date).toLocaleDateString()}</Text>
+                                          <Text style={{ fontSize: 9, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                                       </View>
+                                       <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 4 }}>{item.title}</Text>
+                                       <Text style={{ fontSize: 12, color: isDark ? '#888' : '#64748B', lineHeight: 18 }}>{item.content}</Text>
+                                       {item.meta && (
+                                          <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#E2E8F0' }}>
+                                             <Text style={{ fontSize: 10, fontStyle: 'italic', color: brandColor }}>{item.meta}</Text>
+                                          </View>
+                                       )}
+                                    </View>
+                                 </View>
+                              ))
+                           ) : (
+                              <View style={{ alignItems: 'center', paddingVertical: 40, opacity: 0.5 }}>
+                                 <MaterialCommunityIcons name="history" size={48} color={isDark ? '#888' : '#94A3B8'} />
+                                 <Text style={{ marginTop: 15, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>Aucun événement enregistré.</Text>
+                              </View>
+                           )}
+                        </View>
+                     ) : null}
                   </ScrollView>
                </View>
             </View>

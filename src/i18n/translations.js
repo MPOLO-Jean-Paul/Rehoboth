@@ -449,7 +449,56 @@ export const translations = {
       "OBSERVATIONS CLINIQUES": "OBSERVATIONS CLINIQUES",
       "GÉNÉRER LES NOTES": "GÉNÉRER LES NOTES",
       "NAVIGATION SOINS": "NAVIGATION SOINS",
-      "MODULE INFIRMIER": "MODULE INFIRMIER"
+      "MODULE INFIRMIER": "MODULE INFIRMIER",
+
+      // === ORIENTATION RÉCEPTION ===
+      "ORIENTATION DU PATIENT (ACCUEIL)": "ORIENTATION DU PATIENT (ACCUEIL)",
+      "MÉDECIN": "MÉDECIN",
+      "LABORATOIRE": "LABORATOIRE",
+      "MATERNITÉ": "MATERNITÉ",
+      "PHARMACIE": "PHARMACIE",
+
+      // === SORTIE PATIENT (MÉDECIN) ===
+      "SORTIE DU PATIENT": "SORTIE DU PATIENT",
+      "MOTIF DE SORTIE": "MOTIF DE SORTIE",
+      "GUÉRISON": "GUÉRISON",
+      "RÉFÉRÉ AILLEURS": "RÉFÉRÉ AILLEURS",
+      "ÉVASION / ABANDON": "ÉVASION / ABANDON",
+      "DÉCÈS": "DÉCÈS",
+      "DATE DE SUIVI (OPTIONNEL)": "DATE DE SUIVI (OPTIONNEL)",
+      "JJ/MM/AAAA": "JJ/MM/AAAA",
+      "RÉSUMÉ DE SORTIE (OPTIONNEL)": "RÉSUMÉ DE SORTIE (OPTIONNEL)",
+      "Instructions de sortie...": "Instructions de sortie...",
+      "SORTIE": "SORTIE",
+
+      // === PAIEMENT PARTIEL (CAISSE) ===
+      "MONTANT PAYÉ :": "MONTANT PAYÉ :",
+      "Reste à payer :": "Reste à payer :",
+      "Entrez le montant de l'acompte...": "Entrez le montant de l'acompte...",
+      "VALIDER L'ACOMPTE": "VALIDER L'ACOMPTE",
+      "VALIDER L'ENCAISSEMENT": "VALIDER L'ENCAISSEMENT",
+      "LANCER LA TRANSACTION": "LANCER LA TRANSACTION",
+      "Acompte enregistré avec succès": "Acompte enregistré avec succès",
+
+      // === DÉPENSES (CAISSE) ===
+      "DÉPENSES": "DÉPENSES",
+      "Gestion des sorties de fonds": "Gestion des sorties de fonds",
+      "NOUVELLE DÉPENSE": "NOUVELLE DÉPENSE",
+      "Aucune dépense": "Aucune dépense",
+      "Vous n'avez enregistré aucune dépense pour le moment.": "Vous n'avez enregistré aucune dépense pour le moment.",
+      "CATÉGORIE": "CATÉGORIE",
+      "fourniture": "fourniture",
+      "materiel": "materiel",
+      "salaire": "salaire",
+      "autre": "autre",
+      "MONTANT (FC)": "MONTANT (FC)",
+      "Ex: 50000": "Ex: 50000",
+      "Détails de la dépense...": "Détails de la dépense...",
+      "MÉTHODE": "MÉTHODE",
+      "cash": "cash",
+      "mobile": "mobile",
+      "ENREGISTRER": "ENREGISTRER",
+      "Sorties de fonds": "Sorties de fonds"
 },
 
     // Global Labels
@@ -1162,7 +1211,56 @@ export const translations = {
       "OBSERVATIONS CLINIQUES": "CLINICAL OBSERVATIONS",
       "GÉNÉRER LES NOTES": "GENERATE NOTES",
       "NAVIGATION SOINS": "CARE NAVIGATION",
-      "MODULE INFIRMIER": "NURSING MODULE"
+      "MODULE INFIRMIER": "NURSING MODULE",
+
+      // === PATIENT ORIENTATION (RECEPTION) ===
+      "ORIENTATION DU PATIENT (ACCUEIL)": "PATIENT ORIENTATION (RECEPTION)",
+      "MÉDECIN": "DOCTOR",
+      "LABORATOIRE": "LABORATORY",
+      "MATERNITÉ": "MATERNITY",
+      "PHARMACIE": "PHARMACY",
+
+      // === PATIENT DISCHARGE (DOCTOR) ===
+      "SORTIE DU PATIENT": "PATIENT DISCHARGE",
+      "MOTIF DE SORTIE": "DISCHARGE REASON",
+      "GUÉRISON": "RECOVERY",
+      "RÉFÉRÉ AILLEURS": "REFERRED ELSEWHERE",
+      "ÉVASION / ABANDON": "EVASION / ABANDONMENT",
+      "DÉCÈS": "DEATH",
+      "DATE DE SUIVI (OPTIONNEL)": "FOLLOW-UP DATE (OPTIONAL)",
+      "JJ/MM/AAAA": "DD/MM/YYYY",
+      "RÉSUMÉ DE SORTIE (OPTIONNEL)": "DISCHARGE SUMMARY (OPTIONAL)",
+      "Instructions de sortie...": "Discharge instructions...",
+      "SORTIE": "DISCHARGE",
+
+      // === PARTIAL PAYMENT (CASHIER) ===
+      "MONTANT PAYÉ :": "AMOUNT PAID:",
+      "Reste à payer :": "Balance due:",
+      "Entrez le montant de l'acompte...": "Enter advance payment amount...",
+      "VALIDER L'ACOMPTE": "VALIDATE ADVANCE",
+      "VALIDER L'ENCAISSEMENT": "VALIDATE PAYMENT",
+      "LANCER LA TRANSACTION": "LAUNCH TRANSACTION",
+      "Acompte enregistré avec succès": "Advance payment recorded successfully",
+
+      // === EXPENSES (CASHIER) ===
+      "DÉPENSES": "EXPENSES",
+      "Gestion des sorties de fonds": "Cash outflow management",
+      "NOUVELLE DÉPENSE": "NEW EXPENSE",
+      "Aucune dépense": "No expenses",
+      "Vous n'avez enregistré aucune dépense pour le moment.": "No expenses recorded yet.",
+      "CATÉGORIE": "CATEGORY",
+      "fourniture": "supplies",
+      "materiel": "equipment",
+      "salaire": "salary",
+      "autre": "other",
+      "MONTANT (FC)": "AMOUNT (FC)",
+      "Ex: 50000": "E.g., 50000",
+      "Détails de la dépense...": "Expense details...",
+      "MÉTHODE": "METHOD",
+      "cash": "cash",
+      "mobile": "mobile",
+      "ENREGISTRER": "SAVE",
+      "Sorties de fonds": "Cash outflows"
 },
 
     // Global Labels

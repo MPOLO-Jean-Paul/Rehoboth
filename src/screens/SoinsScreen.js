@@ -98,6 +98,10 @@ export default function SoinsScreen({ navigation, route }) {
     oxygen_saturation: '',
   });
 
+  const [showTimelineModal, setShowTimelineModal] = useState(false);
+  const [selectedTimeline, setSelectedTimeline] = useState(null);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
   const [isRightOpen, setIsRightOpen] = useState(false);
   const rightAnim = useRef(new Animated.Value(width)).current;
   const bottomPanelAnim = useRef(new Animated.Value(0)).current;
@@ -143,6 +147,7 @@ export default function SoinsScreen({ navigation, route }) {
       const visit = visits.find(v => String(v.id) === String(route.params.visitId));
       if (visit) {
         setSelectedVisit(visit);
+        setTransferDestination(visit.orientation || 'medecin');
         setActiveView(requestedTab && requestedTab !== 'history' ? requestedTab : 'queue');
         // Clear params to avoid re-triggering
         navigation.setParams({ visitId: null });
@@ -183,6 +188,20 @@ export default function SoinsScreen({ navigation, route }) {
       subscription.remove();
     };
   }, []);
+
+  const fetchTimeline = async (patientId) => {
+    setTimelineLoading(true);
+    setShowTimelineModal(true);
+    try {
+      const resp = await api.get(`/patients/${patientId}`);
+      setSelectedTimeline(resp.data);
+    } catch (e) {
+      showToast("Impossible de charger l'historique", 'error');
+      setShowTimelineModal(false);
+    } finally {
+      setTimelineLoading(false);
+    }
+  };
 
   const loadCachedData = async () => {
     const cached = await Storage.get('soins_data');
@@ -1087,6 +1106,7 @@ export default function SoinsScreen({ navigation, route }) {
                         onPress={() => {
                           if (activeView === 'control' || activeView === 'history') return;
                           setSelectedVisit(v);
+                          setTransferDestination(v.orientation || 'medecin');
                           setNotes(v.nursing_notes || '');
                           setVitals({
                             temperature: v.vitals?.temperature || '',
@@ -1144,8 +1164,19 @@ export default function SoinsScreen({ navigation, route }) {
 
               {/* Patient Summary Card */}
               <LinearGradient colors={[brandColor, '#805AD5']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ padding: 24, borderRadius: 32, marginBottom: 24, elevation: 8 }}>
-                <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>PATIENT EN SOINS</Text>
-                <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF', marginTop: 6 }}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                   <View style={{ flex: 1 }}>
+                      <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: '900', letterSpacing: 2 }}>PATIENT EN SOINS</Text>
+                      <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF', marginTop: 6 }}>{selectedVisit.patient?.first_name} {selectedVisit.patient?.last_name}</Text>
+                   </View>
+                   <TouchableOpacity 
+                      onPress={() => fetchTimeline(selectedVisit.patient_id)}
+                      style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 12, flexDirection: 'row', alignItems: 'center' }}
+                   >
+                      <MaterialCommunityIcons name="history" size={16} color="#FFF" />
+                      <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900', marginLeft: 6 }}>HISTORIQUE</Text>
+                   </TouchableOpacity>
+                </View>
                 <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 14 }} />
                 <View style={{ flexDirection: 'row', gap: 20 }}>
                   <View>
@@ -1517,6 +1548,98 @@ export default function SoinsScreen({ navigation, route }) {
       />
 
       {/* LEFT SOINS ACTION PANEL */}
+      <Modal visible={showTimelineModal} animationType="slide" transparent>
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' }}>
+          <View style={{ height: height * 0.9, backgroundColor: isDark ? '#1A1A1A' : '#F8FAFC', borderTopLeftRadius: 40, borderTopRightRadius: 40, overflow: 'hidden' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 25, borderBottomWidth: 1, borderBottomColor: isDark ? '#333' : '#E2E8F0' }}>
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A' }}>DOSSIER MÉDICAL</Text>
+                <Text style={{ fontSize: 10, color: brandColor, fontWeight: '900', letterSpacing: 1 }}>HISTORIQUE COMPLET DU MALADE</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowTimelineModal(false)} style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: isDark ? '#333' : '#E2E8F0', alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialIcons name="close" size={24} color={isDark ? '#FFF' : '#0A0A0A'} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+              {timelineLoading ? (
+                <View style={{ padding: 40, alignItems: 'center' }}>
+                  <ActivityIndicator color={brandColor} size="large" />
+                  <Text style={{ marginTop: 15, color: isDark ? '#888' : '#64748B', fontWeight: '700' }}>Chargement du dossier...</Text>
+                </View>
+              ) : selectedTimeline ? (
+                <View style={{ padding: 20 }}>
+                  <LinearGradient colors={[brandColor, '#4F46E5']} style={{ padding: 25, borderRadius: 32, marginBottom: 25, elevation: 8 }}>
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: '#FFF' }}>{selectedTimeline.patient?.first_name} {selectedTimeline.patient?.last_name}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+                      <View style={{ backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginRight: 10 }}>
+                        <Text style={{ color: '#FFF', fontSize: 10, fontWeight: '900' }}>{selectedTimeline.patient?.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</Text>
+                      </View>
+                      <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, fontWeight: '700' }}>Né(e) en {selectedTimeline.patient?.birth_year} ({selectedTimeline.patient?.age} ans)</Text>
+                    </View>
+                    <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.2)', marginVertical: 15 }} />
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                      <View>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>STATUT DOSSIER</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.status?.toUpperCase() || 'ACTIF'}</Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 9, fontWeight: '900' }}>TYPE DE CHARGE</Text>
+                        <Text style={{ color: '#FFF', fontSize: 14, fontWeight: '900' }}>{selectedTimeline.patient?.is_insured ? 'ASSURÉ' : 'PRIVÉ'}</Text>
+                      </View>
+                    </View>
+                  </LinearGradient>
+
+                  <Text style={{ fontSize: 13, fontWeight: '900', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 20, letterSpacing: 1.5 }}>TIMELINE DES SOINS</Text>
+
+                  {selectedTimeline.timeline?.length > 0 ? (
+                    selectedTimeline.timeline.map((item, idx) => (
+                      <View key={idx} style={{ flexDirection: 'row', marginBottom: 25 }}>
+                        <View style={{ alignItems: 'center', width: 40, marginRight: 15 }}>
+                          <View style={{ width: 40, height: 40, borderRadius: 14, backgroundColor: brandColor + '15', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+                            <MaterialCommunityIcons 
+                              name={
+                                item.type === 'vitals' ? 'heart-pulse' :
+                                item.type === 'diagnosis' ? 'clipboard-text-pulse' :
+                                item.type === 'lab' ? 'flask' :
+                                item.type === 'prescription' ? 'pill' :
+                                item.type === 'invoice' ? 'cash-multiple' : 'calendar-clock'
+                              } 
+                              size={20} color={brandColor} 
+                            />
+                          </View>
+                          {idx < selectedTimeline.timeline.length - 1 && (
+                            <View style={{ flex: 1, width: 2, backgroundColor: isDark ? '#333' : '#E2E8F0', marginVertical: 4 }} />
+                          )}
+                        </View>
+                        <View style={{ flex: 1, backgroundColor: isDark ? '#1A1A1A' : '#FFF', padding: 18, borderRadius: 24, borderWidth: 1, borderColor: isDark ? '#333' : '#E2E8F0' }}>
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+                            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, letterSpacing: 1 }}>{item.type.toUpperCase()} • {new Date(item.date).toLocaleDateString()}</Text>
+                            <Text style={{ fontSize: 9, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>{new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+                          </View>
+                          <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#FFF' : '#0A0A0A', marginBottom: 4 }}>{item.title}</Text>
+                          <Text style={{ fontSize: 12, color: isDark ? '#888' : '#64748B', lineHeight: 18 }}>{item.content}</Text>
+                          {item.meta && (
+                            <View style={{ marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: isDark ? '#333' : '#E2E8F0' }}>
+                              <Text style={{ fontSize: 10, fontStyle: 'italic', color: brandColor }}>{item.meta}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    ))
+                  ) : (
+                    <View style={{ alignItems: 'center', paddingVertical: 40, opacity: 0.5 }}>
+                      <MaterialCommunityIcons name="history" size={48} color={isDark ? '#888' : '#94A3B8'} />
+                      <Text style={{ marginTop: 15, color: isDark ? '#888' : '#94A3B8', fontWeight: '700' }}>Aucun événement enregistré.</Text>
+                    </View>
+                  )}
+                </View>
+              ) : null}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       <PremiumLeftDrawer
         isOpen={isNavPanelOpen}
         anim={navPanelAnim}
