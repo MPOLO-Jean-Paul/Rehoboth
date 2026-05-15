@@ -155,29 +155,12 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
-  // Connexion directe via un compte sauvegardé
-  const handleAccountSwitch = async (acc) => {
-    setSwitchingAccount(true);
-    try {
-      const account = await setActiveAccount(acc.email);
-      if (!account) {
-        // Compte expiré
-        await removeAccount(acc.email);
-        setAccounts(prev => prev.filter(a => a.email !== acc.email));
-        showToast(lang === 'en' ? 'Session expired. Please log in again.' : 'Session expirée. Reconnectez-vous.', 'warning');
-        return;
-      }
-      // Injecter le token dans axios
-      api.defaults.headers.common['Authorization'] = `Bearer ${account.token}`;
-      setUser({ name: account.name, email: account.email, role: account.role });
-      showToast((lang === 'en' ? 'Connected as ' : 'Connecté en tant que ') + account.name, 'success');
-      setShowAccounts(false);
-      navigateToDashboard(account.role);
-    } catch (e) {
-      showToast('Erreur lors du changement de compte.', 'warning');
-    } finally {
-      setSwitchingAccount(false);
-    }
+  // Sélection d'un compte sauvegardé
+  const handleAccountSwitch = (acc) => {
+    setEmail(acc.email);
+    setPassword('');
+    setShowAccounts(false);
+    showToast(`Compte ${acc.name || acc.email} sélectionné.`, 'info');
   };
 
   const handleBiometricLogin = async () => {
@@ -487,7 +470,7 @@ export default function LoginScreen({ navigation }) {
               </FadeInView>
 
               {/* Bouton toggle comptes enregistrés */}
-              {accounts.length > 0 && !emailFocused && !passFocused && (
+              {accounts.length > 1 && !emailFocused && !passFocused && (
                 <FadeInView delay={350} style={{ marginBottom: 16 }}>
                   <TouchableOpacity
                     onPress={() => setShowAccounts(v => !v)}

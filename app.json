@@ -3,6 +3,12 @@
     "name": "Rehoboth Medical",
     "slug": "rehoboth-medical-erp",
     "version": "1.1.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/1655af98-1be9-4ca5-aef2-103f035ae8bb"
+    },
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "jsEngine": "hermes",

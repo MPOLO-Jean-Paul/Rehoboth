@@ -989,7 +989,7 @@ export default function AdminScreen({ navigation }) {
                        </TouchableOpacity>
                     ))
                  ) : !selectedMonthFolder ? (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15 }}>
                        {Object.entries(
                           patients.reduce((acc, p) => {
                              const month = new Date(p.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -1048,41 +1048,52 @@ export default function AdminScreen({ navigation }) {
            )}
 
            {activeView === 'data' && (
-               <FadeInView>
-                  <View style={styles.rowBetween}>
+                <FadeInView>
+                   <View style={{ marginBottom: 25 }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                         <View style={{ flex: 1, minWidth: 200 }}>
+                            <Text style={[styles.vTitle, { color: C.text, marginBottom: 4 }]}>DONNÉES HÔPITAL</Text>
+                            <Text style={{ color: C.sub, fontSize: 11, fontWeight: '700' }}>Archives classées par année de naissance</Text>
+                         </View>
+                         <View style={{ flexDirection: 'row', gap: 10 }}>
+                            <TouchableOpacity
+                               onPress={() => setShowResetModal(true)}
+                               style={{ backgroundColor: '#EF444415', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EF444430' }}
+                            >
+                               <MaterialCommunityIcons name="database-remove" size={20} color="#EF4444" />
+                               <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>RESET</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => downloadHospitalData(true)}
+                              disabled={isSubmitting}
+                              style={{ backgroundColor: brandColor, paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16, flexDirection: 'row', alignItems: 'center', elevation: 4, opacity: isSubmitting ? 0.6 : 1 }}
+                            >
+                               <MaterialCommunityIcons name="download" size={20} color="#FFF" />
+                               <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 10, marginLeft: 8 }}>EXPORTER</Text>
+                            </TouchableOpacity>
+                         </View>
+                      </View>
+                   </View>
+
+                   {!selectedYearFolder ? (
                      <View>
-                        <Text style={[styles.vTitle, { color: C.text }]}>DONNÉES HÔPITAL</Text>
-                        <Text style={{ color: C.sub, fontSize: 10, fontWeight: '800' }}>Archives classées par année de naissance</Text>
-                     </View>
-                     <View style={{ flexDirection: 'row', gap: 8 }}>
-                        <TouchableOpacity
-                           onPress={() => setShowResetModal(true)}
-                           style={{ backgroundColor: '#EF444415', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#EF444430' }}
-                        >
-                           <MaterialCommunityIcons name="database-remove" size={18} color="#EF4444" />
-                           <Text style={{ color: '#EF4444', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>RESET</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          onPress={() => downloadHospitalData(true)}
-                          disabled={isSubmitting}
-                          style={{ backgroundColor: brandColor, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, flexDirection: 'row', alignItems: 'center', opacity: isSubmitting ? 0.6 : 1 }}
-                        >
-                           <MaterialCommunityIcons name="download" size={18} color="#FFF" />
-                           <Text style={{ color: '#FFF', fontWeight: '900', fontSize: 10, marginLeft: 6 }}>EXPORTER</Text>
-                        </TouchableOpacity>
-                     </View>
-                  </View>
+                        <View style={[styles.searchBox, { backgroundColor: C.surface, borderColor: C.border, marginBottom: 25, borderRadius: 18, height: 54 }]}>
+                           <MaterialIcons name="search" size={22} color={brandColor} />
+                           <TextInput placeholder="Chercher un patient ou une année..." placeholderTextColor={C.sub} style={[styles.searchInput, { color: C.text, fontSize: 14 }]} value={dataSearch} onChangeText={setDataSearch} />
+                        </View>
 
-                  {!selectedYearFolder ? (
-                    <View>
-                       <View style={{ flexDirection: 'row', gap: 10, marginTop: 16, marginBottom: 20 }}>
-                          <View style={[styles.searchBox, { flex: 1, backgroundColor: C.surface, borderColor: C.border, marginBottom: 0 }]}>
-                             <MaterialIcons name="search" size={20} color={brandColor} />
-                             <TextInput placeholder="Nom, code, téléphone..." placeholderTextColor={C.sub} style={[styles.searchInput, { color: C.text }]} value={dataSearch} onChangeText={setDataSearch} />
-                          </View>
-                       </View>
-
-                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                        {loading && !dataRecords.length ? (
+                           <View style={{ padding: 40, alignItems: 'center' }}>
+                              <ActivityIndicator size="large" color={brandColor} />
+                              <Text style={{ marginTop: 15, color: C.sub, fontWeight: '700' }}>Chargement des dossiers...</Text>
+                           </View>
+                        ) : !dataRecords.length ? (
+                           <View style={{ padding: 40, alignItems: 'center', backgroundColor: C.divider, borderRadius: 24 }}>
+                              <MaterialCommunityIcons name="database-off" size={48} color={C.sub} />
+                              <Text style={{ marginTop: 15, color: C.sub, fontWeight: '800', textAlign: 'center' }}>Aucun dossier trouvé sur le serveur</Text>
+                           </View>
+                        ) : (
+                           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15 }}>
                           {Object.entries(
                             asArray(dataRecords).filter(p => p.status !== 'deceased').reduce((acc, p) => {
                               const year = p.birth_year || 'Sans année';
@@ -2774,5 +2785,5 @@ const createStyles = (C, S, isDark, brandColor) => StyleSheet.create({
   label: { fontSize: 9, fontWeight: '900', color: '#94A3B8', marginBottom: 8, letterSpacing: 1 },
   input: { height: 54, borderWidth: 1, borderRadius: 14, paddingHorizontal: 16, marginBottom: 20, fontSize: 15, fontWeight: '600' },
   premiumCard: { elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 10 },
-  folderContainer: { width: (S.width - 55) / 2, backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', borderWidth: 1, borderColor: C.border, elevation: 4 }
+  folderContainer: { width: '47%', backgroundColor: C.surface, borderRadius: 24, padding: 20, alignItems: 'center', borderWidth: 1, borderColor: C.border, elevation: 4, marginBottom: 15 }
 });

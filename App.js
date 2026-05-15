@@ -4,7 +4,7 @@ import { NavigationContainer, createNavigationContainerRef } from '@react-naviga
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import NetInfo from '@react-native-community/netinfo';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import { View, Text, ActivityIndicator, Image, StyleSheet, Animated, Easing, StatusBar, Dimensions, Platform, useColorScheme } from 'react-native';
+import { View, Text, ActivityIndicator, Image, StyleSheet, Animated, Easing, StatusBar, Dimensions, Platform, useColorScheme, Alert } from 'react-native';
 import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider, useToast } from './src/components/ToastManager';
@@ -16,6 +16,7 @@ import { Theme } from './src/constants/theme';
 import { registerForPushNotificationsAsync, savePushToken, sendLocalNotification, Notifications } from './src/services/notifications';
 import { registerBackgroundSync } from './src/services/BackgroundSyncService';
 import { resolveNotificationTarget } from './src/services/notificationNavigation';
+import * as Updates from 'expo-updates';
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -139,6 +140,24 @@ export default function App() {
   const colors = resolvedDark ? Theme.colors.dark : Theme.colors.light;
 
   useEffect(() => {
+    const checkForOTAUpdates = async () => {
+      try {
+        if (__DEV__) return;
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          Alert.alert(
+            (lang === 'en' ? 'Update Available' : 'Mise à jour disponible'),
+            (lang === 'en' ? 'A new version has been downloaded. The app will restart to apply the changes.' : 'Une nouvelle version a été téléchargée. L\'application va redémarrer pour appliquer les modifications.'),
+            [{ text: 'OK', onPress: () => Updates.reloadAsync() }]
+          );
+        }
+      } catch (e) {
+        console.log('[OTA Updates] Error checking for updates', e);
+      }
+    };
+
+    checkForOTAUpdates();
     checkInitialAuth();
   }, []);
 
