@@ -1118,9 +1118,10 @@ export default function AdminScreen({ navigation }) {
                                 </View>
                              </TouchableOpacity>
                           ))}
-                       </View>
-                    </View>
-                  ) : (
+                        </View>
+                     )}
+                  </View>
+               ) : (
                     <View>
                         <TouchableOpacity 
                            onPress={() => setSelectedYearFolder(null)}
