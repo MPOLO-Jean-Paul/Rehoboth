@@ -13,28 +13,36 @@ class PharmacyController extends Controller
 {
     public function indexMedicines(Request $request)
     {
-        $query = Medicine::orderBy('name');
-        if ($request->has('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+        try {
+            $query = Medicine::orderBy('name');
+            if ($request->has('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            }
+            return response()->json($query->limit(1000)->get());
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement de l\'inventaire: ' . $e->getMessage()], 500);
         }
-        return response()->json($query->get());
     }
 
     public function prescriptions(Request $request)
     {
-        $query = Visit::with(['patient', 'invoice'])
-            ->where('current_service', 'pharmacie')
-            ->where('status', '!=', 'completed');
+        try {
+            $query = Visit::with(['patient', 'invoice'])
+                ->where('current_service', 'pharmacie')
+                ->where('status', '!=', 'completed');
 
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->whereHas('patient', function($q) use ($search) {
-                $q->where('first_name', 'like', "%$search%")
-                  ->orWhere('last_name', 'like', "%$search%");
-            });
+            if ($request->has('search')) {
+                $search = $request->search;
+                $query->whereHas('patient', function($q) use ($search) {
+                    $q->where('first_name', 'like', "%$search%")
+                      ->orWhere('last_name', 'like', "%$search%");
+                });
+            }
+
+            return response()->json($query->latest()->get());
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des prescriptions: ' . $e->getMessage()], 500);
         }
-
-        return response()->json($query->latest()->get());
     }
 
     public function inventoryInsights()
@@ -49,13 +57,17 @@ class PharmacyController extends Controller
 
     public function deliveryHistory()
     {
-        return response()->json(
-            StockMovement::with(['medicine', 'user'])
-                ->where('type', 'out')
-                ->latest()
-                ->limit(100)
-                ->get()
-        );
+        try {
+            return response()->json(
+                StockMovement::with(['medicine', 'user'])
+                    ->where('type', 'out')
+                    ->latest()
+                    ->limit(100)
+                    ->get()
+            );
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement de l\'historique: ' . $e->getMessage()], 500);
+        }
     }
 
     public function sales(Request $request)

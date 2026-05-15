@@ -89,5 +89,12 @@ Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::delete('/admin/users/{id}', [AdminController::class, 'deleteUser']);
     Route::get('/admin/messages', [AdminController::class, 'getMessages']);
     Route::post('/admin/broadcast', [AdminController::class, 'broadcastMail']);
-    Route::get('/admin/patient-records', [AdminController::class, 'fetchDataRecords']);
+    Route::get('/admin/patient-records', [AdminController::class, 'getPatientRecords']);
+    Route::put('/admin/patient-records/{id}', [AdminController::class, 'updatePatientRecord']);
+    Route::delete('/admin/patient-records/{id}', [AdminController::class, 'deletePatientRecord']);
+    Route::get('/admin/settings', [AdminController::class, 'getSettings']);
+    Route::post('/admin/settings/bulk', [AdminController::class, 'updateSettingsBulk']);
+    Route::post('/admin/data/reset-all', [AdminController::class, 'resetAll']);
+    Route::post('/admin/data/reset-service', [AdminController::class, 'resetService']);
+    Route::get('/admin/data/export', [AdminController::class, 'exportHospitalData']);
 });

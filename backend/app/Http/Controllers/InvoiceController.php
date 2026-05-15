@@ -11,12 +11,16 @@ class InvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        $invoices = Invoice::with(['patient', 'visit'])
-            ->whereIn('status', ['unpaid', 'insurance_billed'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-            
-        return response()->json($invoices);
+        try {
+            $invoices = Invoice::with(['patient', 'visit'])
+                ->whereIn('status', ['unpaid', 'insurance_billed'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+                
+            return response()->json($invoices);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des factures: ' . $e->getMessage()], 500);
+        }
     }
 
     public function pay(Request $request, $id)

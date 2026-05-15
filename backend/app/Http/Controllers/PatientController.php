@@ -12,16 +12,20 @@ class PatientController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Patient::query();
-        if ($request->has('q')) {
-            $search = $request->string('q')->toString();
-            $query->where(function ($inner) use ($search) {
-                $inner->where('first_name', 'like', '%' . $search . '%')
-                      ->orWhere('last_name', 'like', '%' . $search . '%')
-                      ->orWhere('contact_info', 'like', '%' . $search . '%');
-            });
+        try {
+            $query = Patient::query();
+            if ($request->has('q')) {
+                $search = $request->string('q')->toString();
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('first_name', 'like', '%' . $search . '%')
+                          ->orWhere('last_name', 'like', '%' . $search . '%')
+                          ->orWhere('contact_info', 'like', '%' . $search . '%');
+                });
+            }
+            return response()->json($query->orderBy('id', 'desc')->limit(500)->get());
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des patients: ' . $e->getMessage()], 500);
         }
-        return response()->json($query->orderBy('id', 'desc')->get());
     }
 
     public function store(Request $request)
@@ -63,10 +67,12 @@ class PatientController extends Controller
                 'complaints_notes' => $data['complaints'] ?? '',
             ]);
 
+            $fichePrice = \App\Models\Setting::where('key', 'fiche_price')->value('value') ?: 5000;
+
             $invoice = Invoice::create([
                 'visit_id' => $visit->id,
                 'patient_id' => $patient->id,
-                'amount' => $request->input('consultation_fee', 5000),
+                'amount' => $request->input('consultation_fee', $fichePrice),
                 'status' => ($data['is_insured'] ?? false) ? 'insurance_billed' : 'unpaid',
                 'details' => 'Frais de consultation initiale',
             ]);
@@ -82,40 +88,48 @@ class PatientController extends Controller
 
     public function cashToday(Request $request)
     {
-        $period = $request->query('period', 'day');
-        $startDate = $period === 'month' ? now()->startOfMonth() : now()->startOfDay();
+        try {
+            $period = $request->query('period', 'day');
+            $startDate = $period === 'month' ? now()->startOfMonth() : now()->startOfDay();
 
-        $items = Visit::join('invoices', 'visits.id', '=', 'invoices.visit_id')
-            ->selectRaw('visits.current_service as service, sum(invoices.amount) as total')
-            ->where('invoices.status', 'paid')
-            ->where('invoices.created_at', '>=', $startDate)
-            ->groupBy('visits.current_service')
-            ->get();
+            $items = Visit::join('invoices', 'visits.id', '=', 'invoices.visit_id')
+                ->selectRaw('visits.current_service as service, sum(invoices.amount) as total')
+                ->where('invoices.status', 'paid')
+                ->where('invoices.created_at', '>=', $startDate)
+                ->groupBy('visits.current_service')
+                ->get();
 
-        return response()->json([
-            'items' => $items,
-            'patient_count' => Patient::where('created_at', '>=', $startDate)->count(),
-            'insured_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', true)->count(),
-            'private_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', false)->count(),
-        ]);
+            return response()->json([
+                'items' => $items,
+                'patient_count' => Patient::where('created_at', '>=', $startDate)->count(),
+                'insured_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', true)->count(),
+                'private_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', false)->count(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du calcul des recettes: ' . $e->getMessage()], 500);
+        }
     }
 
     public function statsToday()
     {
-        $todayCount = Patient::whereDate('created_at', now())->count();
-        $yesterdayCount = Patient::whereDate('created_at', now()->yesterday())->count();
-        $insuredCount = Patient::whereDate('created_at', now())->where('is_insured', true)->count();
-        $privateCount = Patient::whereDate('created_at', now())->where('is_insured', false)->count();
+        try {
+            $todayCount = Patient::whereDate('created_at', Carbon::today())->count();
+            $yesterdayCount = Patient::whereDate('created_at', Carbon::yesterday())->count();
+            $insuredCount = Patient::whereDate('created_at', Carbon::today())->where('is_insured', true)->count();
+            $privateCount = Patient::whereDate('created_at', Carbon::today())->where('is_insured', false)->count();
 
-        $diff = $yesterdayCount > 0 ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100 : 0;
+            $diff = $yesterdayCount > 0 ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100 : 0;
 
-        return response()->json([
-            'today_count' => $todayCount,
-            'yesterday_count' => $yesterdayCount,
-            'insured_count' => $insuredCount,
-            'private_count' => $privateCount,
-            'diff_percent' => round($diff, 1)
-        ]);
+            return response()->json([
+                'today_count' => $todayCount,
+                'yesterday_count' => $yesterdayCount,
+                'insured_count' => $insuredCount,
+                'private_count' => $privateCount,
+                'diff_percent' => round($diff, 1)
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des statistiques: ' . $e->getMessage()], 500);
+        }
     }
 
     public function getInsurances()

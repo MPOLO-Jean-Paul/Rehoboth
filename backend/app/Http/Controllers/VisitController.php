@@ -5,21 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class VisitController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        $role = $user->role;
+        try {
+            $user = $request->user();
+            $role = $user->role;
 
-        $query = Visit::with(['patient', 'invoice']);
+            $query = Visit::with(['patient', 'invoice']);
 
-        if ($role !== 'admin') {
-            $query->where('current_service', $role);
+            // Non-admins only see visits for their service
+            if ($role !== 'admin') {
+                $query->where('current_service', $role);
+            }
+
+            // Optional status filter
+            if ($request->has('status')) {
+                $query->where('status', $request->status);
+            }
+
+            return response()->json($query->orderBy('updated_at', 'desc')->limit(500)->get());
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des visites: ' . $e->getMessage()], 500);
         }
-
-        return response()->json($query->orderBy('updated_at', 'desc')->get());
     }
 
     public function forward(Request $request, $id)
@@ -60,13 +71,23 @@ class VisitController extends Controller
 
     public function myToday(Request $request)
     {
-        $user = $request->user();
-        return response()->json(
-            Visit::with(['patient', 'invoice'])
-                ->whereDate('updated_at', now())
-                ->where('status', 'completed')
-                ->latest()
-                ->get()
-        );
+        try {
+            $user = $request->user();
+            
+            // Show all visits from today for the current service (both active and completed)
+            $query = Visit::with(['patient', 'invoice'])
+                ->whereDate('updated_at', Carbon::today());
+
+            if ($user->role !== 'admin') {
+                $query->where('current_service', $user->role);
+            }
+
+            return response()->json([
+                'visits' => $query->latest()->get(),
+                'count' => $query->count()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Erreur lors du chargement des activités du jour: ' . $e->getMessage()], 500);
+        }
     }
 }
