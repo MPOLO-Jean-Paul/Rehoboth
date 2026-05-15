@@ -173,8 +173,71 @@ class AdminController extends Controller
         ]);
     }
 
-    public function fetchDataRecords()
+    public function getPatientRecords(Request $request)
     {
-        return response()->json(Patient::latest()->get());
+        $query = Patient::query();
+
+        if ($request->has('q')) {
+            $q = $request->query('q');
+            $query->where(function($f) use ($q) {
+                $f->where('first_name', 'like', "%$q%")
+                  ->orWhere('last_name', 'like', "%$q%")
+                  ->orWhere('id', 'like', "%$q%");
+            });
+        }
+
+        if ($request->has('birth_year')) {
+            $query->where('birth_year', $request->query('birth_year'));
+        }
+
+        return response()->json($query->with('insurance')->latest()->limit($request->query('limit', 100))->get());
+    }
+
+    public function updatePatientRecord(Request $request, $id)
+    {
+        $patient = Patient::findOrFail($id);
+        $patient->update($request->all());
+        return response()->json(['message' => 'Dossier mis à jour', 'patient' => $patient]);
+    }
+
+    public function deletePatientRecord($id)
+    {
+        $patient = Patient::findOrFail($id);
+        $patient->delete();
+        return response()->json(['message' => 'Dossier supprimé']);
+    }
+
+    public function exportHospitalData()
+    {
+        return response()->json([
+            'generated_at' => now(),
+            'patients' => Patient::with('insurance')->get(),
+            'insurances' => Patient::where('is_insured', true)->select('insurance_company')->distinct()->get(),
+            'summary' => [
+                'total_patients' => Patient::count(),
+                'insured_patients' => Patient::where('is_insured', true)->count(),
+            ]
+        ]);
+    }
+
+    public function resetAll(Request $request)
+    {
+        // This is destructive!
+        Patient::truncate();
+        Visit::truncate();
+        Invoice::truncate();
+        // Keep users
+        return response()->json(['message' => 'Toutes les données ont été réinitialisées.']);
+    }
+
+    public function resetService(Request $request)
+    {
+        $service = $request->input('service');
+        if ($service === 'reception') {
+            Patient::truncate();
+        } elseif ($service === 'pharmacie') {
+            // Logic for pharmacy reset
+        }
+        return response()->json(['message' => "Données du service $service réinitialisées."]);
     }
 }
