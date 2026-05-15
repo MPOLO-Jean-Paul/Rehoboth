@@ -284,73 +284,51 @@ export default function App() {
   const checkInitialAuth = async () => {
     const startTime = Date.now();
     try {
-          const { token, role, rememberMe, biometricsEnabled, lastUserEmail, lastUserName } = await loadAuthSession();
+      const { token, role, rememberMe, lastUserEmail, lastUserName, isExpired } = await loadAuthSession();
       let targetRoute = 'Home';
-      
-          if (token && rememberMe === 'true') {
-            try {
-              const networkState = await NetInfo.fetch();
-          const routeMap = {
-            'admin': 'AdminDashboard',
-            'reception': 'Reception',
-            'caisse': 'Cashier',
-            'medecin': 'DoctorDashboard',
-            'labo': 'LaboDashboard',
-            'pharmacie': 'PharmacyDashboard',
-            'soins': 'SoinsDashboard',
-            'maternite': 'MaternityDashboard'
-          };
 
-              if (networkState.isConnected) {
-                const userRes = await api.get('/user');
-                setUser(userRes.data);
-              } else {
-                setUser({
-                  name: lastUserName,
-                  email: lastUserEmail,
-                  role,
-                });
-              }
-              targetRoute = routeMap[role] || 'Home';
-            } catch (authError) {
-              if (authError?.response?.status === 401) {
-                await clearAuthSession();
-              } else {
-                setUser({
-                  name: lastUserName,
-                  email: lastUserEmail,
-                  role,
-                });
-                const routeMap = {
-              'admin': 'AdminDashboard',
-              'reception': 'Reception',
-              'caisse': 'Cashier',
-              'medecin': 'DoctorDashboard',
-              'labo': 'LaboDashboard',
-              'pharmacie': 'PharmacyDashboard',
-              'soins': 'SoinsDashboard',
-              'maternite': 'MaternityDashboard'
-            };
+      const routeMap = {
+        'admin':     'AdminDashboard',
+        'reception': 'Reception',
+        'caisse':    'Cashier',
+        'medecin':   'DoctorDashboard',
+        'labo':      'LaboDashboard',
+        'pharmacie': 'PharmacyDashboard',
+        'soins':     'SoinsDashboard',
+        'maternite': 'MaternityDashboard',
+      };
+
+      if (token && rememberMe === 'true' && !isExpired) {
+        try {
+          const networkState = await NetInfo.fetch();
+          if (networkState.isConnected) {
+            api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            const userRes = await api.get('/user');
+            setUser(userRes.data);
+            targetRoute = routeMap[userRes.data.role] || 'Home';
+          } else {
+            setUser({ name: lastUserName, email: lastUserEmail, role });
+            targetRoute = routeMap[role] || 'Home';
+          }
+        } catch (authError) {
+          if (authError?.response?.status === 401) {
+            await clearAuthSession({ preserveAccounts: true });
+          } else {
+            setUser({ name: lastUserName, email: lastUserEmail, role });
             targetRoute = routeMap[role] || 'Home';
           }
         }
       } else {
-        if (!token || biometricsEnabled !== 'true') {
-          await clearAuthSession();
-        }
+        // Session expirée ou sans rememberMe : effacer token mais garder les comptes
+        await clearAuthSession({ preserveAccounts: true });
       }
 
-      // Max 3s d'attente — professionnel
       const elapsedTime = Date.now() - startTime;
       const remainingTime = Math.max(0, 1500 - elapsedTime);
-      setTimeout(() => {
-        setInitialRoute(targetRoute);
-      }, remainingTime);
+      setTimeout(() => setInitialRoute(targetRoute), remainingTime);
 
     } catch (e) {
-      setTimeout(() => {
-        setInitialRoute('Home');
-      }, 3000);
+      setTimeout(() => setInitialRoute('Home'), 3000);
     }
   };
 

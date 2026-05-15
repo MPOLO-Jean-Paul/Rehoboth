@@ -9,7 +9,7 @@ import { AppContext } from '../../App';
 import { ToastContext } from '../components/ToastManager';
 import { PressableScale, FadeInView } from '../components/AnimatedComponents';
 import { translations } from '../i18n/translations';
-import { saveAuthSession, loadAuthSession, setActiveAccount } from '../services/session';
+import { saveAuthSession, loadAuthSession, setActiveAccount, removeAccount, getAccounts } from '../services/session';
 import { registerForPushNotificationsAsync, savePushToken } from '../services/notifications';
 import * as LocalAuthentication from 'expo-local-authentication';
 
@@ -91,6 +91,9 @@ export default function LoginScreen({ navigation }) {
   const [biometricType, setBiometricType] = useState(null); 
   const [hasStoredSession, setHasStoredSession] = useState(false);
   const [storedUser, setStoredUser] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+  const [showAccounts, setShowAccounts] = useState(false);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
 
   // Logo entrance: fade + slide up + scale
   const logoOpacity = useRef(new Animated.Value(0)).current;
@@ -140,15 +143,40 @@ export default function LoginScreen({ navigation }) {
 
   const checkStoredSession = async () => {
     const session = await loadAuthSession();
-    if (session.token && session.lastUserEmail && session.biometricsEnabled === 'true') {
+    const savedAccounts = session.accounts || [];
+    setAccounts(savedAccounts);
+    if (session.token && session.lastUserEmail) {
       setHasStoredSession(true);
       setStoredUser(session);
-      if (!email && session.lastUserEmail) {
-        setEmail(session.lastUserEmail);
-      }
+      if (!email && session.lastUserEmail) setEmail(session.lastUserEmail);
     } else {
       setHasStoredSession(false);
       setStoredUser(null);
+    }
+  };
+
+  // Connexion directe via un compte sauvegardé
+  const handleAccountSwitch = async (acc) => {
+    setSwitchingAccount(true);
+    try {
+      const account = await setActiveAccount(acc.email);
+      if (!account) {
+        // Compte expiré
+        await removeAccount(acc.email);
+        setAccounts(prev => prev.filter(a => a.email !== acc.email));
+        showToast(lang === 'en' ? 'Session expired. Please log in again.' : 'Session expirée. Reconnectez-vous.', 'warning');
+        return;
+      }
+      // Injecter le token dans axios
+      api.defaults.headers.common['Authorization'] = `Bearer ${account.token}`;
+      setUser({ name: account.name, email: account.email, role: account.role });
+      showToast((lang === 'en' ? 'Connected as ' : 'Connecté en tant que ') + account.name, 'success');
+      setShowAccounts(false);
+      navigateToDashboard(account.role);
+    } catch (e) {
+      showToast('Erreur lors du changement de compte.', 'warning');
+    } finally {
+      setSwitchingAccount(false);
     }
   };
 
@@ -458,37 +486,60 @@ export default function LoginScreen({ navigation }) {
                 </View>
               </FadeInView>
 
-              {storedUser?.accounts?.length > 1 && !emailFocused && !passFocused && (
-                <FadeInView delay={350} style={tw`mb-6`}>
-                  <Text style={[tw`text-[10px] font-black mb-3 ml-1`, { color: C.textSecondary, letterSpacing: 1 }]}>COMPTES ENREGISTRÉS</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row`}>
-                    {storedUser.accounts.map((acc, idx) => (
-                      <TouchableOpacity
-                        key={idx}
-                        onPress={() => {
-                          setEmail(acc.email);
-                          setPassword('');
-                          showToast(`Compte ${acc.name} sélectionné`, "info");
-                        }}
-                        style={[
-                          tw`mr-3 px-4 py-3 border flex-row items-center`,
-                          { 
-                            borderRadius: 12, 
-                            backgroundColor: email === acc.email ? brandColor + '15' : (isDark ? 'rgba(255,255,255,0.05)' : '#FFF'),
-                            borderColor: email === acc.email ? brandColor : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0')
-                          }
-                        ]}
-                      >
-                        <View style={[tw`w-8 h-8 rounded-full items-center justify-center mr-3`, { backgroundColor: brandColor }]}>
-                          <Text style={tw`text-white text-[10px] font-black`}>{acc.name.substring(0, 1).toUpperCase()}</Text>
-                        </View>
-                        <View>
-                          <Text style={[tw`text-xs font-black`, { color: isDark ? '#FFF' : '#0F172A' }]}>{acc.name}</Text>
-                          <Text style={[tw`text-[9px] font-bold`, { color: C.sub }]}>{acc.role.toUpperCase()}</Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+              {/* Bouton toggle comptes enregistrés */}
+              {accounts.length > 0 && !emailFocused && !passFocused && (
+                <FadeInView delay={350} style={{ marginBottom: 16 }}>
+                  <TouchableOpacity
+                    onPress={() => setShowAccounts(v => !v)}
+                    style={[
+                      tw`flex-row items-center justify-between px-4 py-3 border`,
+                      { borderRadius: 14, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0', backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC' }
+                    ]}
+                  >
+                    <View style={tw`flex-row items-center`}>
+                      <MaterialIcons name="switch-account" size={18} color={brandColor} style={{ marginRight: 10 }} />
+                      <Text style={[tw`text-sm font-bold`, { color: isDark ? '#CBD5E1' : '#475569' }]}>
+                        {lang === 'en' ? 'Switch Account' : 'Changer de compte'}
+                        <Text style={{ color: brandColor }}> ({accounts.length})</Text>
+                      </Text>
+                    </View>
+                    <MaterialIcons name={showAccounts ? 'expand-less' : 'expand-more'} size={20} color={C.textSecondary} />
+                  </TouchableOpacity>
+
+                  {showAccounts && (
+                    <View style={[
+                      tw`mt-2 border`,
+                      { borderRadius: 14, borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#E2E8F0', overflow: 'hidden' }
+                    ]}>
+                      {accounts.map((acc, idx) => (
+                        <TouchableOpacity
+                          key={acc.email}
+                          onPress={() => handleAccountSwitch(acc)}
+                          disabled={switchingAccount}
+                          style={[
+                            tw`flex-row items-center px-4 py-3`,
+                            idx < accounts.length - 1 && { borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9' },
+                            { backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#FFFFFF' }
+                          ]}
+                        >
+                          {/* Avatar */}
+                          <View style={[tw`w-10 h-10 rounded-full items-center justify-center mr-3`, { backgroundColor: brandColor }]}>
+                            <Text style={tw`text-white text-sm font-black`}>{(acc.name || acc.email)[0].toUpperCase()}</Text>
+                          </View>
+                          <View style={tw`flex-1`}>
+                            <Text style={[tw`text-sm font-black`, { color: isDark ? '#F1F5F9' : '#0F172A' }]}>{acc.name || acc.email}</Text>
+                            <Text style={[tw`text-[10px] font-bold uppercase`, { color: brandColor }]}>{acc.role}</Text>
+                            <Text style={[tw`text-[9px]`, { color: C.textSecondary }]}>{acc.email}</Text>
+                          </View>
+                          {switchingAccount ? (
+                            <ActivityIndicator size="small" color={brandColor} />
+                          ) : (
+                            <MaterialIcons name="arrow-forward-ios" size={14} color={C.textSecondary} />
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
                 </FadeInView>
               )}
 
