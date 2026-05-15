@@ -28,6 +28,7 @@ export default function PharmacyScreen({ navigation, route }) {
    const { showToast } = useContext(ToastContext);
    const t = translations[lang] || translations.fr;
    const bt = t.bottomTabs || {};
+   const parseError = (e) => e.response?.data?.message || e.message || t.error || 'Erreur pharmacie';
 
    const [activeTab, setActiveTab] = useState('dispense');
    const [activeView, setActiveView] = useState('dispense'); // dispense, stock, history, prices

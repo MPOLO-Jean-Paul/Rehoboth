@@ -20,8 +20,8 @@ export default function PremiumLeftDrawer({
   isDark: _ignored,
   t,
 }) {
-  const { themeMode, user } = useContext(AppContext);
-  const { isDark: dark, S, brandColor } = useTheme();
+  const { user } = useContext(AppContext);
+  const { isDark: dark, S, brandColor, lang = 'fr' } = useTheme();
   const insets = useSafeAreaInsets();
 
   if (!isOpen) return null;
@@ -132,7 +132,9 @@ export default function PremiumLeftDrawer({
             {/* Section Title */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                <View style={{ width: 3, height: 24, backgroundColor: brandColor, borderRadius: 2, marginRight: 10 }} />
-               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>Navigation</Text>
+               <Text style={{ fontSize: 22, fontWeight: '900', color: txt, letterSpacing: 0 }}>
+                 {lang === 'fr' ? 'Navigation' : 'Navigation'}
+               </Text>
             </View>
           </LinearGradient>
 

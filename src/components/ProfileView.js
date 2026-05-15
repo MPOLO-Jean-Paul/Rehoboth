@@ -77,15 +77,15 @@ export default function ProfileView({ onBack }) {
   if (!user) return null;
 
   const roleDisplay = {
-    'admin': 'Administrateur',
-    'reception': 'Réceptionniste',
-    'medecin': 'Médecin',
-    'infirmier': 'Infirmier',
-    'soins': 'Infirmier / Soins',
-    'maternite': 'Maternité',
-    'labo': 'Laborantin',
-    'pharmacie': 'Pharmacien',
-    'caisse': 'Caissier'
+    'admin': lang === 'fr' ? 'Administrateur' : 'Administrator',
+    'reception': lang === 'fr' ? 'Réceptionniste' : 'Receptionist',
+    'medecin': lang === 'fr' ? 'Médecin' : 'Doctor',
+    'infirmier': lang === 'fr' ? 'Infirmier' : 'Nurse',
+    'soins': lang === 'fr' ? 'Infirmier / Soins' : 'Nurse / Care',
+    'maternite': lang === 'fr' ? 'Maternité' : 'Maternity',
+    'labo': lang === 'fr' ? 'Laborantin' : 'Lab Tech',
+    'pharmacie': lang === 'fr' ? 'Pharmacien' : 'Pharmacist',
+    'caisse': lang === 'fr' ? 'Caissier' : 'Cashier'
   }[user.role?.toLowerCase()] || user.role;
 
   const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString(lang === 'fr' ? 'fr-FR' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Inconnu';

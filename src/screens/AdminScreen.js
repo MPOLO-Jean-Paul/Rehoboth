@@ -989,7 +989,7 @@ export default function AdminScreen({ navigation }) {
                        </TouchableOpacity>
                     ))
                  ) : !selectedMonthFolder ? (
-                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15 }}>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                        {Object.entries(
                           patients.reduce((acc, p) => {
                              const month = new Date(p.created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
@@ -1082,9 +1082,9 @@ export default function AdminScreen({ navigation }) {
                           </View>
                        </View>
 
-                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 15 }}>
+                       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
                           {Object.entries(
-                            asArray(dataRecords).reduce((acc, p) => {
+                            asArray(dataRecords).filter(p => p.status !== 'deceased').reduce((acc, p) => {
                               const year = p.birth_year || 'Sans année';
                               if (!acc[year]) acc[year] = [];
                               acc[year].push(p);
@@ -1101,9 +1101,9 @@ export default function AdminScreen({ navigation }) {
                                 style={styles.folderContainer}
                              >
                                 <MaterialCommunityIcons name="folder-account" size={48} color={brandColor} style={{ opacity: 0.8 }} />
-                                <Text style={{ color: C.text, fontWeight: '900', fontSize: 13, marginTop: 12, textAlign: 'center' }}>ANNÉE {year}</Text>
+                                <Text style={{ color: C.text, fontWeight: '900', fontSize: 13, marginTop: 12, textAlign: 'center' }}>{lang === 'en' ? 'YEAR' : 'ANNÉE'} {year}</Text>
                                 <View style={{ backgroundColor: C.brandLight, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8, marginTop: 8 }}>
-                                   <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{records.length} DOSSIERS</Text>
+                                   <Text style={{ color: brandColor, fontSize: 10, fontWeight: '900' }}>{records.length} {lang === 'en' ? 'RECORDS' : 'DOSSIERS'}</Text>
                                 </View>
                              </TouchableOpacity>
                           ))}
@@ -1349,7 +1349,7 @@ export default function AdminScreen({ navigation }) {
                      )}
                   </View>
 
-                  <View style={{ flexDirection: 'row', gap: 15, marginBottom: 25 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 25 }}>
                      {/* TOP INSURANCES */}
                      <View style={{ flex: 1, backgroundColor: C.surface, borderRadius: 28, padding: 20, borderWidth: 1, borderColor: C.border }}>
                         <Text style={{ fontSize: 11, fontWeight: '900', color: C.text, marginBottom: 15 }}>TOP ASSURANCES</Text>

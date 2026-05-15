@@ -35,6 +35,9 @@ export default function PremiumRightPanel({
   const accountName = user?.name || roleName;
   const accountRole = user?.role ? user.role.toUpperCase() : String(roleName || '').toUpperCase();
 
+  // Translation helpers
+  const getLabel = (fr, en) => lang === 'fr' ? fr : en;
+
   // Android-style radio row
   const RadioRow = ({ label, subtitle, selected, onPress, isFirst, isLast }) => (
     <TouchableOpacity
@@ -58,7 +61,6 @@ export default function PremiumRightPanel({
         <Text style={{ fontSize: 16, color: txt, fontWeight: '400' }}>{label}</Text>
         {subtitle ? <Text style={{ fontSize: 12, color: sub, marginTop: 2 }}>{subtitle}</Text> : null}
       </View>
-      {/* Android-style radio button */}
       <View style={{
         width: 22, height: 22, borderRadius: 11,
         borderWidth: 2,
@@ -76,7 +78,6 @@ export default function PremiumRightPanel({
     </TouchableOpacity>
   );
 
-  // Android-style list row (with chevron or toggle)
   const ListRow = ({ icon, iconBg, label, subtitle, onPress, rightElement, isFirst, isLast, showChevron = true }) => (
     <TouchableOpacity
       onPress={onPress}
@@ -118,7 +119,6 @@ export default function PremiumRightPanel({
 
   return (
     <>
-      {/* Dimmed overlay */}
       <TouchableOpacity
         activeOpacity={1}
         onPress={onClose}
@@ -156,7 +156,9 @@ export default function PremiumRightPanel({
               </View>
             </TouchableOpacity>
             
-            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>Paramètres</Text>
+            <Text style={{ fontSize: 24, fontWeight: '900', color: txt, marginBottom: 20, letterSpacing: 0 }}>
+              {getLabel('Paramètres', 'Settings')}
+            </Text>
 
             {/* Profile Card */}
             <TouchableOpacity 
@@ -180,14 +182,14 @@ export default function PremiumRightPanel({
                   shadowColor: brandColor, shadowOpacity: 0.4, shadowRadius: 12
                 }}
               >
-                <MaterialCommunityIcons name={roleIcon} size={28} color={brandColor} />
+                <MaterialCommunityIcons name={roleIcon} size={28} color="#FFF" />
               </LinearGradient>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 18, fontWeight: '900', color: txt }}>{accountName}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isOnline ? '#34C759' : '#FF3B30', marginRight: 6 }} />
                    <Text style={{ fontSize: 11, color: brandColor, fontWeight: '800', letterSpacing: 0 }}>
-                     {accountRole} • {isOnline ? 'EN LIGNE' : 'HORS-LIGNE'}
+                     {accountRole} • {isOnline ? getLabel('EN LIGNE', 'ONLINE') : getLabel('HORS-LIGNE', 'OFFLINE')}
                    </Text>
                 </View>
               </View>
@@ -198,40 +200,46 @@ export default function PremiumRightPanel({
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}>
 
             {/* COMPTE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>COMPTE</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>
+              {getLabel('COMPTE', 'ACCOUNT')}
+            </Text>
             <View style={{ borderRadius: 12, overflow: 'hidden' }}>
               <ListRow
                 icon={<MaterialCommunityIcons name="information" size={18} color="#FFF" />}
                 iconBg={brandColor}
-                label="Mon Compte"
-                subtitle="Gérer mes informations"
+                label={getLabel('Mon Compte', 'My Account')}
+                subtitle={getLabel('Gérer mes informations', 'Manage my info')}
                 isFirst isLast
                 onPress={() => { onClose(); if (setActiveView) setActiveView('profile'); }}
               />
             </View>
 
             {/* APPARENCE */}
-            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>APPARENCE</Text>
+            <Text style={{ fontSize: 10, fontWeight: '900', color: brandColor, marginTop: 28, marginBottom: 12, marginLeft: 6, letterSpacing: 0 }}>
+              {getLabel('APPARENCE', 'APPEARANCE')}
+            </Text>
 
             {/* Thème */}
-            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>Thème de l'application</Text>
+            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>
+              {getLabel("Thème de l'application", 'Application Theme')}
+            </Text>
             <View style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
               <RadioRow
-                label="Clair"
-                subtitle="Toujours en mode clair"
+                label={getLabel('Clair', 'Light')}
+                subtitle={getLabel('Toujours en mode clair', 'Always in light mode')}
                 selected={themeMode === 'light'}
                 onPress={() => setThemeMode && setThemeMode('light')}
                 isFirst
               />
               <RadioRow
-                label="Sombre"
-                subtitle="Toujours en mode sombre"
+                label={getLabel('Sombre', 'Dark')}
+                subtitle={getLabel('Toujours en mode sombre', 'Always in dark mode')}
                 selected={themeMode === 'dark'}
                 onPress={() => setThemeMode && setThemeMode('dark')}
               />
               <RadioRow
-                label="Système"
-                subtitle="Suivre les préférences du téléphone"
+                label={getLabel('Système', 'System')}
+                subtitle={getLabel('Suivre les préférences du téléphone', 'Follow phone preferences')}
                 selected={themeMode === 'system'}
                 onPress={() => setThemeMode && setThemeMode('system')}
                 isLast
@@ -239,16 +247,18 @@ export default function PremiumRightPanel({
             </View>
 
             {/* Langue */}
-            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>Langue de l'interface</Text>
+            <Text style={{ fontSize: 12, color: sub, marginBottom: 6, marginLeft: 4 }}>
+              {getLabel("Langue de l'interface", 'Interface Language')}
+            </Text>
             <View style={{ borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
               <RadioRow
-                label=""
+                label="Français"
                 selected={lang === 'fr'}
                 onPress={() => setLang && setLang('fr')}
                 isFirst
               />
               <RadioRow
-                label="Anglais"
+                label="English"
                 selected={lang === 'en'}
                 onPress={() => setLang && setLang('en')}
                 isLast
@@ -261,8 +271,8 @@ export default function PremiumRightPanel({
               <ListRow
                 icon={<MaterialIcons name={notificationsEnabled ? 'notifications-active' : 'notifications-off'} size={18} color={brandColor} />}
                 iconBg="#34C759"
-                label="Notifications push"
-                subtitle={notificationsEnabled ? 'Alertes activées' : 'Alertes désactivées'}
+                label={getLabel('Notifications push', 'Push Notifications')}
+                subtitle={notificationsEnabled ? getLabel('Alertes activées', 'Alerts enabled') : getLabel('Alertes désactivées', 'Alerts disabled')}
                 isFirst isLast
                 showChevron={false}
                 rightElement={
@@ -294,7 +304,7 @@ export default function PremiumRightPanel({
             >
               <MaterialIcons name="logout" size={20} color="#FF3B30" />
               <Text style={{ color: '#FF3B30', fontWeight: '700', marginLeft: 10, fontSize: 15 }}>
-                {t.settingsLogout || 'Déconnexion'}
+                {getLabel('Déconnexion', 'Sign Out')}
               </Text>
             </TouchableOpacity>
           </View>

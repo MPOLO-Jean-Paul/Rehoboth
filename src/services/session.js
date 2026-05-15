@@ -28,14 +28,22 @@ export async function saveAuthSession({ token, role, rememberMe, biometricsEnabl
   
   if (lastUserEmail) {
     await storage.setItem(ACTIVE_EMAIL_KEY, lastUserEmail);
-    const account = {
+    const accountsRaw = await storage.getItem(ACCOUNTS_KEY);
+    let accounts = accountsRaw ? JSON.parse(accountsRaw) : [];
+    
+    // Remove existing entry for this email if it exists
+    accounts = accounts.filter(a => a.email !== lastUserEmail);
+    
+    // Add new/updated account to the top
+    accounts.unshift({
       email: lastUserEmail,
       name: lastUserName,
       role: role,
       token: token
-    };
+    });
 
-    await storage.setItem(ACCOUNTS_KEY, JSON.stringify([account]));
+    // Limit to 2 accounts
+    await storage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts.slice(0, 2)));
   }
 }
 
@@ -53,17 +61,7 @@ export async function clearAuthSession({ preserveAccounts = true } = {}) {
 
 export async function getAccounts() {
   const accountsRaw = await storage.getItem(ACCOUNTS_KEY);
-  const accounts = accountsRaw ? JSON.parse(accountsRaw) : [];
-  const latestAccount = accounts.slice(0, 1);
-
-  if (accounts.length > 1) {
-    await storage.setItem(ACCOUNTS_KEY, JSON.stringify(latestAccount));
-    if (latestAccount[0]?.email) {
-      await storage.setItem(ACTIVE_EMAIL_KEY, latestAccount[0].email);
-    }
-  }
-
-  return latestAccount;
+  return accountsRaw ? JSON.parse(accountsRaw) : [];
 }
 
 export async function loadAuthSession() {

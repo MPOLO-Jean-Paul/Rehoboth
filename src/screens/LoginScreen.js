@@ -307,7 +307,7 @@ export default function LoginScreen({ navigation }) {
               ]}
               onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}
             >
-              <MaterialIcons name="arrow-back-ios-new" size={18} color={isDark ? "#FFF" : '#0A0A0A'} />
+              <MaterialIcons name="arrow-back" size={20} color={isDark ? "#FFF" : '#0A0A0A'} />
             </TouchableOpacity>
           </Animated.View>
 
@@ -370,7 +370,7 @@ export default function LoginScreen({ navigation }) {
                     ? { borderColor: brandColor, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : '#FFF' } 
                     : { borderColor: isDark ? 'rgba(148, 163, 184, 0.16)' : C.border, backgroundColor: isDark ? 'rgba(15, 23, 42, 0.72)' : '#FFFFFF' }
                 ]}>
-                  <Feather name="account" size={20} color={emailFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
+                  <Feather name="user" size={20} color={emailFocused ? brandColor : (isDark ? "#555555" : '#94A3B8')} style={tw`mr-4`} />
                   <TextInput
                     style={[tw`flex-1 text-base font-semibold`, { color: isDark ? '#F8FAFC' : '#0A0A0A' }]}
                     placeholder="agent@mdcd.com" placeholderTextColor={isDark ? "#555555" : '#94A3B8'}
@@ -451,12 +451,46 @@ export default function LoginScreen({ navigation }) {
                   ) : (
                     <TouchableOpacity onPress={showLoginHelp}>
                       <Text style={tw`text-sm font-black text-[${brandColor}]`}>
-                        {t.loginForgot || ""}
+                        {t.loginForgot || "Aide"}
                       </Text>
                     </TouchableOpacity>
                   )}
                 </View>
               </FadeInView>
+
+              {storedUser?.accounts?.length > 1 && !emailFocused && !passFocused && (
+                <FadeInView delay={350} style={tw`mb-6`}>
+                  <Text style={[tw`text-[10px] font-black mb-3 ml-1`, { color: C.textSecondary, letterSpacing: 1 }]}>COMPTES ENREGISTRÉS</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={tw`flex-row`}>
+                    {storedUser.accounts.map((acc, idx) => (
+                      <TouchableOpacity
+                        key={idx}
+                        onPress={() => {
+                          setEmail(acc.email);
+                          setPassword('');
+                          showToast(`Compte ${acc.name} sélectionné`, "info");
+                        }}
+                        style={[
+                          tw`mr-3 px-4 py-3 border flex-row items-center`,
+                          { 
+                            borderRadius: 12, 
+                            backgroundColor: email === acc.email ? brandColor + '15' : (isDark ? 'rgba(255,255,255,0.05)' : '#FFF'),
+                            borderColor: email === acc.email ? brandColor : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0')
+                          }
+                        ]}
+                      >
+                        <View style={[tw`w-8 h-8 rounded-full items-center justify-center mr-3`, { backgroundColor: brandColor }]}>
+                          <Text style={tw`text-white text-[10px] font-black`}>{acc.name.substring(0, 1).toUpperCase()}</Text>
+                        </View>
+                        <View>
+                          <Text style={[tw`text-xs font-black`, { color: isDark ? '#FFF' : '#0F172A' }]}>{acc.name}</Text>
+                          <Text style={[tw`text-[9px] font-bold`, { color: C.sub }]}>{acc.role.toUpperCase()}</Text>
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                </FadeInView>
+              )}
 
               <FadeInView delay={400}>
                 <PressableScale
@@ -487,7 +521,7 @@ export default function LoginScreen({ navigation }) {
                       <Text style={[tw`text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-black mr-2`, { letterSpacing: 0 }]}>
                         {t.login || 'Se Connecter'}
                       </Text>
-                      <Feather name="account" size={20} color="#FFF" />
+                        <Feather name="log-in" size={20} color="#FFF" />
                     </>
                   )}
                 </PressableScale>
