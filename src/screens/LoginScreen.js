@@ -156,11 +156,41 @@ export default function LoginScreen({ navigation }) {
   };
 
   // Sélection d'un compte sauvegardé
-  const handleAccountSwitch = (acc) => {
-    setEmail(acc.email);
-    setPassword('');
-    setShowAccounts(false);
-    showToast(`Compte ${acc.name || acc.email} sélectionné.`, 'info');
+  const handleAccountSwitch = async (acc) => {
+    if (!acc.token) {
+      setEmail(acc.email);
+      setPassword('');
+      setShowAccounts(false);
+      showToast(`Compte ${acc.name || acc.email} sélectionné. Veuillez entrer votre mot de passe.`, 'info');
+      return;
+    }
+
+    setSwitchingAccount(true);
+    try {
+      // ✅ Inject token immédiatement
+      api.defaults.headers.common['Authorization'] = `Bearer ${acc.token}`;
+      
+      // ✅ Marquer comme compte actif dans le stockage
+      await setActiveAccount(acc.email);
+      
+      // ✅ Mettre à jour l'état utilisateur global
+      setUser({
+        name: acc.name,
+        email: acc.email,
+        role: acc.role,
+      });
+
+      showToast(`Reconnexion à ${acc.name || acc.email}...`, 'success');
+      
+      // ✅ Naviguer vers le bon dashboard
+      navigateToDashboard(acc.role);
+    } catch (e) {
+      showToast("Session expirée, veuillez vous reconnecter.", "warning");
+      await removeAccount(acc.email);
+      checkStoredSession();
+    } finally {
+      setSwitchingAccount(false);
+    }
   };
 
   const handleBiometricLogin = async () => {

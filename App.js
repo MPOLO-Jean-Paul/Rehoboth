@@ -35,6 +35,7 @@ import NotificationScreen from './src/screens/NotificationScreen';
 import StaffMessagesScreen from './src/screens/StaffMessagesScreen';
 import RoleGuard from './src/components/RoleGuard';
 import GlobalErrorBoundary from './src/components/GlobalErrorBoundary';
+import UpdateManager from './src/components/UpdateManager';
 
 
 export const AppContext = createContext();
@@ -140,24 +141,6 @@ export default function App() {
   const colors = resolvedDark ? Theme.colors.dark : Theme.colors.light;
 
   useEffect(() => {
-    const checkForOTAUpdates = async () => {
-      try {
-        if (__DEV__) return;
-        const update = await Updates.checkForUpdateAsync();
-        if (update.isAvailable) {
-          await Updates.fetchUpdateAsync();
-          Alert.alert(
-            (lang === 'en' ? 'Update Available' : 'Mise à jour disponible'),
-            (lang === 'en' ? 'A new version has been downloaded. The app will restart to apply the changes.' : 'Une nouvelle version a été téléchargée. L\'application va redémarrer pour appliquer les modifications.'),
-            [{ text: 'OK', onPress: () => Updates.reloadAsync() }]
-          );
-        }
-      } catch (e) {
-        console.log('[OTA Updates] Error checking for updates', e);
-      }
-    };
-
-    checkForOTAUpdates();
     checkInitialAuth();
   }, []);
 
@@ -451,6 +434,7 @@ export default function App() {
   return (
     <GlobalErrorBoundary>
       <SafeAreaProvider>
+      <UpdateManager lang={lang} />
       <AppContext.Provider value={{ 
         themeMode, setThemeMode, toggleTheme, 
         lang, setLang, toggleLang, 
