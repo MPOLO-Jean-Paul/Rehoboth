@@ -165,7 +165,7 @@ Route::middleware(['auth:sanctum', 'role:admin,pharmacie,soins'])->group(functio
 
 Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
     // Admin
-    Route::get('/admin/bootstrap', [AdminController::class, 'getBootstrap']);
+    Route::get('/admin/bootstrap', [AdminController::class, 'bootstrap']);
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
     Route::post('/admin/notify-daily', [AdminController::class, 'sendDailyReportNotification']);
     Route::post('/admin/users', [AdminController::class, 'createUser']);
