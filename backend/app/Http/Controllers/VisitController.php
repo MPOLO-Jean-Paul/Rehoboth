@@ -57,4 +57,16 @@ class VisitController extends Controller
             'visit' => $visit
         ]);
     }
+
+    public function myToday(Request $request)
+    {
+        $user = $request->user();
+        return response()->json(
+            Visit::with(['patient', 'invoice'])
+                ->whereDate('updated_at', now())
+                ->where('status', 'completed')
+                ->latest()
+                ->get()
+        );
+    }
 }

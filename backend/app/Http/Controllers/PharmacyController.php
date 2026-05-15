@@ -11,9 +11,79 @@ use Illuminate\Support\Facades\DB;
 
 class PharmacyController extends Controller
 {
-    public function indexMedicines()
+    public function indexMedicines(Request $request)
     {
-        return response()->json(Medicine::orderBy('name')->get());
+        $query = Medicine::orderBy('name');
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        return response()->json($query->get());
+    }
+
+    public function prescriptions(Request $request)
+    {
+        $query = Visit::with(['patient', 'invoice'])
+            ->where('current_service', 'pharmacie')
+            ->where('status', '!=', 'completed');
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->whereHas('patient', function($q) use ($search) {
+                $q->where('first_name', 'like', "%$search%")
+                  ->orWhere('last_name', 'like', "%$search%");
+            });
+        }
+
+        return response()->json($query->latest()->get());
+    }
+
+    public function inventoryInsights()
+    {
+        return response()->json([
+            'fast_movers' => Medicine::orderByDesc('stock_quantity')->limit(5)->get(),
+            'slow_movers' => Medicine::where('stock_quantity', '>', 0)->orderBy('stock_quantity')->limit(5)->get(),
+            'to_renew' => Medicine::whereRaw('stock_quantity <= low_stock_threshold')->get(),
+            'all' => Medicine::all()
+        ]);
+    }
+
+    public function deliveryHistory()
+    {
+        return response()->json(
+            StockMovement::with(['medicine', 'user'])
+                ->where('type', 'out')
+                ->latest()
+                ->limit(100)
+                ->get()
+        );
+    }
+
+    public function sales(Request $request)
+    {
+        $period = $request->query('period', 'day');
+        $startDate = match($period) {
+            'week' => now()->startOfWeek(),
+            'month' => now()->startOfMonth(),
+            default => now()->startOfDay(),
+        };
+
+        $totalRevenue = Visit::join('invoices', 'visits.id', '=', 'invoices.visit_id')
+            ->where('visits.current_service', 'completed')
+            ->where('invoices.status', 'paid')
+            ->where('invoices.created_at', '>=', $startDate)
+            ->sum('invoices.amount');
+
+        $itemsSold = StockMovement::with('medicine')
+            ->where('type', 'out')
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('medicine_id, sum(quantity) as total_qty')
+            ->groupBy('medicine_id')
+            ->get();
+
+        return response()->json([
+            'total_revenue' => $totalRevenue,
+            'items_sold' => $itemsSold
+        ]);
     }
 
     public function addStock(Request $request)
@@ -92,5 +162,15 @@ class PharmacyController extends Controller
         });
 
         return response()->json(['message' => 'Ordonnance délivrée et stock mis à jour. Patient libéré.']);
+    }
+
+    public function dispensedToday()
+    {
+        return response()->json([
+            'count' => StockMovement::where('type', 'out')
+                                    ->whereDate('created_at', now())
+                                    ->distinct('reason') 
+                                    ->count()
+        ]);
     }
 }

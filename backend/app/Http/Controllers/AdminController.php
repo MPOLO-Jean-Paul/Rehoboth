@@ -14,6 +14,50 @@ use Carbon\Carbon;
 
 class AdminController extends Controller
 {
+    public function bootstrap(Request $request)
+    {
+        $period = $request->query('period', 'day');
+        $now = Carbon::now();
+        
+        if ($period === 'week') {
+            $startDate = Carbon::now()->startOfWeek();
+        } elseif ($period === 'month') {
+            $startDate = Carbon::now()->startOfMonth();
+        } else {
+            $startDate = Carbon::today();
+        }
+
+        $stats = [
+            'total_patients_period' => Patient::where('created_at', '>=', $startDate)->count(),
+            'total_visits_period' => Visit::where('created_at', '>=', $startDate)->count(),
+            'revenue_period' => Invoice::where('created_at', '>=', $startDate)->where('status', 'paid')->sum('amount'),
+            'revenue_by_service' => Visit::join('invoices', 'visits.id', '=', 'invoices.visit_id')
+                                        ->selectRaw('visits.current_service as service, sum(invoices.amount) as total')
+                                        ->where('invoices.status', 'paid')
+                                        ->where('invoices.created_at', '>=', $startDate)
+                                        ->groupBy('visits.current_service')
+                                        ->get(),
+            'top_insurances' => Patient::selectRaw('insurance_company as name, count(*) as count')
+                                        ->where('is_insured', true)
+                                        ->groupBy('insurance_company')
+                                        ->orderByDesc('count')
+                                        ->limit(5)
+                                        ->get(),
+            'low_stock_count' => Medicine::whereRaw('stock_quantity <= low_stock_threshold')->count(),
+            'lab_pending_count' => Visit::where('current_service', 'labo')->where('status', '!=', 'completed')->count()
+        ];
+
+        return response()->json([
+            'stats' => $stats,
+            'users' => User::all(),
+            'patients' => Patient::latest()->limit(500)->get(),
+            'insurances' => Patient::where('is_insured', true)->select('insurance_company')->distinct()->get()->map(function($i) {
+                return ['name' => $i->insurance_company];
+            }),
+            'messages' => StaffMessage::with('sender:id,name,role')->latest()->limit(50)->get()
+        ]);
+    }
+
     public function dashboard(Request $request)
     {
         $today = Carbon::today();
@@ -113,5 +157,24 @@ class AdminController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'Utilisateur supprimé']);
+    }
+
+    public function getCatalog()
+    {
+        // Simple mock or fetch from a real 'catalog' table if it exists.
+        // For now, based on previous edits, we can return some common ones or empty.
+        return response()->json([
+            'lab_tests' => [
+                ['code' => 'GE', 'label' => 'Goutte Épaisse', 'price' => 5000],
+                ['code' => 'HEM', 'label' => 'Hémogramme', 'price' => 15000],
+                ['code' => 'GLY', 'label' => 'Glycémie', 'price' => 3000],
+                ['code' => 'WID', 'label' => 'Widal', 'price' => 7000],
+            ]
+        ]);
+    }
+
+    public function fetchDataRecords()
+    {
+        return response()->json(Patient::latest()->get());
     }
 }

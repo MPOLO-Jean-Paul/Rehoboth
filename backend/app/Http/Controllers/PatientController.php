@@ -79,4 +79,53 @@ class PatientController extends Controller
             ], 201);
         });
     }
+
+    public function cashToday(Request $request)
+    {
+        $period = $request->query('period', 'day');
+        $startDate = $period === 'month' ? now()->startOfMonth() : now()->startOfDay();
+
+        $items = Visit::join('invoices', 'visits.id', '=', 'invoices.visit_id')
+            ->selectRaw('visits.current_service as service, sum(invoices.amount) as total')
+            ->where('invoices.status', 'paid')
+            ->where('invoices.created_at', '>=', $startDate)
+            ->groupBy('visits.current_service')
+            ->get();
+
+        return response()->json([
+            'items' => $items,
+            'patient_count' => Patient::where('created_at', '>=', $startDate)->count(),
+            'insured_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', true)->count(),
+            'private_count' => Patient::where('created_at', '>=', $startDate)->where('is_insured', false)->count(),
+        ]);
+    }
+
+    public function statsToday()
+    {
+        $todayCount = Patient::whereDate('created_at', now())->count();
+        $yesterdayCount = Patient::whereDate('created_at', now()->yesterday())->count();
+        $insuredCount = Patient::whereDate('created_at', now())->where('is_insured', true)->count();
+        $privateCount = Patient::whereDate('created_at', now())->where('is_insured', false)->count();
+
+        $diff = $yesterdayCount > 0 ? (($todayCount - $yesterdayCount) / $yesterdayCount) * 100 : 0;
+
+        return response()->json([
+            'today_count' => $todayCount,
+            'yesterday_count' => $yesterdayCount,
+            'insured_count' => $insuredCount,
+            'private_count' => $privateCount,
+            'diff_percent' => round($diff, 1)
+        ]);
+    }
+
+    public function getInsurances()
+    {
+        return response()->json(
+            Patient::where('is_insured', true)
+                ->whereNotNull('insurance_company')
+                ->select('insurance_company as name')
+                ->distinct()
+                ->get()
+        );
+    }
 }
