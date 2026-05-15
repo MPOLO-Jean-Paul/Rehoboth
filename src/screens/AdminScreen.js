@@ -102,6 +102,7 @@ export default function AdminScreen({ navigation }) {
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetService, setResetService] = useState('pharmacie');
   const [resetPassword, setResetPassword] = useState('');
+  const [showResetPasswordInput, setShowResetPasswordInput] = useState(false);
 
   const [showTimelineModal, setShowTimelineModal] = useState(false);
   const [selectedTimeline, setSelectedTimeline] = useState(null);
@@ -336,7 +337,7 @@ export default function AdminScreen({ navigation }) {
        { text: "OUI, TOUT RÉINITIALISER", style: "destructive", onPress: async () => {
           setIsSubmitting(true);
           try {
-             const res = await api.post('/admin/data/reset-all');
+             const res = await api.post('/admin/data/reset-all', { password: resetPassword });
              showToast(res.data.message, "success");
              setShowResetModal(false);
              setResetPassword('');
@@ -357,7 +358,7 @@ export default function AdminScreen({ navigation }) {
        { text: "CONFIRMER", style: "destructive", onPress: async () => {
           setIsSubmitting(true);
           try {
-             const res = await api.post('/admin/data/reset-service', { service: resetService });
+             const res = await api.post('/admin/data/reset-service', { service: resetService, password: resetPassword });
              showToast(res.data.message, "success");
              setShowResetModal(false);
              setResetPassword('');
@@ -2724,15 +2725,22 @@ export default function AdminScreen({ navigation }) {
                      </FadeInView>
                   )}
 
-                  <Text style={styles.label}>CODE DE SÉCURITÉ ADMIN</Text>
-                  <TextInput 
-                     style={[styles.input, { color: C.text, borderColor: '#EF4444', backgroundColor: C.input }]} 
-                     placeholder="Entrez REHOBOTH_ADMIN_RESET" 
-                     placeholderTextColor={C.placeholder}
-                     secureTextEntry={true}
-                     value={resetPassword}
-                     onChangeText={setResetPassword}
-                  />
+                  <Text style={styles.label}>MOT DE PASSE ADMINISTRATEUR</Text>
+                  <View style={{ borderColor: C.danger + '40', backgroundColor: C.input, borderWidth: 1, borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15, height: 56, marginBottom: 20 }}>
+                     <MaterialCommunityIcons name="lock-alert" size={20} color={C.danger} />
+                     <TextInput 
+                        style={{ flex: 1, height: '100%', marginLeft: 10, color: C.text, fontWeight: '800' }} 
+                        placeholder="Saisissez votre mot de passe..." 
+                        placeholderTextColor={C.placeholder} 
+                        secureTextEntry={!showResetPasswordInput} 
+                        value={resetPassword} 
+                        onChangeText={setResetPassword} 
+                     />
+                     <TouchableOpacity onPress={() => setShowResetPasswordInput(!showResetPasswordInput)}>
+                        <MaterialCommunityIcons name={showResetPasswordInput ? "eye-off" : "eye"} size={22} color={C.sub} />
+                     </TouchableOpacity>
+                  </View>
+                  <Text style={{ fontSize: 9, color: C.sub, marginTop: -10, marginBottom: 15, fontStyle: 'italic' }}>Cette action supprimera définitivement les données. Votre mot de passe est requis pour valider.</Text>
 
                   <TouchableOpacity 
                      onPress={resetService === 'ALL' ? handleResetAll : handleResetService} 
