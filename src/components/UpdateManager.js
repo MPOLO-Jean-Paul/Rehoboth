@@ -13,6 +13,9 @@ export default function UpdateManager({ lang = 'fr' }) {
   const [isFinished, setIsFinished] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [isIgnored, setIsIgnored] = useState(false);
+  const [totalBytes, setTotalBytes] = useState(0);
+  const [writtenBytes, setWrittenBytes] = useState(0);
+  const [error, setError] = useState(null);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const modalFadeAnim = useRef(new Animated.Value(0)).current;
@@ -43,6 +46,13 @@ export default function UpdateManager({ lang = 'fr' }) {
         if (event.type === Updates.UpdateEventType.UPDATE_AVAILABLE) {
           setUpdateAvailable(true);
           setShowModal(true);
+        } else if (event.type === Updates.UpdateEventType.DOWNLOAD_PROGRESS) {
+          const { totalBytesWritten, totalBytesExpectedToWrite } = event.payload || {};
+          if (totalBytesExpectedToWrite) {
+            setTotalBytes(totalBytesExpectedToWrite);
+            setWrittenBytes(totalBytesWritten);
+            setDownloadProgress(totalBytesWritten / totalBytesExpectedToWrite);
+          }
         }
       });
     }
@@ -96,10 +106,12 @@ export default function UpdateManager({ lang = 'fr' }) {
 
   const handleUpdate = async () => {
     setIsDownloading(true);
+    setError(null);
     try {
+      // Small initial animation if listener takes time to kick in
       Animated.timing(progressAnim, {
-        toValue: 1,
-        duration: 5000, // Simulation un peu plus longue pour la barre
+        toValue: 0.1,
+        duration: 800,
         useNativeDriver: false,
       }).start();
 
@@ -107,6 +119,7 @@ export default function UpdateManager({ lang = 'fr' }) {
       setIsFinished(true);
     } catch (e) {
       console.log('[UpdateManager] Download error:', e);
+      setError(e.message);
       setIsDownloading(false);
     }
   };
@@ -136,18 +149,22 @@ export default function UpdateManager({ lang = 'fr' }) {
       subtitle: 'Une nouvelle version de Rehoboth Elite est prête. Améliorez votre expérience maintenant.',
       btn: 'METTRE À JOUR MAINTENANT',
       downloading: 'TÉLÉCHARGEMENT...',
-      finished: 'MISE À JOUR TERMINÉE',
-      restart: 'REDÉMARRER L\'APPLICATION',
-      later: 'Plus tard'
+      finished: 'TÉLÉCHARGEMENT TERMINÉ',
+      restart: 'INSTALLER ET REDÉMARRER',
+      later: 'Plus tard',
+      readyToInstall: 'La mise à jour est prête à être installée.',
+      error: 'Erreur lors du téléchargement'
     },
     en: {
       title: 'UPDATE AVAILABLE',
       subtitle: 'A new version of Rehoboth Elite is ready. Enhance your experience now.',
       btn: 'UPDATE NOW',
       downloading: 'DOWNLOADING...',
-      finished: 'UPDATE FINISHED',
-      restart: 'RESTART APPLICATION',
-      later: 'Later'
+      finished: 'DOWNLOAD FINISHED',
+      restart: 'INSTALL & RESTART',
+      later: 'Later',
+      readyToInstall: 'The update is ready to be installed.',
+      error: 'Download error'
     }
   }[lang] || {
     title: 'MISE À JOUR DISPONIBLE',
@@ -156,10 +173,18 @@ export default function UpdateManager({ lang = 'fr' }) {
     downloading: 'CHARGEMENT...',
     finished: 'TERMINÉ',
     restart: 'REDÉMARRER',
-    later: 'Plus tard'
+    later: 'Plus tard',
+    readyToInstall: 'Prêt à installer.',
+    error: 'Erreur'
+  };
+
+  const formatSize = (bytes) => {
+    if (!bytes) return '0 MB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
   return (
+    <>
     <Modal transparent visible={showModal} animationType="none">
       <View style={styles.overlay}>
         <Animated.View 
@@ -190,8 +215,8 @@ export default function UpdateManager({ lang = 'fr' }) {
               )}
             </View>
 
-            <Text style={styles.title}>{isFinished ? t.finished : t.title}</Text>
-            <Text style={styles.subtitle}>{t.subtitle}</Text>
+            <Text style={styles.title}>{isFinished ? t.finished : (error ? t.error : t.title)}</Text>
+            <Text style={styles.subtitle}>{isFinished ? t.readyToInstall : (error || t.subtitle)}</Text>
 
             {isDownloading && !isFinished && (
               <View style={styles.progressWrapper}>
@@ -200,15 +225,24 @@ export default function UpdateManager({ lang = 'fr' }) {
                     style={[
                       styles.progressBar, 
                       { 
-                        width: progressAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0%', '100%']
-                        }) 
+                        width: writtenBytes && totalBytes 
+                          ? `${(writtenBytes / totalBytes) * 100}%`
+                          : progressAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0%', '100%']
+                            }) 
                       }
                     ]} 
                   />
                 </View>
-                <Text style={styles.progressText}>{t.downloading}</Text>
+                <View style={styles.progressInfo}>
+                  <Text style={styles.progressText}>{t.downloading}</Text>
+                  {totalBytes > 0 && (
+                    <Text style={styles.sizeText}>
+                      {formatSize(writtenBytes)} / {formatSize(totalBytes)}
+                    </Text>
+                  )}
+                </View>
               </View>
             )}
 
@@ -353,8 +387,18 @@ const styles = StyleSheet.create({
     color: '#38BDF8',
     fontSize: 10,
     fontWeight: '900',
-    textAlign: 'center',
     letterSpacing: 2,
+  },
+  progressInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  sizeText: {
+    color: '#64748B',
+    fontSize: 10,
+    fontWeight: '700',
   },
   actionContainer: {
     width: '100%',
