@@ -12,10 +12,13 @@ export default function UpdateManager({ lang = 'fr' }) {
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isIgnored, setIsIgnored] = useState(false);
 
   const progressAnim = useRef(new Animated.Value(0)).current;
   const modalFadeAnim = useRef(new Animated.Value(0)).current;
   const modalScaleAnim = useRef(new Animated.Value(0.9)).current;
+  const badgeAnim = useRef(new Animated.Value(0)).current;
+  const badgeBounceAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (__DEV__) return;
@@ -68,6 +71,29 @@ export default function UpdateManager({ lang = 'fr' }) {
     }
   }, [showModal]);
 
+  useEffect(() => {
+    if (updateAvailable && !showModal && !isFinished) {
+      setIsIgnored(true);
+      Animated.sequence([
+        Animated.delay(500),
+        Animated.parallel([
+          Animated.spring(badgeAnim, { toValue: 1, useNativeDriver: true }),
+          Animated.timing(badgeBounceAnim, { toValue: 1, duration: 1000, useNativeDriver: true })
+        ])
+      ]).start(() => {
+        // Start infinite subtle bounce
+        Animated.loop(
+          Animated.sequence([
+            Animated.timing(badgeBounceAnim, { toValue: 1.1, duration: 1500, useNativeDriver: true }),
+            Animated.timing(badgeBounceAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+          ])
+        ).start();
+      });
+    } else {
+      setIsIgnored(false);
+    }
+  }, [updateAvailable, showModal, isFinished]);
+
   const handleUpdate = async () => {
     setIsDownloading(true);
     try {
@@ -94,7 +120,15 @@ export default function UpdateManager({ lang = 'fr' }) {
     }
   };
 
-  if (!showModal) return null;
+  const handleLater = () => {
+    setShowModal(false);
+  };
+
+  const handleOpenUpdate = () => {
+    setShowModal(true);
+  };
+
+  if (!updateAvailable) return null;
 
   const t = {
     fr: {
@@ -190,7 +224,7 @@ export default function UpdateManager({ lang = 'fr' }) {
                   </TouchableOpacity>
                   
                   {!isDownloading && (
-                    <TouchableOpacity style={styles.laterBtn} onPress={() => setShowModal(false)}>
+                    <TouchableOpacity style={styles.laterBtn} onPress={handleLater}>
                       <Text style={styles.laterBtnText}>{t.later}</Text>
                     </TouchableOpacity>
                   )}
@@ -212,6 +246,30 @@ export default function UpdateManager({ lang = 'fr' }) {
         </Animated.View>
       </View>
     </Modal>
+
+    {isIgnored && (
+      <Animated.View 
+        style={[
+          styles.floatingBadge, 
+          { 
+            opacity: badgeAnim,
+            transform: [
+              { translateY: badgeAnim.interpolate({ inputRange: [0, 1], outputRange: [-100, 0] }) },
+              { scale: badgeBounceAnim }
+            ] 
+          }
+        ]}
+      >
+        <TouchableOpacity style={styles.badgePressable} onPress={handleOpenUpdate}>
+          <LinearGradient colors={['#0EA5E9', '#2563EB']} style={styles.badgeGradient} start={{x:0, y:0}} end={{x:1, y:1}}>
+            <MaterialCommunityIcons name="rocket-launch" size={16} color="#FFF" />
+            <Text style={styles.badgeText}>{lang === 'fr' ? 'MISE À JOUR' : 'UPDATE'}</Text>
+            <View style={styles.badgeDot} />
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
+    )}
+    </>
   );
 }
 
@@ -345,6 +403,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
     letterSpacing: 0.5,
+  },
+  floatingBadge: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 20,
+    alignSelf: 'center',
+    zIndex: 9999,
+    shadowColor: '#0EA5E9',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 15,
+  },
+  badgePressable: {
+    borderRadius: 24,
+    overflow: 'hidden',
+  },
+  badgeGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  badgeText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 1,
+    marginLeft: 8,
+    marginRight: 6,
+  },
+  badgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFF',
+    shadowColor: '#FFF',
+    shadowOpacity: 1,
+    shadowRadius: 4,
   }
 });
 
